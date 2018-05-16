@@ -100,11 +100,11 @@ size_t ConstantPool::makeString(const std::string& value) {
   return ensureValue(strings_, value);
 }
 
-size_t ConstantPool::makeIPAddress(const IPAddress& value) {
+size_t ConstantPool::makeIPAddress(const util::IPAddress& value) {
   return ensureValue(ipaddrs_, value);
 }
 
-size_t ConstantPool::makeCidr(const Cidr& value) {
+size_t ConstantPool::makeCidr(const util::Cidr& value) {
   return ensureValue(cidrs_, value);
 }
 
@@ -133,11 +133,11 @@ size_t ConstantPool::makeStringArray(const std::vector<std::string>& elements) {
   return stringArrays_.size() - 1;
 }
 
-size_t ConstantPool::makeIPaddrArray(const std::vector<IPAddress>& elements) {
+size_t ConstantPool::makeIPaddrArray(const std::vector<util::IPAddress>& elements) {
   return ensureValue(ipaddrArrays_, elements);
 }
 
-size_t ConstantPool::makeCidrArray(const std::vector<Cidr>& elements) {
+size_t ConstantPool::makeCidrArray(const std::vector<util::Cidr>& elements) {
   return ensureValue(cidrArrays_, elements);
 }
 

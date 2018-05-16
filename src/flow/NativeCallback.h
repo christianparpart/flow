@@ -38,7 +38,7 @@ class NativeCallback {
   using Functor = std::function<void(Params& args)>;
   using Verifier = std::function<bool(Instr*, IRBuilder*)>;
   using DefaultValue = std::variant<std::monostate,
-        bool, FlowString, FlowNumber, IPAddress, Cidr, util::RegExp>;
+        bool, FlowString, FlowNumber, util::IPAddress, util::Cidr, util::RegExp>;
 
  private:
   Runtime* runtime_;

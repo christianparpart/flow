@@ -141,12 +141,12 @@ static inline void completeDefaultValue(
     case LiteralType::IPAddress:
       args.push_back(
           name,
-          std::make_unique<IPAddressExpr>(std::get<IPAddress>(dv), loc));
+          std::make_unique<IPAddressExpr>(std::get<util::IPAddress>(dv), loc));
       break;
     case LiteralType::Cidr:
       args.push_back(
           name,
-          std::make_unique<CidrExpr>(std::get<Cidr>(dv), loc));
+          std::make_unique<CidrExpr>(std::get<util::Cidr>(dv), loc));
       break;
     default:
       fprintf(stderr, "Unsupported type in default completion. Please report me. I am a bug.");
@@ -584,7 +584,7 @@ LiteralType LiteralExpr<util::RegExp>::getType() const {
 }
 
 template <>
-LiteralType LiteralExpr<Cidr>::getType() const {
+LiteralType LiteralExpr<util::Cidr>::getType() const {
   return LiteralType::Cidr;
 }
 
@@ -594,7 +594,7 @@ LiteralType LiteralExpr<bool>::getType() const {
 }
 
 template <>
-LiteralType LiteralExpr<IPAddress>::getType() const {
+LiteralType LiteralExpr<util::IPAddress>::getType() const {
   return LiteralType::IPAddress;
 }
 

@@ -138,12 +138,12 @@ class Runner {
 
   FlowNumber getNumber(int si) const { return static_cast<FlowNumber>(stack_[si]); }
   const FlowString& getString(int si) const { return *(FlowString*) stack_[si]; }
-  const IPAddress& getIPAddress(int si) const { return *(IPAddress*) stack_[si]; }
-  const Cidr& getCidr(int si) const { return *(Cidr*) stack_[si]; }
+  const util::IPAddress& getIPAddress(int si) const { return *(util::IPAddress*) stack_[si]; }
+  const util::Cidr& getCidr(int si) const { return *(util::Cidr*) stack_[si]; }
   const util::RegExp& getRegExp(int si) const { return *(util::RegExp*) stack_[si]; }
 
   const FlowString* getStringPtr(int si) const { return (FlowString*) stack_[si]; }
-  const Cidr* getCidrPtr(int si) const { return (Cidr*) stack_[si]; }
+  const util::Cidr* getCidrPtr(int si) const { return (util::Cidr*) stack_[si]; }
 
   void push(Value value) { stack_.push(value); }
   Value pop() { return stack_.pop(); }

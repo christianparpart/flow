@@ -80,11 +80,11 @@ template ConstantArray* IRProgram::get<
 template ConstantString* IRProgram::get<ConstantString, std::string>(
     std::vector<std::unique_ptr<ConstantString>>&, const std::string&);
 
-template ConstantIP* IRProgram::get<ConstantIP, IPAddress>(
-    std::vector<std::unique_ptr<ConstantIP>>&, const IPAddress&);
+template ConstantIP* IRProgram::get<ConstantIP, util::IPAddress>(
+    std::vector<std::unique_ptr<ConstantIP>>&, const util::IPAddress&);
 
-template ConstantCidr* IRProgram::get<ConstantCidr, Cidr>(
-    std::vector<std::unique_ptr<ConstantCidr>>&, const Cidr&);
+template ConstantCidr* IRProgram::get<ConstantCidr, util::Cidr>(
+    std::vector<std::unique_ptr<ConstantCidr>>&, const util::Cidr&);
 
 template ConstantRegExp* IRProgram::get<ConstantRegExp, util::RegExp>(
     std::vector<std::unique_ptr<ConstantRegExp>>&, const util::RegExp&);

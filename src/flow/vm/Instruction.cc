@@ -256,7 +256,7 @@ std::string disassemble(Instruction pc, size_t ip, size_t sp, const ConstantPool
       case Opcode::PTLOAD: {
         line << "[";
         n++;
-        const std::vector<IPAddress>& v = cp->getIPAddressArray(A);
+        const std::vector<util::IPAddress>& v = cp->getIPAddressArray(A);
         for (size_t i = 0, e = v.size(); i != e; ++i) {
           if (i) {
             line << ", ";
@@ -273,7 +273,7 @@ std::string disassemble(Instruction pc, size_t ip, size_t sp, const ConstantPool
       case Opcode::CTLOAD: {
         line << "[";
         n++;
-        const std::vector<Cidr>& v = cp->getCidrArray(A);
+        const std::vector<util::Cidr>& v = cp->getCidrArray(A);
         for (size_t i = 0, e = v.size(); i != e; ++i) {
           if (i) {
             line << ", ";

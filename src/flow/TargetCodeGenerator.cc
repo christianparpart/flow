@@ -320,12 +320,12 @@ void TargetCodeGenerator::emitLoad(Value* value) {
         break;
       case LiteralType::IPAddrArray:
         emitInstr(Opcode::PTLOAD,
-             cp_.makeIPaddrArray(convert<IPAddress, ConstantIP>(array->get())));
+             cp_.makeIPaddrArray(convert<util::IPAddress, ConstantIP>(array->get())));
         changeStack(0, value);
         break;
       case LiteralType::CidrArray:
         emitInstr(Opcode::CTLOAD,
-             cp_.makeCidrArray(convert<Cidr, ConstantCidr>(array->get())));
+             cp_.makeCidrArray(convert<util::Cidr, ConstantCidr>(array->get())));
         changeStack(0, value);
         break;
       default:

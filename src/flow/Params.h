@@ -34,8 +34,8 @@ class Params {
   void setResult(const std::string& str) { argv_[0] = (Value) caller_->newString(str); }
   void setResult(std::string&& str) { argv_[0] = (Value) caller_->newString(std::move(str)); }
   void setResult(const FlowString* str) { argv_[0] = (Value) str; }
-  void setResult(const IPAddress* ip) { argv_[0] = (Value) ip; }
-  void setResult(const Cidr* cidr) { argv_[0] = (Value) cidr; }
+  void setResult(const util::IPAddress* ip) { argv_[0] = (Value) ip; }
+  void setResult(const util::Cidr* cidr) { argv_[0] = (Value) cidr; }
 
   int size() const { return argc_; }
   int count() const { return argc_; }
@@ -48,8 +48,8 @@ class Params {
   FlowNumber getInt(size_t offset) const { return at(offset); }
   const FlowString& getString(size_t offset) const { return *(FlowString*)at(offset); }
   Handler* getHandler(size_t offset) const { return caller_->program()->handler(static_cast<size_t>(at(offset))); }
-  const IPAddress& getIPAddress(size_t offset) const { return *(IPAddress*)at(offset); }
-  const Cidr& getCidr(size_t offset) const { return *(Cidr*)at(offset); }
+  const util::IPAddress& getIPAddress(size_t offset) const { return *(util::IPAddress*)at(offset); }
+  const util::Cidr& getCidr(size_t offset) const { return *(util::Cidr*)at(offset); }
 
   const FlowIntArray& getIntArray(size_t offset) const { return *(FlowIntArray*)at(offset); }
   const FlowStringArray& getStringArray(size_t offset) const { return *(FlowStringArray*)at(offset); }

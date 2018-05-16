@@ -543,8 +543,8 @@ bool Runner::loop() {
   }
 
   instr(PINCIDR) {
-    const IPAddress& ipaddr = getIPAddress(-2);
-    const Cidr& cidr = getCidr(-1);
+    const util::IPAddress& ipaddr = getIPAddress(-2);
+    const util::Cidr& cidr = getCidr(-1);
     SP(-2) = cidr.contains(ipaddr);
     pop();
     next;
@@ -592,13 +592,13 @@ bool Runner::loop() {
   }
 
   instr(P2S) {
-    const IPAddress& ipaddr = getIPAddress(-1);
+    const util::IPAddress& ipaddr = getIPAddress(-1);
     SP(-1) = (Value) newString(ipaddr.str());
     next;
   }
 
   instr(C2S) {
-    const Cidr& cidr = getCidr(-1);
+    const util::Cidr& cidr = getCidr(-1);
     SP(-1) = (Value) newString(cidr.str());
     next;
   }

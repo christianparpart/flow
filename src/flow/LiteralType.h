@@ -16,9 +16,6 @@
 
 namespace flow {
 
-using Cidr = util::Cidr;
-using IPAddress = util::IPAddress;
-
 //! \addtogroup Flow
 //@{
 
@@ -64,8 +61,8 @@ class FlowArray {
 
 typedef std::vector<FlowNumber> FlowIntArray;
 typedef std::vector<FlowString> FlowStringArray;
-typedef std::vector<IPAddress> FlowIPAddrArray;
-typedef std::vector<Cidr> FlowCidrArray;
+typedef std::vector<util::IPAddress> FlowIPAddrArray;
+typedef std::vector<util::Cidr> FlowCidrArray;
 
 // }}}
 

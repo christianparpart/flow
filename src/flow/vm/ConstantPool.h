@@ -40,14 +40,14 @@ class ConstantPool {
   // builder
   size_t makeInteger(FlowNumber value);
   size_t makeString(const std::string& value);
-  size_t makeIPAddress(const IPAddress& value);
-  size_t makeCidr(const Cidr& value);
+  size_t makeIPAddress(const util::IPAddress& value);
+  size_t makeCidr(const util::Cidr& value);
   size_t makeRegExp(const util::RegExp& value);
 
   size_t makeIntegerArray(const std::vector<FlowNumber>& elements);
   size_t makeStringArray(const std::vector<std::string>& elements);
-  size_t makeIPaddrArray(const std::vector<IPAddress>& elements);
-  size_t makeCidrArray(const std::vector<Cidr>& elements);
+  size_t makeIPaddrArray(const std::vector<util::IPAddress>& elements);
+  size_t makeCidrArray(const std::vector<util::Cidr>& elements);
 
   size_t makeMatchDef();
   MatchDef& getMatchDef(size_t id) { return matchDefs_[id]; }
@@ -68,8 +68,8 @@ class ConstantPool {
   // accessor
   FlowNumber getInteger(size_t id) const { return numbers_[id]; }
   const FlowString& getString(size_t id) const { return strings_[id]; }
-  const IPAddress& getIPAddress(size_t id) const { return ipaddrs_[id]; }
-  const Cidr& getCidr(size_t id) const { return cidrs_[id]; }
+  const util::IPAddress& getIPAddress(size_t id) const { return ipaddrs_[id]; }
+  const util::Cidr& getCidr(size_t id) const { return cidrs_[id]; }
   const util::RegExp& getRegExp(size_t id) const { return regularExpressions_[id]; }
 
   const std::vector<FlowNumber>& getIntArray(size_t id) const {
@@ -78,10 +78,10 @@ class ConstantPool {
   const std::vector<std::string>& getStringArray(size_t id) const {
     return stringArrays_[id];
   }
-  const std::vector<IPAddress>& getIPAddressArray(size_t id) const {
+  const std::vector<util::IPAddress>& getIPAddressArray(size_t id) const {
     return ipaddrArrays_[id];
   }
-  const std::vector<Cidr>& getCidrArray(size_t id) const {
+  const std::vector<util::Cidr>& getCidrArray(size_t id) const {
     return cidrArrays_[id];
   }
 
@@ -121,15 +121,15 @@ class ConstantPool {
   // constant primitives
   std::vector<FlowNumber> numbers_;
   std::vector<std::string> strings_;
-  std::vector<IPAddress> ipaddrs_;
-  std::vector<Cidr> cidrs_;
+  std::vector<util::IPAddress> ipaddrs_;
+  std::vector<util::Cidr> cidrs_;
   std::vector<util::RegExp> regularExpressions_;
 
   // constant arrays
   std::vector<std::vector<FlowNumber>> intArrays_;
   std::vector<std::vector<std::string>> stringArrays_;
-  std::vector<std::vector<IPAddress>> ipaddrArrays_;
-  std::vector<std::vector<Cidr>> cidrArrays_;
+  std::vector<std::vector<util::IPAddress>> ipaddrArrays_;
+  std::vector<std::vector<util::Cidr>> cidrArrays_;
 
   // code data
   std::vector<std::pair<std::string, std::string>> modules_;
