@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 class Instr;
 
@@ -71,4 +71,4 @@ class Value {
   std::vector<Instr*> uses_;  //! list of instructions that <b>use</b> this value.
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

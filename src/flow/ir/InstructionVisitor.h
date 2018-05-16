@@ -9,7 +9,7 @@
 
 #include <flow/LiteralType.h>
 
-namespace xzero::flow {
+namespace flow {
 
 enum class UnaryOperator {
   // numerical
@@ -293,4 +293,4 @@ class IsSameInstruction : public InstructionVisitor {
   void visit(PInCidrInstr& instr) override;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

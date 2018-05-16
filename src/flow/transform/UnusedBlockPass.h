@@ -9,7 +9,7 @@
 
 #include <flow/ir/HandlerPass.h>
 
-namespace xzero::flow {
+namespace flow {
 
 class BasicBlock;
 
@@ -23,4 +23,4 @@ class UnusedBlockPass : public HandlerPass {
   bool run(IRHandler* handler) override;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

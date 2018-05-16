@@ -11,7 +11,7 @@
 #include <xzero/testing.h>
 
 using namespace xzero;
-using namespace xzero::flow;
+using namespace flow;
 
 TEST(FlowLexer, eof) {
   diagnostics::Report report;

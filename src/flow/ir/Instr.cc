@@ -16,7 +16,7 @@
 #include <assert.h>
 #include <inttypes.h>
 
-namespace xzero::flow {
+namespace flow {
 
 Instr::Instr(const Instr& v)
     : Value(v), basicBlock_(nullptr), operands_(v.operands_) {
@@ -206,4 +206,4 @@ void Instr::dumpOne(const char* mnemonic) {
   printf("\n");
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

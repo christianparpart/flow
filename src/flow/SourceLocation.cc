@@ -12,7 +12,6 @@
 #include <fcntl.h>
 #include <fstream>
 
-namespace xzero {
 namespace flow {
 
 std::string SourceLocation::str() const {
@@ -40,4 +39,3 @@ std::string SourceLocation::text() const {
 }
 
 }  // namespace flow
-}  // namespace xzero

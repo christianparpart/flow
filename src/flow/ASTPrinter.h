@@ -7,7 +7,6 @@
 
 #include <flow/ASTVisitor.h>
 
-namespace xzero {
 namespace flow {
 
 //! \addtogroup Flow
@@ -69,4 +68,3 @@ class ASTPrinter : public ASTVisitor {
 //!@}
 
 }  // namespace flow
-}  // namespace xzero

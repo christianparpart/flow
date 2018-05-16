@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include <memory>
 
-namespace xzero::flow {
+namespace flow {
 
 // {{{ SymbolTable
 SymbolTable::SymbolTable(SymbolTable* outer, const std::string& name)
@@ -617,4 +617,4 @@ LiteralType VariableExpr::getType() const {
 LiteralType HandlerRefExpr::getType() const { return LiteralType::Handler; }
 // }}}
 
-}  // namespace xzero::flow
+}  // namespace flow

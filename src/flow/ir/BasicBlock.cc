@@ -22,7 +22,7 @@
  * TODO assert() on last instruction in current BB is not a terminator instr.
  */
 
-namespace xzero::flow {
+namespace flow {
 
 BasicBlock::BasicBlock(const std::string& name, IRHandler* parent)
     : Value(LiteralType::Void, name),
@@ -265,4 +265,4 @@ void BasicBlock::verify() {
       fmt::format("BasicBlock {}: verify: Found a terminate instruction in the middle of the block.", name()));
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

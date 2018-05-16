@@ -8,7 +8,7 @@
 #include <flow/FlowToken.h>
 #include <flow/util/assert.h>
 
-namespace xzero::flow {
+namespace flow {
 
 bool FlowTokenTraits::isKeyword(FlowToken t) {
   switch (t) {
@@ -295,4 +295,4 @@ std::string to_string(FlowToken t) {
   }
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

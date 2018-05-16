@@ -9,7 +9,7 @@
 
 #include <flow/ir/Value.h>
 
-namespace xzero::flow {
+namespace flow {
 
 class Constant : public Value {
  public:
@@ -18,4 +18,4 @@ class Constant : public Value {
   void dump() override;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

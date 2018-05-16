@@ -25,7 +25,7 @@
 #include <limits>
 #include <unordered_map>
 
-namespace xzero::flow {
+namespace flow {
 
 template <typename T, typename S>
 std::vector<T> convert(const std::vector<Constant*>& source) {
@@ -630,4 +630,4 @@ void TargetCodeGenerator::visit(PInCidrInstr& pincidr) {
 }
 // }}}
 
-}  // namespace xzero::flow
+}  // namespace flow

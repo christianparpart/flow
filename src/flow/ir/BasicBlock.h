@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 class Instr;
 class TerminateInstr;
@@ -204,4 +204,4 @@ class BasicBlock : public Value {
   friend class Instr;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

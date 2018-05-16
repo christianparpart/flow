@@ -25,7 +25,7 @@
 #include <arpa/inet.h>   // ntohl(), htonl()
 #endif
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 /**
  * IPv4 or IPv6 network address.
@@ -196,13 +196,13 @@ inline bool operator!=(const IPAddress& a, const IPAddress& b) {
   return !(a == b);
 }
 
-}  // namespace xzero::flow::util
+}  // namespace flow::util
 // }}}
 
 namespace std {
   template <>
-  struct hash<::xzero::flow::util::IPAddress> {
-    size_t operator()(const ::xzero::flow::util::IPAddress& v) const {
+  struct hash<::flow::util::IPAddress> {
+    size_t operator()(const ::flow::util::IPAddress& v) const {
       return *(uint32_t*)(v.data());
     }
   };
@@ -210,8 +210,8 @@ namespace std {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::util::IPAddress> {
-    using IPAddress = xzero::flow::util::IPAddress;
+  struct formatter<flow::util::IPAddress> {
+    using IPAddress = flow::util::IPAddress;
 
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
@@ -225,8 +225,8 @@ namespace fmt {
 
 namespace fmt {
   template<>
-  struct formatter<std::optional<xzero::flow::util::IPAddress>> {
-    using IPAddress = xzero::flow::util::IPAddress;
+  struct formatter<std::optional<flow::util::IPAddress>> {
+    using IPAddress = flow::util::IPAddress;
 
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }

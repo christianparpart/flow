@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <list>
 
-namespace xzero::flow {
+namespace flow {
 
 bool isSameInstructions(BasicBlock* a, BasicBlock* b) {
   if (a->size() != b->size())
@@ -74,4 +74,4 @@ bool MergeBlockPass::run(IRHandler* handler) {
   return false;
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

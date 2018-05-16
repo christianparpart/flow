@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 
-namespace xzero::flow {
+namespace flow {
 
 class Signature {
  private:
@@ -50,16 +50,16 @@ class Signature {
 LiteralType typeSignature(char ch);
 char signatureType(LiteralType t);
 
-}  // namespace xzero::flow
+}  // namespace flow
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::Signature> {
+  struct formatter<flow::Signature> {
     template <typename ParseContext>
     auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    auto format(const xzero::flow::Signature& v, FormatContext &ctx) {
+    auto format(const flow::Signature& v, FormatContext &ctx) {
       return format_to(ctx.begin(), v.to_s());
     }
   };

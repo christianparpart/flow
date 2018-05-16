@@ -13,7 +13,7 @@
 #include <utility>  // make_pair
 #include <assert.h>
 
-namespace xzero::flow {
+namespace flow {
 
 template <typename T, typename U>
 inline std::vector<U> join(const T& a, const std::vector<U>& vec)  // {{{
@@ -274,4 +274,4 @@ std::unique_ptr<Instr> StoreInstr::clone() {
 }
 // }}}
 
-}  // namespace xzero::flow
+}  // namespace flow

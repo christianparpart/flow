@@ -11,7 +11,7 @@
 #include <memory>
 
 using namespace xzero;
-using namespace xzero::flow;
+using namespace flow;
 
 TEST(FlowParser, handlerDecl) {
   auto parser = std::make_shared<FlowParser>(nullptr, nullptr, nullptr);

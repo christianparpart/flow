@@ -31,7 +31,7 @@
 
 #define FLOW_DEBUG(msg, ...) do {} while (1)
 
-namespace xzero::flow {
+namespace flow {
 
 // {{{ VM helper preprocessor definitions
 #define OP opcode((Instruction) *pc)
@@ -674,4 +674,4 @@ bool Runner::loop() {
   LOOP_END()
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

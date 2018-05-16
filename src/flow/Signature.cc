@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 Signature::Signature()
     : name_(),
@@ -152,4 +152,4 @@ char signatureType(LiteralType t) {
   }
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

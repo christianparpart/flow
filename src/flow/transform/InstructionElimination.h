@@ -9,7 +9,7 @@
 
 #include <flow/ir/HandlerPass.h>
 
-namespace xzero::flow {
+namespace flow {
 
 class BasicBlock;
 
@@ -30,4 +30,4 @@ class InstructionElimination : public HandlerPass {
   bool branchToExit(BasicBlock* bb);
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

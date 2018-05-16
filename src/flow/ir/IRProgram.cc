@@ -11,7 +11,7 @@
 #include <flow/ir/ConstantArray.h>
 #include <assert.h>
 
-namespace xzero::flow {
+namespace flow {
 
 IRProgram::IRProgram()
     : modules_(),
@@ -89,4 +89,4 @@ template ConstantCidr* IRProgram::get<ConstantCidr, Cidr>(
 template ConstantRegExp* IRProgram::get<ConstantRegExp, util::RegExp>(
     std::vector<std::unique_ptr<ConstantRegExp>>&, const util::RegExp&);
 
-}  // namespace xzero::flow
+}  // namespace flow

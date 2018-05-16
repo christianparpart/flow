@@ -16,7 +16,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-namespace xzero::flow {
+namespace flow {
 
 IRBuilder::IRBuilder()
     : program_(nullptr),
@@ -670,4 +670,4 @@ Value* IRBuilder::createMatchRegExp(Value* cond) {
 }
 // }}}
 
-}  // namespace xzero::flow
+}  // namespace flow

@@ -17,7 +17,7 @@
 #include <memory>
 #include <functional>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -176,4 +176,4 @@ inline bool FlowParser::testTokens(A1 a1, Args... tokens) const {
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow

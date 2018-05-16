@@ -14,7 +14,7 @@
 #include <memory>
 #include <utility>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -86,4 +86,4 @@ class ASTVisitor {
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow

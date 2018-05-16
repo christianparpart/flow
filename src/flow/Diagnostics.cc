@@ -8,7 +8,7 @@
 #include <flow/Diagnostics.h>
 #include <fmt/format.h>
 
-namespace xzero::flow::diagnostics {
+namespace flow::diagnostics {
 
 std::string Message::string() const {
   switch (type) {
@@ -78,4 +78,4 @@ DifferenceReport difference(const Report& first, const Report& second) {
   return diff;
 }
 
-} // namespace xzero::flow::diagnostics
+} // namespace flow::diagnostics

@@ -18,7 +18,6 @@
 #include <glob.h>
 #endif
 
-namespace xzero {
 namespace flow {
 
 inline std::string escape(char value)  // {{{
@@ -891,4 +890,3 @@ FlowToken FlowLexer::continueCidr(size_t range) {
 // }}}
 
 }  // namespace flow
-}  // namespace xzero

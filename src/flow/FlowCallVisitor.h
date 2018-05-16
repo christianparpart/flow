@@ -9,7 +9,7 @@
 #include <flow/ASTVisitor.h>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -63,4 +63,4 @@ class FlowCallVisitor : public ASTVisitor {
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow

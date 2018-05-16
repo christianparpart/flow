@@ -16,7 +16,7 @@
 #include <list>
 #include <unordered_map>
 
-namespace xzero::flow {
+namespace flow {
 
 bool InstructionElimination::run(IRHandler* handler) {
   for (BasicBlock* bb : handler->basicBlocks()) {
@@ -155,4 +155,4 @@ bool InstructionElimination::branchToExit(BasicBlock* bb) {
   return false;
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

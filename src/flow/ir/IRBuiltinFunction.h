@@ -11,7 +11,7 @@
 #include <flow/Signature.h>
 #include <flow/NativeCallback.h>
 
-namespace xzero::flow {
+namespace flow {
 
 class IRBuiltinFunction : public Constant {
  public:
@@ -26,4 +26,4 @@ class IRBuiltinFunction : public Constant {
   const NativeCallback& native_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

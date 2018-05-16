@@ -8,7 +8,7 @@
 #include <flow/ir/ConstantArray.h>
 #include <cstdlib>
 
-namespace xzero::flow {
+namespace flow {
 
 LiteralType ConstantArray::makeArrayType(LiteralType elementType) {
   switch (elementType) {
@@ -34,4 +34,4 @@ LiteralType ConstantArray::makeArrayType(LiteralType elementType) {
   }
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

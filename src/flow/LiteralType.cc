@@ -8,7 +8,6 @@
 #include <flow/LiteralType.h>
 #include <flow/util/assert.h>
 
-namespace xzero {
 namespace flow {
 
 std::string tos(LiteralType type) {
@@ -79,4 +78,3 @@ LiteralType elementTypeOf(LiteralType type) {
 }
 
 }  // namespace flow
-}  // namespace xzero

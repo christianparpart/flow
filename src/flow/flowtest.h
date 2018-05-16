@@ -98,15 +98,15 @@ class Lexer {
   std::string source_;
   size_t startOffset_;
   Token currentToken_;
-  xzero::flow::FilePos currentPos_;
+  flow::FilePos currentPos_;
   unsigned numberValue_;
   std::string stringValue_;
 };
 
-using DiagnosticsType = xzero::flow::diagnostics::Type;
-using Message = xzero::flow::diagnostics::Message;
-using SourceLocation = xzero::flow::SourceLocation;
-using FilePos = xzero::flow::FilePos;
+using DiagnosticsType = flow::diagnostics::Type;
+using Message = flow::diagnostics::Message;
+using SourceLocation = flow::SourceLocation;
+using FilePos = flow::FilePos;
 
 /**
  * Parses the input @p contents and splits it into a flow program and a vector
@@ -116,7 +116,7 @@ class Parser {
  public:
   Parser(const std::string& filename, const std::string& contents);
 
-  std::error_code parse(xzero::flow::diagnostics::Report* report);
+  std::error_code parse(flow::diagnostics::Report* report);
 
  private:
   std::string parseUntilInitializer();

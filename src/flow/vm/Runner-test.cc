@@ -6,7 +6,7 @@
 #include <flow/vm/ConstantPool.h>
 
 using namespace xzero;
-using namespace xzero::flow;
+using namespace flow;
 
 using Code = ConstantPool::Code;
 

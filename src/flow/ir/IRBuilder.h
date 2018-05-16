@@ -23,7 +23,7 @@
 #include <string>
 #include <memory>
 
-namespace xzero::flow {
+namespace flow {
 
 class Value;
 class Instr;
@@ -202,4 +202,4 @@ class IRBuilder {
   Value* createMatchRegExp(Value* cond);
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

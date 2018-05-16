@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <assert.h>
 
-namespace xzero::flow {
+namespace flow {
 
 IRHandler::IRHandler(const std::string& name, IRProgram* program)
     : Constant(LiteralType::Handler, name), program_(program), blocks_() {
@@ -137,4 +137,4 @@ void IRHandler::verify() {
   }
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

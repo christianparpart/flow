@@ -9,7 +9,7 @@
 #include <flow/ir/HandlerPass.h>
 #include <flow/ir/IRProgram.h>
 
-namespace xzero::flow {
+namespace flow {
 
 PassManager::PassManager() {
 }
@@ -42,4 +42,4 @@ void PassManager::run(IRHandler* handler) {
   }
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

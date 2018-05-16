@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -580,16 +580,16 @@ class MatchStmt : public Stmt {
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::Symbol*> {
+  struct formatter<flow::Symbol*> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(xzero::flow::Symbol* const& v, FormatContext &ctx) {
+    constexpr auto format(flow::Symbol* const& v, FormatContext &ctx) {
       return format_to(ctx.begin(), "{}<{}>", v->name(), v->type());
     }
   };

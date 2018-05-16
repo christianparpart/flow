@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace xzero::flow {
+namespace flow {
 
 class IRHandler;
 
@@ -31,4 +31,4 @@ class HandlerPass {
   const char* name_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

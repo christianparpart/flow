@@ -15,7 +15,7 @@
 #include <vector>
 #include <list>
 
-namespace xzero::flow {
+namespace flow {
 
 class IRBuiltinHandler : public Constant {
  public:
@@ -30,4 +30,4 @@ class IRBuiltinHandler : public Constant {
   const NativeCallback& native_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

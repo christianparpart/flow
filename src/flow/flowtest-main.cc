@@ -24,11 +24,10 @@
 namespace fs = std::experimental::filesystem;
 
 using namespace std;
-using namespace xzero;
 using namespace flowtest;
 using flow::SourceLocation;
 
-class Tester : public xzero::flow::Runtime {
+class Tester : public flow::Runtime {
  public:
   Tester();
 
@@ -37,11 +36,11 @@ class Tester : public xzero::flow::Runtime {
   bool testDirectory(const std::string& path);
 
  private:
-  void compileFile(const std::string& filename, xzero::flow::diagnostics::Report* report);
+  void compileFile(const std::string& filename, flow::diagnostics::Report* report);
 
   bool import(const std::string& name,
               const std::string& path,
-              std::vector<xzero::flow::NativeCallback*>* builtins) override;
+              std::vector<flow::NativeCallback*>* builtins) override;
 
   void reportError(const std::string& msg);
 
@@ -51,15 +50,15 @@ class Tester : public xzero::flow::Runtime {
   }
 
   // handlers
-  void flow_handle_always(xzero::flow::Params& args);
-  void flow_handle(xzero::flow::Params& args);
+  void flow_handle_always(flow::Params& args);
+  void flow_handle(flow::Params& args);
 
   // functions
-  void flow_sum(xzero::flow::Params& args);
-  void flow_assert(xzero::flow::Params& args);
+  void flow_sum(flow::Params& args);
+  void flow_assert(flow::Params& args);
 
  private:
-  xzero::flow::diagnostics::Report report_;
+  flow::diagnostics::Report report_;
   uintmax_t errorCount_ = 0;
 
 };

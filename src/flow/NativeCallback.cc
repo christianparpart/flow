@@ -7,7 +7,7 @@
 
 #include <flow/NativeCallback.h>
 
-namespace xzero::flow {
+namespace flow {
 
 // constructs a handler callback
 NativeCallback::NativeCallback(Runtime* runtime, const std::string& _name)
@@ -80,4 +80,4 @@ void NativeCallback::invoke(Params& args) const {
   function_(args);
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

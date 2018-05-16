@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 class IRProgram;
 class IRBuilder;
@@ -50,4 +50,4 @@ class Runtime {
   std::vector<std::unique_ptr<NativeCallback>> builtins_;
 };
 
-}  // xzero::flow
+}  // flow

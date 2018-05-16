@@ -9,7 +9,6 @@
 #include <flow/AST.h>
 #include <cctype>
 
-namespace xzero {
 namespace flow {
 
 inline std::string escape(char value)  // {{{
@@ -241,4 +240,3 @@ void ASTPrinter::accept(AssignStmt& assign) {
 }
 
 }  // namespace flow
-}  // namespace xzero

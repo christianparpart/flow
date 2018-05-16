@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cassert>
 
-namespace xzero {
 namespace flow {
 
 FlowCallVisitor::FlowCallVisitor(ASTNode* root) : calls_() { visit(root); }
@@ -119,4 +118,3 @@ void FlowCallVisitor::accept(AssignStmt& assignStmt) {
 // }}}
 
 }  // namespace flow
-}  // namespace xzero

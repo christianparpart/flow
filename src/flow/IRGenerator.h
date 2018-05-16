@@ -13,7 +13,6 @@
 #include <vector>
 #include <string>
 
-namespace xzero {
 namespace flow {
 
 //! \addtogroup Flow
@@ -139,4 +138,3 @@ inline void IRGenerator::reportError(const std::string& fmt, Args&&... args) {
 //!@}
 
 }  // namespace flow
-}  // namespace xzero

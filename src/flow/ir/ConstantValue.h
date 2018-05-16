@@ -12,16 +12,13 @@
 #include <iostream>
 #include <string>
 
-namespace xzero {
+namespace flow::util {
+  class RegExp;
   class Cidr;
   class IPAddress;
 }
 
-namespace xzero::flow::util {
-  class RegExp;
-}
-
-namespace xzero::flow {
+namespace flow {
 
 template <typename T, const LiteralType Ty>
 class ConstantValue : public Constant {
@@ -43,8 +40,8 @@ class ConstantValue : public Constant {
 typedef ConstantValue<int64_t, LiteralType::Number> ConstantInt;
 typedef ConstantValue<bool, LiteralType::Boolean> ConstantBoolean;
 typedef ConstantValue<std::string, LiteralType::String> ConstantString;
-typedef ConstantValue<IPAddress, LiteralType::IPAddress> ConstantIP;
-typedef ConstantValue<Cidr, LiteralType::Cidr> ConstantCidr;
+typedef ConstantValue<util::IPAddress, LiteralType::IPAddress> ConstantIP;
+typedef ConstantValue<util::Cidr, LiteralType::Cidr> ConstantCidr;
 typedef ConstantValue<util::RegExp, LiteralType::RegExp> ConstantRegExp;
 
-}  // namespace xzero::flow
+}  // namespace flow

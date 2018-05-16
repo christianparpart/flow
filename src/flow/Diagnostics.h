@@ -15,7 +15,7 @@
 #include <system_error>
 #include <vector>
 
-namespace xzero::flow::diagnostics {
+namespace flow::diagnostics {
 
 enum class Type {
   TokenError,
@@ -123,12 +123,12 @@ class TypeError : public DiagnosticsError {
   TypeError(SourceLocation sloc, const std::string& msg) : DiagnosticsError{sloc, msg} {}
 };
 
-} // namespace xzero::flow
+} // namespace flow
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::diagnostics::Type> {
-    using Type = xzero::flow::diagnostics::Type;
+  struct formatter<flow::diagnostics::Type> {
+    using Type = flow::diagnostics::Type;
 
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
@@ -155,8 +155,8 @@ namespace fmt {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::diagnostics::Message> {
-    using Message = xzero::flow::diagnostics::Message;
+  struct formatter<flow::diagnostics::Message> {
+    using Message = flow::diagnostics::Message;
 
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }

@@ -228,7 +228,7 @@ Parser::Parser(const std::string& filename, const std::string& source)
     : lexer_{filename, source} {
 }
 
-std::error_code Parser::parse(xzero::flow::diagnostics::Report* report) {
+std::error_code Parser::parse(flow::diagnostics::Report* report) {
   lexer_.consume(Token::InitializerMark);
 
   while (!lexer_.eof())

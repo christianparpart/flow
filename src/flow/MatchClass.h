@@ -9,10 +9,10 @@
 
 #include <string>
 
-namespace xzero::flow {
+namespace flow {
 
 enum class MatchClass { Same, Head, Tail, RegExp, };
 
 std::string tos(MatchClass c);
 
-}  // namespace xzero::flow
+}  // namespace flow

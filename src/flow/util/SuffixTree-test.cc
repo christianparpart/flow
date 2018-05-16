@@ -9,7 +9,7 @@
 #include <flow/util/SuffixTree.h>
 
 TEST(SuffixTree, exactMatch) {
-  xzero::flow::util::SuffixTree<std::string, int> t;
+  flow::util::SuffixTree<std::string, int> t;
   t.insert("www.example.com.", 1);
   t.insert("example.com.", 2);
   t.insert("com.", 3);
@@ -26,7 +26,7 @@ TEST(SuffixTree, exactMatch) {
 }
 
 TEST(SuffixTree, subMatch) {
-  xzero::flow::util::SuffixTree<std::string, int> t;
+  flow::util::SuffixTree<std::string, int> t;
   t.insert("www.example.com.", 1);
   t.insert(    "example.com.", 2);
   t.insert(            "com.", 3);

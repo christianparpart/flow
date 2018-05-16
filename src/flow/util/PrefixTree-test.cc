@@ -9,7 +9,7 @@
 #include <flow/util/PrefixTree.h>
 
 TEST(PrefixTree, exactMatch) {
-  xzero::flow::util::PrefixTree<std::string, int> t;
+  flow::util::PrefixTree<std::string, int> t;
   t.insert("/foo", 1);
   t.insert("/foo/bar", 2);
   t.insert("/foo/fnord", 3);
@@ -26,7 +26,7 @@ TEST(PrefixTree, exactMatch) {
 }
 
 TEST(PrefixTree, subMatch) {
-  xzero::flow::util::PrefixTree<std::string, int> t;
+  flow::util::PrefixTree<std::string, int> t;
   t.insert("/foo", 1);
   t.insert("/foo/bar", 2);
   t.insert("/foo/fnord", 3);

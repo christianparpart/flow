@@ -11,7 +11,7 @@
 #include <vector>
 #include <memory>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 class BufferRef;
 
@@ -79,4 +79,4 @@ class RegExpContext {
   mutable std::unique_ptr<RegExp::Result> regexMatch_;
 };
 
-}  // namespace xzero::flow::util
+}  // namespace flow::util

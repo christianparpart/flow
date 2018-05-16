@@ -10,7 +10,7 @@
 #include <list>
 #include <memory>
 
-namespace xzero::flow {
+namespace flow {
 
 class HandlerPass;
 class IRHandler;
@@ -37,4 +37,4 @@ class PassManager {
   std::list<std::unique_ptr<HandlerPass>> handlerPasses_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

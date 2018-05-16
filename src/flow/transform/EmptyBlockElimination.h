@@ -9,7 +9,7 @@
 
 #include <flow/ir/HandlerPass.h>
 
-namespace xzero::flow {
+namespace flow {
 
 /**
  * Eliminates empty blocks, that are just jumping to the next block.
@@ -21,4 +21,4 @@ class EmptyBlockElimination : public HandlerPass {
   bool run(IRHandler* handler) override;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

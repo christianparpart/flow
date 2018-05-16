@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 class ConstantArray : public Constant {
  public:
@@ -31,4 +31,4 @@ class ConstantArray : public Constant {
   LiteralType makeArrayType(LiteralType elementType);
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

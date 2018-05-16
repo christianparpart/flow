@@ -7,10 +7,10 @@
 
 #include <flow/ir/Constant.h>
 
-namespace xzero::flow {
+namespace flow {
 
 void Constant::dump() {
   printf("Constant '%s': %s\n", name().c_str(), tos(type()).c_str());
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

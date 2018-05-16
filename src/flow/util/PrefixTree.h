@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 template <typename K, typename V>
 class PrefixTree {
@@ -93,4 +93,4 @@ bool PrefixTree<K, V>::lookup(const Key& key, Value* value) const {
 }
 // }}}
 
-}  // namespace xzero::flow::util
+}  // namespace flow::util

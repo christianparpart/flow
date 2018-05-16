@@ -8,7 +8,7 @@
 #include <flow/util/Cidr.h>
 #include <flow/util/IPAddress.h>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 std::string Cidr::str() const {
   char result[INET6_ADDRSTRLEN + 32];
@@ -61,4 +61,4 @@ bool operator==(const Cidr& a, const Cidr& b) {
 
 bool operator!=(const Cidr& a, const Cidr& b) { return !(a == b); }
 
-}  // namespace xzero
+}  // namespace flow::util

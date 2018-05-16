@@ -20,7 +20,7 @@
 #include <variant>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 class Params;
 class Instr;
@@ -353,4 +353,4 @@ inline const NativeCallback::DefaultValue& NativeCallback::getDefaultParamAt(siz
 }
 // }}}
 
-}  // namespace xzero::flow
+}  // namespace flow

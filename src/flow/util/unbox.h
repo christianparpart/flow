@@ -8,7 +8,7 @@
 
 #include <iterator>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 template<typename T>
 class UnboxedRange {
@@ -73,4 +73,4 @@ UnboxedRange<BoxedContainer> unbox(BoxedContainer& boxedContainer) {
   return UnboxedRange<BoxedContainer>(boxedContainer);
 }
 
-} // namespace xzero::flow::util
+} // namespace flow::util

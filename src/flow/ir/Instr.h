@@ -17,7 +17,7 @@
 #include <vector>
 #include <list>
 
-namespace xzero::flow {
+namespace flow {
 
 class Instr;
 class BasicBlock;
@@ -127,4 +127,4 @@ class Instr : public Value {
   std::vector<Value*> operands_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

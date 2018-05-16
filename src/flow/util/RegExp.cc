@@ -9,7 +9,7 @@
 #include <cstring>
 #include <regex>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 RegExp::RegExp()
     : pattern_(),
@@ -47,4 +47,4 @@ const char* RegExp::c_str() const {
   return pattern_.c_str();
 }
 
-}  // namespace xzero::flow::util
+}  // namespace flow::util

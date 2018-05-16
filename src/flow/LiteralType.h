@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 using Cidr = util::Cidr;
 using IPAddress = util::IPAddress;
@@ -71,12 +71,12 @@ typedef std::vector<Cidr> FlowCidrArray;
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow
 
 namespace std {
   template <>
-  struct hash<xzero::flow::LiteralType> {
-    uint32_t operator()(xzero::flow::LiteralType v) const noexcept {
+  struct hash<flow::LiteralType> {
+    uint32_t operator()(flow::LiteralType v) const noexcept {
       return static_cast<uint32_t>(v);
     }
   };
@@ -84,8 +84,8 @@ namespace std {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::LiteralType> {
-    using LiteralType = xzero::flow::LiteralType;
+  struct formatter<flow::LiteralType> {
+    using LiteralType = flow::LiteralType;
 
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }

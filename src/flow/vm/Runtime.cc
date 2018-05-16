@@ -12,7 +12,7 @@
 #include <flow/ir/Instructions.h>
 #include <flow/NativeCallback.h>
 
-namespace xzero::flow {
+namespace flow {
 
 Runtime::~Runtime() {
 }
@@ -70,4 +70,4 @@ bool Runtime::verifyNativeCalls(IRProgram* program, IRBuilder* builder) {
   return true;
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

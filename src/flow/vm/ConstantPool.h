@@ -13,7 +13,7 @@
 #include <flow/util/RegExp.h>
 #include <flow/vm/Match.h>
 
-namespace xzero::flow {
+namespace flow {
 
 class IRHandler;
 class IRBuiltinFunction;
@@ -139,4 +139,4 @@ class ConstantPool {
   std::vector<std::string> nativeFunctionSignatures_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

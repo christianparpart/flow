@@ -10,7 +10,7 @@
 #include <string>
 #include <fmt/format.h>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -103,16 +103,16 @@ inline SourceLocation operator-(const SourceLocation& end,
 
 //!@}
 
-} // namespace xzero::flow
+} // namespace flow
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::FilePos> {
+  struct formatter<flow::FilePos> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(const xzero::flow::FilePos& v, FormatContext &ctx) {
+    constexpr auto format(const flow::FilePos& v, FormatContext &ctx) {
       return format_to(ctx.begin(), "{}:{}", v.line, v.column);
     }
   };
@@ -120,12 +120,12 @@ namespace fmt {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::SourceLocation> {
+  struct formatter<flow::SourceLocation> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(const xzero::flow::SourceLocation& v, FormatContext &ctx) {
+    constexpr auto format(const flow::SourceLocation& v, FormatContext &ctx) {
       if (!v.filename.empty())
         return format_to(ctx.begin(), "{}:{}", v.filename, v.begin);
       else

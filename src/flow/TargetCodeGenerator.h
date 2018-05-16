@@ -20,7 +20,7 @@
 #include <utility>
 #include <memory>
 
-namespace xzero::flow {
+namespace flow {
   class Value;
   class Instr;
   class IRProgram;
@@ -30,11 +30,11 @@ namespace xzero::flow {
   class IRBuiltinFunction;
 }
 
-namespace xzero::flow::vm {
+namespace flow::vm {
   class Program;
 }
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -221,4 +221,4 @@ class TargetCodeGenerator : public InstructionVisitor {
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow

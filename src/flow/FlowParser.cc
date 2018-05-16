@@ -33,7 +33,6 @@ struct hash<OpSig> {
 };
 }
 
-namespace xzero {
 namespace flow {
 
 // {{{ scoped(SCOPED_SYMBOL)
@@ -1647,4 +1646,3 @@ std::unique_ptr<Stmt> FlowParser::postscriptStmt(
 // }}}
 
 }  // namespace flow
-}  // namespace xzero

@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <fmt/format.h>
 
-namespace xzero::flow {
+namespace flow {
 
 //! \addtogroup Flow
 //@{
@@ -126,12 +126,12 @@ std::string to_string(FlowToken t);
 
 //!@}
 
-}  // namespace xzero::flow
+}  // namespace flow
 
 namespace std {
   template <>
-  struct hash<xzero::flow::FlowToken> {
-    uint32_t operator()(xzero::flow::FlowToken v) const {
+  struct hash<flow::FlowToken> {
+    uint32_t operator()(flow::FlowToken v) const {
       return static_cast<uint32_t>(v);
     }
   };
@@ -139,12 +139,12 @@ namespace std {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::FlowToken> {
+  struct formatter<flow::FlowToken> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(const xzero::flow::FlowToken& v, FormatContext &ctx) {
+    constexpr auto format(const flow::FlowToken& v, FormatContext &ctx) {
       return format_to(ctx.begin(), to_string(v));
     }
   };

@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 // ExecutionEngine
 // VM
@@ -181,4 +181,4 @@ class Runner {
   std::list<std::string> stringGarbage_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

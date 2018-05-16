@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 /* {{{ possible binary file format
  * ----------------------------------------------
@@ -181,4 +181,4 @@ bool Program::link(Runtime* runtime, diagnostics::Report* report) {
   return errors == 0;
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

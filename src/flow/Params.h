@@ -15,7 +15,7 @@
 #include <flow/util/Cidr.h>
 #include <memory>
 
-namespace xzero::flow {
+namespace flow {
 
 class Params {
  public:
@@ -96,4 +96,4 @@ class Params {
   std::vector<Value> argv_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

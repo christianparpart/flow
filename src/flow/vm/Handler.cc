@@ -11,7 +11,7 @@
 #include <flow/vm/Instruction.h>
 #include <flow/sysconfig.h>
 
-namespace xzero::flow {
+namespace flow {
 
 Handler::Handler() {
 }
@@ -87,4 +87,4 @@ void Handler::disassemble() const noexcept {
                                  &program_->constants()).c_str());
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

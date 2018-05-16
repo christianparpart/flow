@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace xzero::flow {
+namespace flow {
 
 template class ConstantValue<int64_t, LiteralType::Number>;
 template class ConstantValue<bool, LiteralType::Boolean>;
@@ -21,4 +21,4 @@ template class ConstantValue<util::IPAddress, LiteralType::IPAddress>;
 template class ConstantValue<util::Cidr, LiteralType::Cidr>;
 template class ConstantValue<util::RegExp, LiteralType::RegExp>;
 
-}  // namespace xzero::flow
+}  // namespace flow

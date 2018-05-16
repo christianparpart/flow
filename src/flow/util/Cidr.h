@@ -10,7 +10,7 @@
 #include <flow/util/IPAddress.h>
 #include <fmt/format.h>
 
-namespace xzero::flow::util {
+namespace flow::util {
 
 /**
  * @brief CIDR network notation object.
@@ -88,13 +88,13 @@ class Cidr {
   size_t prefix_;
 };
 
-}  // namespace xzero
+}  // namespace flow::util
 
 namespace std {
 
 template <>
-struct hash<xzero::flow::util::Cidr> {
-  size_t operator()(const xzero::flow::util::Cidr& v) const noexcept {
+struct hash<flow::util::Cidr> {
+  size_t operator()(const flow::util::Cidr& v) const noexcept {
     // TODO: let it honor IPv6 better
     return static_cast<size_t>(*(uint32_t*)(v.address().data()) + v.prefix());
   }
@@ -104,12 +104,12 @@ struct hash<xzero::flow::util::Cidr> {
 
 namespace fmt {
   template<>
-  struct formatter<xzero::flow::util::Cidr> {
+  struct formatter<flow::util::Cidr> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(const xzero::flow::util::Cidr& v, FormatContext &ctx) {
+    constexpr auto format(const flow::util::Cidr& v, FormatContext &ctx) {
       return format_to(ctx.begin(), v.str());
     }
   };

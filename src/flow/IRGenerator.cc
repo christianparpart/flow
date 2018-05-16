@@ -16,7 +16,6 @@
 #include <assert.h>
 #include <math.h>
 
-namespace xzero {
 namespace flow {
 
 IRGenerator::IRGenerator()
@@ -479,4 +478,3 @@ void IRGenerator::reportError(const std::string& message) {
 }
 
 }  // namespace flow
-}  // namespace xzero

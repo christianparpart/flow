@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace xzero::flow {
+namespace flow {
 
 struct MatchCaseDef {
   //!< offset into the string pool (or regexp pool) of the associated program.
@@ -110,4 +110,4 @@ class MatchRegEx : public Match {
   std::vector<std::pair<util::RegExp, uint64_t>> map_;
 };
 
-}  // namespace xzero::flow
+}  // namespace flow

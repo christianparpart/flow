@@ -11,7 +11,7 @@
 #include <flow/ir/Instructions.h>
 #include <list>
 
-namespace xzero::flow {
+namespace flow {
 
 bool EmptyBlockElimination::run(IRHandler* handler) {
   std::list<BasicBlock*> eliminated;
@@ -41,4 +41,4 @@ bool EmptyBlockElimination::run(IRHandler* handler) {
   return eliminated.size() > 0;
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

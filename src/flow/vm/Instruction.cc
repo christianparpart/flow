@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <sstream>
 
-namespace xzero::flow {
+namespace flow {
 
 // {{{ InstructionInfo
 struct InstructionInfo {
@@ -390,4 +390,4 @@ std::string disassemble(Instruction pc, size_t ip, size_t sp, const ConstantPool
   return line.str();
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

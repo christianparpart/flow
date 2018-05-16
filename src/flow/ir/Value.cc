@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace xzero::flow {
+namespace flow {
 
 static unsigned long long valueCounter = 1;
 
@@ -68,4 +68,4 @@ void Value::dump() {
   printf("Value '%s': %s\n", name_.c_str(), tos(type_).c_str());
 }
 
-}  // namespace xzero::flow
+}  // namespace flow

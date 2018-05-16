@@ -19,7 +19,6 @@
 #include <cctype>
 #include <list>
 
-namespace xzero {
 namespace flow {
 
 namespace diagnostics {
@@ -138,4 +137,3 @@ inline FlowLexer::Scope* FlowLexer::scope() const {
 //!@}
 
 }  // namespace flow
-}  // namespace xzero
