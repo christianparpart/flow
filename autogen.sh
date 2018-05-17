@@ -60,5 +60,5 @@ exec cmake "${ROOT}" \
             -DCMAKE_INSTALL_PREFIX="${HOME}/local" \
             -DCMAKE_VERBOSE_MAKEFILE=OFF \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-            -DENABLE_TIDY=ON \
+            -DENABLE_TIDY=OFF \
             "${@}"
