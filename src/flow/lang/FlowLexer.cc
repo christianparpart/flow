@@ -6,7 +6,7 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <flow/Diagnostics.h>
-#include <flow/FlowLexer.h>
+#include <flow/lang/FlowLexer.h>
 #include <flow/util/IPAddress.h>
 
 #include <sstream>
@@ -18,7 +18,7 @@
 #include <glob.h>
 #endif
 
-namespace flow {
+namespace flow::lang {
 
 inline std::string escape(char value)  // {{{
 {

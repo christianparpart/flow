@@ -5,18 +5,19 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/IRGenerator.h>
 #include <flow/NativeCallback.h>
-#include <flow/AST.h>
-#include <flow/ir/IRProgram.h>
-#include <flow/ir/IRHandler.h>
-#include <flow/ir/Instructions.h>
 #include <flow/ir/ConstantArray.h>
-#include <algorithm>
-#include <assert.h>
-#include <math.h>
+#include <flow/ir/IRHandler.h>
+#include <flow/ir/IRProgram.h>
+#include <flow/ir/Instructions.h>
+#include <flow/lang/AST.h>
+#include <flow/lang/IRGenerator.h>
 
-namespace flow {
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+
+namespace flow::lang {
 
 IRGenerator::IRGenerator()
     : IRGenerator{ErrorHandler{}, {}} {}
@@ -477,4 +478,4 @@ void IRGenerator::reportError(const std::string& message) {
   }
 }
 
-}  // namespace flow
+}  // namespace flow::lang

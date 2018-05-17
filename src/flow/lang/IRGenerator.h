@@ -7,13 +7,14 @@
 
 #pragma once
 
-#include <flow/ASTVisitor.h>
 #include <flow/ir/IRBuilder.h>
-#include <deque>
-#include <vector>
-#include <string>
+#include <flow/lang/ASTVisitor.h>
 
-namespace flow {
+#include <deque>
+#include <string>
+#include <vector>
+
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
@@ -137,4 +138,4 @@ inline void IRGenerator::reportError(const std::string& fmt, Args&&... args) {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang

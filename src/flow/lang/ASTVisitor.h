@@ -14,7 +14,7 @@
 #include <memory>
 #include <utility>
 
-namespace flow {
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
@@ -86,4 +86,4 @@ class ASTVisitor {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang

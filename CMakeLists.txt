@@ -72,60 +72,73 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/flow/sysconfig.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/src/flow/sysconfig.h)
 
-# {{{ libFlow
-set(flow_SRC src/flow/AST.cc
-             src/flow/ASTPrinter.cc
-             src/flow/Diagnostics.cc
-             src/flow/FlowCallVisitor.cc
-             src/flow/FlowLexer.cc
-             src/flow/FlowParser.cc
-             src/flow/FlowToken.cc
-             src/flow/LiteralType.cc
-             src/flow/IRGenerator.cc
-             src/flow/MatchClass.cc
-             src/flow/NativeCallback.cc
-             src/flow/Signature.cc
-             src/flow/SourceLocation.cc
-             src/flow/TargetCodeGenerator.cc
-             src/flow/ir/BasicBlock.cc
-             src/flow/ir/Constant.cc
-             src/flow/ir/ConstantArray.cc
-             src/flow/ir/ConstantValue.cc
-             src/flow/ir/IRBuilder.cc
-             src/flow/ir/IRHandler.cc
-             src/flow/ir/IRProgram.cc
-             src/flow/ir/Instr.cc
-             src/flow/ir/InstructionVisitor.cc
-             src/flow/ir/Instructions.cc
-             src/flow/ir/PassManager.cc
-             src/flow/ir/Value.cc
-             src/flow/transform/EmptyBlockElimination.cc
-             src/flow/transform/InstructionElimination.cc
-             src/flow/transform/MergeBlockPass.cc
-             src/flow/transform/UnusedBlockPass.cc
-             src/flow/util/Cidr.cc
-             src/flow/util/RegExp.cc
-             src/flow/vm/ConstantPool.cc
-             src/flow/vm/Handler.cc
-             src/flow/vm/Instruction.cc
-             src/flow/vm/Match.cc
-             src/flow/vm/Program.cc
-             src/flow/vm/Runner.cc
-             src/flow/vm/Runtime.cc
-             )
+# {{{ FlowCore
+add_library(FlowCore STATIC
+            src/flow/Diagnostics.cc
+            src/flow/LiteralType.cc
+            src/flow/MatchClass.cc
+            src/flow/NativeCallback.cc
+            src/flow/SourceLocation.cc
+            src/flow/Signature.cc
+            src/flow/TargetCodeGenerator.cc
+            src/flow/ir/BasicBlock.cc
+            src/flow/ir/Constant.cc
+            src/flow/ir/ConstantArray.cc
+            src/flow/ir/ConstantValue.cc
+            src/flow/ir/IRBuilder.cc
+            src/flow/ir/IRHandler.cc
+            src/flow/ir/IRProgram.cc
+            src/flow/ir/Instr.cc
+            src/flow/ir/InstructionVisitor.cc
+            src/flow/ir/Instructions.cc
+            src/flow/ir/PassManager.cc
+            src/flow/ir/Value.cc
+            src/flow/transform/EmptyBlockElimination.cc
+            src/flow/transform/InstructionElimination.cc
+            src/flow/transform/MergeBlockPass.cc
+            src/flow/transform/UnusedBlockPass.cc
+            src/flow/util/Cidr.cc
+            src/flow/util/RegExp.cc
+            src/flow/vm/ConstantPool.cc
+            src/flow/vm/Handler.cc
+            src/flow/vm/Instruction.cc
+            src/flow/vm/Match.cc
+            src/flow/vm/Program.cc
+            src/flow/vm/Runner.cc
+            src/flow/vm/Runtime.cc
+            )
 
-add_library(flow STATIC ${flow_SRC})
-set_target_properties(flow PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 if(CLANG_TIDY_EXE)
-  set_target_properties(flow PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+  set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
-install(TARGETS flow DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS FlowCore DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(
     DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/flow/"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/include/flow"
     FILES_MATCHING PATTERN "*.h")
 # }}}
+# {{{ FlowLang
+add_library(FlowLang STATIC
+            src/flow/lang/AST.cc
+            src/flow/lang/ASTPrinter.cc
+            src/flow/lang/FlowCallVisitor.cc
+            src/flow/lang/FlowLexer.cc
+            src/flow/lang/FlowParser.cc
+            src/flow/lang/FlowToken.cc
+            src/flow/lang/IRGenerator.cc
+            )
 
+set_target_properties(FlowLang PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+if(CLANG_TIDY_EXE)
+  set_target_properties(FlowLang PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+endif()
+install(TARGETS FlowLang DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(
+    DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/flow/lang"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/include/flow/lang"
+    FILES_MATCHING PATTERN "*.h")
+# }}}
 # {{{ flowtest
 add_executable(flowtest src/flow/flowtest-main.cc
                         src/flow/flowtest.cc)
@@ -134,7 +147,7 @@ set_target_properties(flowtest PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED 
 if(CLANG_TIDY_EXE)
   set_target_properties(flowtest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
-target_link_libraries(flowtest flow)
+target_link_libraries(flowtest FlowLang FlowCore)
 
 if(UNIX)
   target_link_libraries(flowtest stdc++fs)

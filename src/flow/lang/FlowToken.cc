@@ -5,10 +5,10 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/FlowToken.h>
+#include <flow/lang/FlowToken.h>
 #include <flow/util/assert.h>
 
-namespace flow {
+namespace flow::lang {
 
 bool FlowTokenTraits::isKeyword(FlowToken t) {
   switch (t) {

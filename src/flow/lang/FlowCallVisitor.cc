@@ -5,12 +5,12 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/FlowCallVisitor.h>
-#include <flow/AST.h>
+#include <flow/lang/FlowCallVisitor.h>
+#include <flow/lang/AST.h>
 #include <algorithm>
 #include <cassert>
 
-namespace flow {
+namespace flow::lang {
 
 FlowCallVisitor::FlowCallVisitor(ASTNode* root) : calls_() { visit(root); }
 

@@ -5,10 +5,10 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/AST.h>
-#include <flow/ASTPrinter.h>
 #include <flow/NativeCallback.h>
 #include <flow/Signature.h>
+#include <flow/lang/AST.h>
+#include <flow/lang/ASTPrinter.h>
 
 #include <fmt/format.h>
 
@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include <memory>
 
-namespace flow {
+namespace flow::lang {
 
 // {{{ SymbolTable
 SymbolTable::SymbolTable(SymbolTable* outer, const std::string& name)

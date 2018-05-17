@@ -5,11 +5,11 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/ASTPrinter.h>
-#include <flow/AST.h>
+#include <flow/lang/ASTPrinter.h>
+#include <flow/lang/AST.h>
 #include <cctype>
 
-namespace flow {
+namespace flow::lang {
 
 inline std::string escape(char value)  // {{{
 {

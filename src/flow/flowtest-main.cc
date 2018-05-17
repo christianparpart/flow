@@ -1,8 +1,8 @@
 #include <flow/flowtest.h>
 
-#include <flow/FlowParser.h>
+#include <flow/lang/FlowParser.h>
+#include <flow/lang/IRGenerator.h>
 #include <flow/SourceLocation.h>
-#include <flow/IRGenerator.h>
 #include <flow/NativeCallback.h>
 #include <flow/Params.h>
 #include <flow/TargetCodeGenerator.h>
@@ -180,14 +180,14 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   fmt::print("testing {}\n", filename);
 
   constexpr bool optimize = true;
-  flow::FlowParser parser(report,
-                          this,
-                          [this](auto x, auto y, auto z) { return import(x, y, z); });
+  flow::lang::FlowParser parser(report,
+                                this,
+                                [this](auto x, auto y, auto z) { return import(x, y, z); });
   parser.openStream(std::make_unique<std::ifstream>(filename), filename);
-  std::unique_ptr<flow::UnitSym> unit = parser.parse();
+  std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 
-  flow::IRGenerator irgen([this] (const std::string& msg) { reportError(msg); },
-                          {"main"});
+  flow::lang::IRGenerator irgen([this] (const std::string& msg) { reportError(msg); },
+                                {"main"});
   std::shared_ptr<flow::IRProgram> programIR = irgen.generate(unit.get());
 
   if (optimize) {

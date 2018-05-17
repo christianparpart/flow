@@ -5,9 +5,9 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/ASTVisitor.h>
+#include <flow/lang/ASTVisitor.h>
 
-namespace flow {
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
@@ -67,4 +67,4 @@ class ASTPrinter : public ASTVisitor {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang

@@ -8,8 +8,8 @@
 #pragma once
 
 #include <flow/SourceLocation.h>
-#include <flow/FlowToken.h>
 #include <flow/LiteralType.h>
+#include <flow/lang/FlowToken.h>
 #include <flow/util/IPAddress.h>
 #include <flow/util/Cidr.h>
 
@@ -19,11 +19,11 @@
 #include <cctype>
 #include <list>
 
-namespace flow {
-
-namespace diagnostics {
+namespace flow::diagnostics {
   class Report;
 }
+
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
@@ -136,4 +136,4 @@ inline FlowLexer::Scope* FlowLexer::scope() const {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang

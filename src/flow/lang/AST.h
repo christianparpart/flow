@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <flow/ASTVisitor.h>
-#include <flow/SourceLocation.h>
-#include <flow/FlowToken.h>
 #include <flow/LiteralType.h>
 #include <flow/MatchClass.h>
 #include <flow/Signature.h>
+#include <flow/SourceLocation.h>
+#include <flow/lang/ASTVisitor.h>
+#include <flow/lang/FlowToken.h>
 #include <flow/vm/Instruction.h>  // Opcode
 
 #include <fmt/format.h>
@@ -23,11 +23,14 @@
 #include <vector>
 
 namespace flow {
+  class NativeCallback;
+}
+
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
 
-class NativeCallback;
 class ASTVisitor;
 class SymbolTable;
 class Expr;
@@ -580,16 +583,16 @@ class MatchStmt : public Stmt {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang
 
 namespace fmt {
   template<>
-  struct formatter<flow::Symbol*> {
+  struct formatter<flow::lang::Symbol*> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(flow::Symbol* const& v, FormatContext &ctx) {
+    constexpr auto format(flow::lang::Symbol* const& v, FormatContext &ctx) {
       return format_to(ctx.begin(), "{}<{}>", v->name(), v->type());
     }
   };

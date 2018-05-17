@@ -6,10 +6,10 @@
 // the License at: http://opensource.org/licenses/MIT
 #pragma once
 
-#include <flow/FlowToken.h>
-#include <flow/FlowLexer.h>
 #include <flow/Diagnostics.h>
-#include <flow/AST.h>  // SymbolTable
+#include <flow/lang/AST.h>  // SymbolTable
+#include <flow/lang/FlowLexer.h>
+#include <flow/lang/FlowToken.h>
 
 #include <list>
 #include <vector>
@@ -18,13 +18,16 @@
 #include <functional>
 
 namespace flow {
+  class NativeCallback;
+  class Runtime;
+}
+
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
 
 class FlowLexer;
-class NativeCallback;
-class Runtime;
 
 class FlowParser {
  public:
@@ -176,4 +179,4 @@ inline bool FlowParser::testTokens(A1 a1, Args... tokens) const {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang

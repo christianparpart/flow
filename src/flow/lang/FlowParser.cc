@@ -6,34 +6,36 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <flow/NativeCallback.h>
-#include <flow/FlowParser.h>
-#include <flow/FlowLexer.h>
-#include <flow/AST.h>
+#include <flow/lang/AST.h>
+#include <flow/lang/FlowLexer.h>
+#include <flow/lang/FlowParser.h>
 #include <flow/vm/Runtime.h>
 #include <unordered_map>
 #include <memory>
 
-enum class OpSig {
-  Invalid,
-  BoolBool,
-  NumNum,
-  StringString,
-  StringRegexp,
-  IpIp,
-  IpCidr,
-  CidrCidr,
-};
-
-namespace std {
-template <>
-struct hash<OpSig> {
-  uint32_t operator()(OpSig v) const noexcept {
-    return static_cast<uint32_t>(v);
-  }
-};
+namespace flow::lang {
+  enum class OpSig {
+    Invalid,
+    BoolBool,
+    NumNum,
+    StringString,
+    StringRegexp,
+    IpIp,
+    IpCidr,
+    CidrCidr,
+  };
 }
 
-namespace flow {
+namespace std {
+  template <>
+  struct hash<flow::lang::OpSig> {
+    uint32_t operator()(flow::lang::OpSig v) const noexcept {
+      return static_cast<uint32_t>(v);
+    }
+  };
+}
+
+namespace flow::lang {
 
 // {{{ scoped(SCOPED_SYMBOL)
 class FlowParser::Scope {

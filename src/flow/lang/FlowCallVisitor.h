@@ -6,10 +6,10 @@
 // the License at: http://opensource.org/licenses/MIT
 #pragma once
 
-#include <flow/ASTVisitor.h>
+#include <flow/lang/ASTVisitor.h>
 #include <vector>
 
-namespace flow {
+namespace flow::lang {
 
 //! \addtogroup Flow
 //@{
@@ -63,4 +63,4 @@ class FlowCallVisitor : public ASTVisitor {
 
 //!@}
 
-}  // namespace flow
+}  // namespace flow::lang
