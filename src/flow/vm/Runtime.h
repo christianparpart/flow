@@ -43,6 +43,11 @@ class Runtime {
 
   /**
    * Verifies all call instructions.
+   *
+   * @param program the IRProgram to verify.
+   * @param builder the IRBuilder to pass to each verify(), that can be used for modifications.
+   *
+   * @see bool NativeCallback::verify(Instr* call, IRBuilder* irBuilder);
    */
   bool verifyNativeCalls(IRProgram* program, IRBuilder* builder);
 
