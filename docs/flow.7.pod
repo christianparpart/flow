@@ -1,0 +1,494 @@
+=encoding UTF-8
+=head1 NAME
+
+Flow Language Specification
+
+=head1 SYNOPSIS
+
+Flow is a tiny domain specific language designed to define
+control flow for customizable hooks in an application,
+e.g. an HTTP server's request handling.
+
+=head1 DESCRIPTION
+
+A B<Flow> source (or configuration-) file specifies a list of named handlers.
+
+These handlers may be invoked by the host application (e.g. an HTTP web server)
+on certain events, e.g. an incoming request to be processed.
+The handler then decides - depending on the request properties
+(such as source IP, hostname, or request path) - how to exactly handle this request,
+e.g. either passing it to a FastCGI backend server, the static file handler,
+or just responding with a 403 (Access Denied) response directly.
+
+You can define custom sub handlers within your control file for common tasks
+frequently handled, e.g. a custom php or cgi handler that may be
+invoked by others.
+
+With this in mind, B<Flow> can be used to build up complex decision control
+flows that make it pretty easy to tweak.
+
+B<Flow> itself is built upon five basic concepts:
+
+=over 6
+
+=item B<handlers>
+
+Handlers define the handlers your application invokes to actually execute your
+customized control flow, or sub-handlers, a handler that is called by other handlers.
+
+A handler is special as it
+B<only returns to the caller if it has not processed the context>
+(e.g. an HTTP request).
+
+In pseudo-language, you may describe it as follows:
+
+  if (call_my_handler("handler1", context) == HANDLED_MY_DATA)
+      return HANDLED_MY_DATA;
+
+  // else: proceed with the next statement
+
+So you can understand this as if the B<Flow>-parser would implicitely
+generate an if-clause after every handler-invokation to jump out completely
+with a special result state as soon as a handler has handled the context.
+
+=item B<variables>
+
+Variables can be used to make your decision control flow much more flexible
+dependant on your context.
+
+Variables must not change their underlying data type during lifetime, i.e. if
+you assigned it a "string" upon initialization, it must remain a string on mutation.
+
+=item B<functions>
+
+Functions only provided by the host application to aid your control flow with common tasks,
+e.g. setting the document-root, retrieving environment variables, or the remote IP address
+of the current HTTP client (i.e. the context), or just writing into a log file, etc.
+
+You cannot define a function within a Flow file itself.
+Functions must be provided by the host application.
+
+=item B<expressions>
+
+Expressions make the flow control actually more useful, as it allows you to composite
+more complex tests or eases the readability.
+
+=item B<statements>
+
+Statements are the most interesting part.
+You write a condition-statement to test on a specific state of your
+request and depending on the result you pass control to either a certain
+sub-block or another that itself can then invoke handlers, statements or
+even yet another if-statement, etc.
+
+=back
+
+=head1 HANDLERS
+
+A handler is a named group of ordered statements to be invoked by the host
+program to handle certain events. You may call also handlers within your own
+handler to devide your big flow into multiple smaller and more
+comprehensible ones.
+
+A minimal handler, not doing anything, looks like follows:
+
+  handler HANDLER_NAME { }
+
+Every handler starts with the keyword B<handler> followed by its handler name.
+The next must be a valid statement or a block of statements.
+Statement blocks are embraced by B<{> and B<}>, so, the above handler defines
+an empty statement block with no statements inside, resulting into a
+no-operation when invoked. A handler may also invoke other handlers.
+
+Though, looking at the following example:
+
+  handler helper
+  {
+  }
+
+  handler main
+  {
+      helper;
+  }
+
+The helper handler is doing nothing and the main handler is invoking the helper handler
+
+=head1 VARIABLES
+
+Variables are values that are referenced by its well known name but can contain
+(and even change over time) any arbitary value, depending on the variable's use and origin.
+
+The syntax for defining own variables looks as follows:
+
+  var VARIABLE_NAME = VALUE;
+
+A variable definition is always introduced with the keyword B<var>, followed by its variable name you want to use,
+and B<=> sign and the initial expression this variable represents.
+
+Examples:
+
+  var i = 32;
+  var hello = 'Hello, World';
+  var value = 2 + 3 * i;
+
+As you can see, you may assign simple values to your variable, e.g. 32 or a string,
+as well as more complex expressions, such as C<2 + 3 * i>.
+
+Any place you use your variables, they will represent the values assigned to it.
+
+=head1 DATA TYPES
+
+=over 6
+
+=item B<*> Boolean
+
+Indicating logical state of B<true> or B<false>.
+
+Examples: true, false
+
+=item B<*> Integer
+
+64bit signed numbers.
+
+Examples: -32767, 0, 26, +42
+
+=item B<*> String
+
+Strings may be interpolated if enclosed in double-quotes (")
+and will be taken as pure literal when enclosed in single-quotes (').
+
+  handler main {
+    var world = 41;
+    var sample_interpolation = "Hello, ${world + 1}";
+    var raw_string = 'fnord.txt';
+  }
+
+=item B<*> IP Address (IPv4, IPv6)
+
+Examples: 192.168.42.1, 10.26.91.12, ::1, 3ffe:80::4242
+
+=item B<*> CIDR Network Address (IPv4, IPv6)
+
+Examples: 192.168.0.0/16, 127.0.0.0/8, 10.10.48.0/24
+
+=item B<*> Regular Expression
+
+Examples: /^\/foo/(.*).jsp$/ or /^Hel[l]o.*/
+
+=item B<*> Array of Integers
+
+Examples: [26, 4, 91], [12]
+
+=item B<*> Array of Strings
+
+Examples: ['text/plain', 'text/css', 'text/html']
+
+=back
+
+=head1 FUNCTIONS
+
+Functions are always and thus must be provided by the host application
+and cannot be defined within a B<Flow> program itself.
+They help you defining your flow by e.g. configuring the request for post processing,
+a log function to log arbitary data (e.g. strings) to your log file, or communicating with other services.
+
+The host application is absolutely free in what it does inside its functions.
+
+Though, the B<flow-tool> defines e.g. the following function:
+
+  __print(string_value);
+
+that can be used to print any string value (or list of values) to your controlling terminal. e.g.:
+
+  var hello = "Hello, World!";
+  __print(hello);
+  __print("this is me. the flow");
+
+=head1 EXPRESSIONS
+
+We have seen expressions already above, e.g. the little mathematical example C<2 + 3 * i>, or just C<42>.
+However, expressions can be much more powerful than that.
+As a help rule, you may say, that an expressions like quite like a mathematical one,
+and the operator precedence is quite like it, too.
+
+=head2 Operators
+
+=over 3
+
+=item LHS B<and> RHS
+
+Logical and-operation.
+
+=item LHS B<or> RHS
+
+Logical or-operation.
+
+=item LHS B<xor> RHS
+
+Logical exclusive-or-operation.
+
+=item LHS B<==> RHS
+
+Both sides must be equal.
+
+=item LHS B<!=> RHS
+
+Both sides must not be equal.
+
+=item LHS B<<=> RHS
+
+Left side must be less or equal than the right side.
+
+=item LHS B<E<gt>=> RHS
+
+Left side must be greater or equal than the right side.
+
+=item LHS B<<> RHS
+
+Left side must be less than the right side.
+
+=item LHS B<E<gt>> RHS
+
+Left side must be greater than the right side.
+
+=item LHS B<in> RHS
+
+Tests if B<LHS> occurs in B<RHS>. That is, if LHS and RHS are both strings, it'll perform a substring match
+that evaluates to true if B<LHS> is a substring of B<RHS>
+
+If B<LHS> is an IP address and B<RHS> is a CIDR network notation, it will test if the given IP is part of the given network.
+
+=item LHS B<shl> RHS
+
+Bit-shift left side by B<RHS> bits to the left.
+
+=item LHS B<shr> RHS
+
+Bit-shift left side by B<RHS> bits to the right.
+
+=item LHS B<=^> RHS
+
+Evaluates to true if the left-side string begins the right-side string (prefix-match).
+
+=item LHS B<=$> RHS
+
+Evaluates to true if the left-side string ends the right-side string (suffix-match).
+
+=item LHS B<=~> RHS
+
+Evaluates to true if the left-side string matches right-side regular expression.
+
+=item LHS B<+> RHS
+
+Arithmetic addition of the two integers.
+
+=item LHS B<-> RHS
+
+Arithmetic substraction of the two integers.
+
+=item LHS B<*> RHS
+
+Arithmetic multiplication of the two integers.
+
+=item LHS B</> RHS
+
+Arithmetic division of the two integers.
+
+=item LHS B<**> RHS
+
+Computes the power of LHS and RHS.
+
+=item B<not> RHS
+
+Boolean negation of the given expression - true becomes false and false becomes true.
+
+=item B<-> RHS
+
+Numerical negation of the given expression.
+
+=item B<~> RHS
+
+Numerical bit-wise negation of the given numerical expression.
+
+=item B<(> EXPR B<)>
+
+Groups an expression together. This helps in order to change precedence rules of the
+language parser, or just to make it very clear to the reader what you mean.
+
+=back
+
+=head1 STATEMENTS
+
+B<Flow> is not meant to run loops or other complex general purpose logic but to define paths of decisions.
+
+Though, B<Flow> only supports the if and match condition and no loops.
+
+=head2 if-statement
+
+You can branch at any given point with the if-statement to conditionally continue processing
+depending on certain input data. You may optionally also add an alternative branch
+that is executed instead if the expression is not evaluated to be true.
+
+The condition expression may or may not be surrounded by round brace symbols,
+this is up to your own style preferences.
+
+  if EXPRESSION
+      STATEMENT    # invoked when expression evaluates to true
+
+  if EXPRESSION
+      STATEMENT    # invoked when expression evaluates to true
+  else
+      STATEMENT    # invoked when expression evaluates to false
+
+Example:
+
+  handler main {
+    var i = 42;
+    
+    if (i > 13) {
+      log.debug("that's true");
+    } else {
+      log.debug("World is odd.");
+    }
+  }
+
+=head2 match-statement
+
+Matches are a very powerful feature in B<Flow>. They allow you to effeciently
+match on multiple possible cases and let each distinct case run its own code blocks.
+
+Also, using the match statement makes your source file look well structured,
+easy to read and maintain.
+
+The input value must always be a string.
+
+=head3 Syntax
+
+  MatchStmt      ::= 'match' expression [MATCH_OPERATOR] '{' matchCase* ['else' stmt] '}'
+  MatchCase      ::= 'on' LITERAL (',' 'on' LITERAL)* stmt
+  MATCH_OPERATOR ::= '==' | '=^' | '=$' | '=~'
+
+=head3 Supported match operations are:
+
+=over 6
+
+=item == B<Full Compare>
+
+Performs a full string match on the input value and the case label.
+
+This is the default action, i.e. ommitting the match operator will
+always result in a full string compare match.
+
+  handler main {
+    match req.path == {
+      on '/server_status' {
+        status.nginx_compat;
+      }
+      on '/favicon.ico' {
+        respond 404;
+      }
+      else {
+        # ...
+      }
+    }
+  }
+
+=item =^ B<Prefix Match>
+
+Selects the branch whose case label "prefix" matches the input value.
+The case label with the longest match will be preferred.
+
+  handler main {
+    match req.path =^ {
+      on '/admin' {
+        admin_stuff;
+      }
+      on '/static/',
+      on '/assets/' {
+        docroot '/srv/website/public';
+        staticfile;
+      }
+      else {
+        # ...
+      }
+    }
+  }
+
+Please note, that we use a multi label case in the above match statement.
+This is the preferred way if you have multiple cases with the same body but different labels.
+
+=item =$ B<Suffix Match>
+
+Selects the branch whose case label "suffix" matches the input value.
+The case label with the longest match will be preferred.
+
+  handler main {
+    match phys.path =$ {
+      on '.torrent' {
+        respond 403;
+      }
+      on '.php' {
+        php_fcgi;
+      }
+      else {
+        # ...
+      }
+    }
+  }
+
+=item =~ B<Regular Expression Match>
+
+Iteratively walks through all case label regular expressions in declaration order
+and performs an evaluation against the input value.
+
+The case label that matches the first will be the selected branch of execution.
+
+  handler main {
+    match phys.path =~ {
+      on /^\/admin\/.*$/ {
+        admin_panel;
+      }
+      on /^\/cart\/.*$/ {
+        cart_service;
+      }
+      else {
+        # ...
+      }
+    }
+  }
+
+=back
+
+=head1 COMMENTS
+
+=over 6
+
+=item C-style comments /* ... */
+
+=item Shell-style comments # ...
+
+=back
+
+=head1 TODO
+
+=over 3
+
+=item B<*> Plugin Loading
+
+=item B<*> Builtin function/handler calls and parameter passing
+
+=back
+
+=head1 AUTHOR
+
+The B<Flow> language is designed and implemented by Christian Parpart <christian@parpart.family> for
+the x0 (Xzero) HTTP web server project to provide a very flexible and runtime-efficient
+configuration syntax.
+
+=head1 SEE ALSO
+
+L<x0d(8)>, L<x0d.conf(5)>
+
+L<http://github.com/xzero/x0>, x0 Project Management Page
+
+L<http://xzero.io>, x0 Official Website
