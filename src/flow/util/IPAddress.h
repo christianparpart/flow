@@ -49,7 +49,8 @@ class IPAddress {
   explicit IPAddress(const sockaddr_in* saddr);
   explicit IPAddress(const sockaddr_in6* saddr);
   explicit IPAddress(const std::string& text);
-  explicit IPAddress(const std::string& text, Family v);
+  IPAddress(int family, const void* addr);
+  IPAddress(const std::string& text, Family v);
 
   IPAddress& operator=(const std::string& value);
   IPAddress& operator=(const IPAddress& value);
@@ -106,6 +107,16 @@ inline IPAddress::IPAddress(const std::string& text) {
     set(text, Family::V6);
   } else {
     set(text, Family::V4);
+  }
+}
+
+inline IPAddress::IPAddress(int family, const void* addr) {
+  family_ = static_cast<Family>(family);
+  cstr_[0] = '\0';
+  if (family_ == Family::V6) {
+    memcpy(buf_, addr, sizeof(sockaddr_in6::sin6_addr));
+  } else {
+    memcpy(buf_, addr, sizeof(sockaddr_in::sin_addr));
   }
 }
 

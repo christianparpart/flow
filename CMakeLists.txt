@@ -2,14 +2,20 @@ cmake_minimum_required(VERSION 3.6)
 project(flow VERSION "0.11.0" LANGUAGES CXX)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+set(MASTER_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+  set(MASTER_PROJECT ON)
+endif ()
+
 option(FLOW_DIRECT_THREADED_VM "Flow VM using direct threaded mode [default: OFF]" OFF)
-option(ENABLE_TESTS "Enable building tests [default: ON]" ON)
-option(ENABLE_EXAMPLES "Enable building examples [default: ON]" ON)
-option(ENABLE_TIDY "Enable clang-tidy [default: OFF]" OFF)
+option(FLOW_EMBEDDED_FMTLIB "Build against embedded fmtlib [default: ${MASTER_PROJECT}]" ${MASTER_PROJECT})
+option(FLOW_ENABLE_TESTS "Enable building tests [default: ${MASTER_PROJECT}]" ${MASTER_PROJECT})
+option(FLOW_ENABLE_EXAMPLES "Enable building examples [default: ${MASTER_PROJECT}]" ${MASTER_PROJECT})
+option(FLOW_ENABLE_TIDY "Enable clang-tidy [default: OFF]" OFF)
 
 set(PACKAGE_URL "https://github.com/christianparpart/flow/")
 
-if(ENABLE_TIDY) # {{{ clang-tidy
+if(FLOW_ENABLE_TIDY) # {{{ clang-tidy
   set(CLANG_TIDY_CHECKS "\
 ,bugprone-*\
 ,clang-analyzer-*\
@@ -50,13 +56,15 @@ include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
 
 # fmtlib
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt" EXCLUDE_FROM_ALL)
-add_definitions(-DFMT_USE_WINDOWS_H=0)
+if(FLOW_EMBEDDED_FMTLIB)
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt" EXCLUDE_FROM_ALL)
+  add_definitions(-DFMT_USE_WINDOWS_H=0)
+else()
+  # master project must provide its own fmtlib
+endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src
-                    ${CMAKE_CURRENT_SOURCE_DIR}/src
-                    ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/fmt/src/fmt/include
-                    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt/include)
+                    ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/flow/sysconfig.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/src/flow/sysconfig.h)
@@ -102,11 +110,17 @@ set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED 
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
+
 install(TARGETS FlowCore DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(
     DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/flow/"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/include/flow"
     FILES_MATCHING PATTERN "*.h")
+
+target_include_directories(FlowCore PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
 # }}}
 # {{{ FlowLang
 add_library(FlowLang STATIC
@@ -124,14 +138,20 @@ target_link_libraries(FlowLang PRIVATE fmt::fmt-header-only)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowLang PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
+
 install(TARGETS FlowLang DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 install(
     DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src/flow/lang"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/include/flow/lang"
     FILES_MATCHING PATTERN "*.h")
+
+target_include_directories(FlowLang PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+  $<INSTALL_INTERFACE:include>)
 # }}}
 # {{{ fltest
-if(ENABLE_TESTS)
+if(FLOW_ENABLE_TESTS)
   add_executable(fltest src/fltest/main.cc
                         src/fltest/flowtest.cc)
 
