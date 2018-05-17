@@ -9,39 +9,8 @@ option(ENABLE_TIDY "Enable clang-tidy [default: OFF]" OFF)
 
 set(PACKAGE_URL "https://github.com/christianparpart/flow/")
 
-find_package(Git)
-include(ExternalProject)
-
-if(GIT_FOUND) # {{{ fmtlib
-  ExternalProject_Add(
-    fmt
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG master
-    CMAKE_ARGS -DMASTER_PROJECT=OFF
-                -DFMT_DOC=OFF
-                -DFMT_INSTALL=ON
-                -DFMT_TEST=OFF
-                -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-                -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    LOG_DOWNLOAD 1
-    UPDATE_DISCONNECTED 1
-    BUILD_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --config ${configuration}
-    INSTALL_COMMAND ""
-  )
-  add_definitions(-DFMT_HEADER_ONLY=1 -DFMT_USE_WINDOWS_H=0)
-  if(UNIX)
-		set(FMT_LIBRARIES "${CMAKE_CURRENT_BINARY_DIR}/3rdparty/fmt/src/fmt-build/libfmt.a")
-	else()
-		set(FMT_LIBRARIES "${CMAKE_CURRENT_BINARY_DIR}/3rdparty/fmt/src/fmt-build/fmt.lib")
-	endif()
-else()
-  # assume catch is installed in a system directory
-  #add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt")
-endif() # }}}
-
-set(CLANG_TIDY_CHECKS "\
+if(ENABLE_TIDY) # {{{ clang-tidy
+  set(CLANG_TIDY_CHECKS "\
 ,bugprone-*\
 ,clang-analyzer-*\
 ,cppcoreguidelines-*\
@@ -57,11 +26,8 @@ set(CLANG_TIDY_CHECKS "\
 ,-cppcoreguidelines-pro-type-union-access\
 ,-cppcoreguidelines-pro-type-vararg\
 ,-modernize-use-auto\
-"
-CACHE STRING "clang-tidy checks to enable/disable")
-message("Clang Tidy Checks: ${CLANG_TIDY_CHECKS}")
+")
 
-if(ENABLE_TIDY)
   find_program(CLANG_TIDY_EXE
     NAMES clang-tidy-7 clang-tidy-6.0 clang-tidy
     DOC "Path to clang-tidy executable")
@@ -71,7 +37,7 @@ if(ENABLE_TIDY)
     message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
     set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=${CLANG_TIDY_CHECKS}")
   endif()
-endif()
+endif() # }}}
 
 include(FindDoxygen)
 include(CheckIncludeFiles)
@@ -82,6 +48,10 @@ include(CheckTypeSize)
 include(CheckLibraryExists)
 include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
+
+# fmtlib
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt" EXCLUDE_FROM_ALL)
+add_definitions(-DFMT_USE_WINDOWS_H=0)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src
                     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -127,7 +97,7 @@ add_library(FlowCore STATIC
             src/flow/vm/Runtime.cc
             )
 
-add_dependencies(FlowCore fmt)
+target_link_libraries(FlowCore PRIVATE fmt::fmt-header-only)
 set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
@@ -150,7 +120,7 @@ add_library(FlowLang STATIC
             )
 
 set_target_properties(FlowLang PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-add_dependencies(FlowLang fmt)
+target_link_libraries(FlowLang PRIVATE fmt::fmt-header-only)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowLang PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
