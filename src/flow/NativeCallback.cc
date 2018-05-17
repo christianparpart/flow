@@ -34,9 +34,6 @@ NativeCallback::NativeCallback(Runtime* runtime, const std::string& _name,
   signature_.setReturnType(_returnType);
 }
 
-NativeCallback::~NativeCallback() {
-}
-
 bool NativeCallback::isHandler() const noexcept {
   return isHandler_;
 }

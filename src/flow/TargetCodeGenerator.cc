@@ -47,9 +47,6 @@ TargetCodeGenerator::TargetCodeGenerator()
       cp_() {
 }
 
-TargetCodeGenerator::~TargetCodeGenerator() {
-}
-
 std::unique_ptr<Program> TargetCodeGenerator::generate(IRProgram* programIR) {
   for (IRHandler* handler : programIR->handlers())
     generate(handler);
@@ -262,7 +259,7 @@ Operand TargetCodeGenerator::getConstantInt(Value* value) {
 
 void TargetCodeGenerator::emitLoad(Value* value) {
   // const int
-  if (ConstantInt* integer = dynamic_cast<ConstantInt*>(value)) {
+  if (auto integer = dynamic_cast<ConstantInt*>(value)) {
     // FIXME this constant initialization should pretty much be done in the entry block
     FlowNumber number = integer->get();
     if (number <= std::numeric_limits<Operand>::max()) {
@@ -283,28 +280,28 @@ void TargetCodeGenerator::emitLoad(Value* value) {
   }
 
   // const string
-  if (ConstantString* str = dynamic_cast<ConstantString*>(value)) {
+  if (auto str = dynamic_cast<ConstantString*>(value)) {
     emitInstr(Opcode::SLOAD, cp_.makeString(str->get()));
     changeStack(0, value);
     return;
   }
 
   // const ip
-  if (ConstantIP* ip = dynamic_cast<ConstantIP*>(value)) {
+  if (auto ip = dynamic_cast<ConstantIP*>(value)) {
     emitInstr(Opcode::PLOAD, cp_.makeIPAddress(ip->get()));
     changeStack(0, value);
     return;
   }
 
   // const cidr
-  if (ConstantCidr* cidr = dynamic_cast<ConstantCidr*>(value)) {
+  if (auto cidr = dynamic_cast<ConstantCidr*>(value)) {
     emitInstr(Opcode::CLOAD, cp_.makeCidr(cidr->get()));
     changeStack(0, value);
     return;
   }
 
   // const array<T>
-  if (ConstantArray* array = dynamic_cast<ConstantArray*>(value)) {
+  if (auto array = dynamic_cast<ConstantArray*>(value)) {
     switch (array->type()) {
       case LiteralType::IntArray:
         emitInstr(Opcode::ITLOAD,
@@ -336,7 +333,7 @@ void TargetCodeGenerator::emitLoad(Value* value) {
   }
 
   // const regex
-  if (ConstantRegExp* re = dynamic_cast<ConstantRegExp*>(value)) {
+  if (auto re = dynamic_cast<ConstantRegExp*>(value)) {
     // TODO emitInstr(Opcode::RLOAD, re->get());
     emitInstr(Opcode::ILOAD, cp_.makeRegExp(re->get()));
     changeStack(0, value);
@@ -393,7 +390,7 @@ void TargetCodeGenerator::visit(MatchInstr& matchInstr) {
   matchDef.op = matchInstr.op();
   matchDef.elsePC = 0;  // XXX to be filled in post-processing the handler
 
-  matchHints_.push_back({&matchInstr, matchId});
+  matchHints_.emplace_back(&matchInstr, matchId);
 
   for (const auto& one : matchInstr.cases()) {
     switch (one.first->type()) {

@@ -44,7 +44,7 @@ using StackPointer = size_t;
 class TargetCodeGenerator : public InstructionVisitor {
  public:
   TargetCodeGenerator();
-  ~TargetCodeGenerator();
+  ~TargetCodeGenerator() = default;
 
   std::unique_ptr<Program> generate(IRProgram* program);
 

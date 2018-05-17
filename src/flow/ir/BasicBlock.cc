@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 
 /*
  * TODO assert() on last instruction in current BB is not a terminator instr.

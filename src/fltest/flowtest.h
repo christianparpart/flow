@@ -10,7 +10,6 @@
 #include <flow/Diagnostics.h>
 #include <flow/Params.h>
 #include <flow/SourceLocation.h>
-#include <flow/vm/Runtime.h>
 
 #include <cstdint>
 #include <initializer_list>

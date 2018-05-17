@@ -10,8 +10,9 @@
 #include <flow/ir/InstructionVisitor.h>
 #include <flow/ir/IRBuiltinHandler.h>
 #include <flow/ir/IRBuiltinFunction.h>
+
+#include <cassert>
 #include <utility>  // make_pair
-#include <assert.h>
 
 namespace flow {
 
@@ -172,8 +173,8 @@ std::vector<std::pair<Constant*, BasicBlock*>> MatchInstr::cases() const {
   size_t caseCount = (operands().size() - 2) / 2;
 
   for (size_t i = 0; i < caseCount; ++i) {
-    Constant* label = static_cast<Constant*>(operand(2 + 2 * i + 0));
-    BasicBlock* code = static_cast<BasicBlock*>(operand(2 + 2 * i + 1));
+    auto label = static_cast<Constant*>(operand(2 + 2 * i + 0));
+    auto code = static_cast<BasicBlock*>(operand(2 + 2 * i + 1));
 
     out.push_back(std::make_pair(label, code));
   }

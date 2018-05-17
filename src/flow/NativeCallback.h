@@ -58,7 +58,7 @@ class NativeCallback {
   NativeCallback(Runtime* runtime, const std::string& _name);
   NativeCallback(Runtime* runtime, const std::string& _name,
                  LiteralType _returnType);
-  ~NativeCallback();
+  ~NativeCallback() = default;
 
   bool isHandler() const noexcept;
   bool isFunction() const noexcept;

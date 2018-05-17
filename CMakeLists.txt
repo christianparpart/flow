@@ -4,16 +4,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(FLOW_DIRECT_THREADED_VM "Flow VM using direct threaded mode [default: OFF]" OFF)
 option(ENABLE_TESTS "Enable building tests [default: ON]" ON)
+option(ENABLE_EXAMPLES "Enable building examples [default: ON]" ON)
 option(ENABLE_TIDY "Enable clang-tidy [default: OFF]" OFF)
 
-set(PACKAGE_URL "https://flowlang.io/")
-
-set(CLANG_TIDY_CHECKS "-checks=bugprone-*,cppcoreguidelines-*,performance-*,clang-analyzer-*,modernize-*,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-type-union-access" CACHE STRING "clang-tidy checks to enable/disable")
+set(PACKAGE_URL "https://github.com/christianparpart/flow/")
 
 find_package(Git)
 include(ExternalProject)
 
-if(GIT_FOUND)
+if(GIT_FOUND) # {{{ fmtlib
   ExternalProject_Add(
     fmt
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/fmt
@@ -40,7 +39,22 @@ if(GIT_FOUND)
 else()
   # assume catch is installed in a system directory
   #add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt")
-endif()
+endif() # }}}
+
+set(CLANG_TIDY_CHECKS "\
+,bugprone-*\
+,clang-analyzer-*\
+,cppcoreguidelines-*\
+,modernize-*\
+,performance-*\
+,-cppcoreguidelines-pro-bounds-array-to-pointer-decay\
+,-cppcoreguidelines-pro-bounds-constant-array-index\
+,-cppcoreguidelines-pro-type-union-access\
+,-cppcoreguidelines-pro-type-vararg\
+,-cppcoreguidelines-pro-bounds-pointer-arithmetic\
+"
+CACHE STRING "clang-tidy checks to enable/disable")
+message("Clang Tidy Checks: ${CLANG_TIDY_CHECKS}")
 
 if(ENABLE_TIDY)
   find_program(CLANG_TIDY_EXE
@@ -50,7 +64,7 @@ if(ENABLE_TIDY)
     message(STATUS "clang-tidy not found.")
   else()
     message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-    set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "${CLANG_TIDY_CHECKS}")
+    set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=${CLANG_TIDY_CHECKS}")
   endif()
 endif()
 
@@ -108,6 +122,7 @@ add_library(FlowCore STATIC
             src/flow/vm/Runtime.cc
             )
 
+add_dependencies(FlowCore fmt)
 set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
@@ -130,6 +145,7 @@ add_library(FlowLang STATIC
             )
 
 set_target_properties(FlowLang PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+add_dependencies(FlowLang fmt)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowLang PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif()
@@ -139,17 +155,19 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/include/flow/lang"
     FILES_MATCHING PATTERN "*.h")
 # }}}
-# {{{ flowtest
-add_executable(flowtest src/flow/flowtest-main.cc
-                        src/flow/flowtest.cc)
+# {{{ fltest
+if(ENABLE_TESTS)
+  add_executable(fltest src/fltest/main.cc
+                        src/fltest/flowtest.cc)
 
-set_target_properties(flowtest PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-if(CLANG_TIDY_EXE)
-  set_target_properties(flowtest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
-endif()
-target_link_libraries(flowtest FlowLang FlowCore)
+  set_target_properties(fltest PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  if(CLANG_TIDY_EXE)
+    set_target_properties(fltest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+  endif()
+  target_link_libraries(fltest FlowLang FlowCore)
 
-if(UNIX)
-  target_link_libraries(flowtest stdc++fs)
+  if(UNIX)
+    target_link_libraries(fltest stdc++fs)
+  endif()
 endif()
 # }}}
