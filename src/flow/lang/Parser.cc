@@ -7,8 +7,8 @@
 
 #include <flow/NativeCallback.h>
 #include <flow/lang/AST.h>
-#include <flow/lang/FlowLexer.h>
-#include <flow/lang/FlowParser.h>
+#include <flow/lang/Lexer.h>
+#include <flow/lang/Parser.h>
 #include <flow/vm/Runtime.h>
 #include <unordered_map>
 #include <memory>
@@ -38,30 +38,30 @@ namespace std {
 namespace flow::lang {
 
 // {{{ scoped(SCOPED_SYMBOL)
-class FlowParser::Scope {
+class Parser::Scope {
  private:
-  FlowParser* parser_;
+  Parser* parser_;
   SymbolTable* table_;
   bool flipped_;
 
  public:
-  Scope(FlowParser* parser, SymbolTable* table)
+  Scope(Parser* parser, SymbolTable* table)
       : parser_(parser), table_(table), flipped_(false) {
     parser_->enterScope(table_);
   }
 
-  Scope(FlowParser* parser, ScopedSym* symbol)
+  Scope(Parser* parser, ScopedSym* symbol)
       : parser_(parser), table_(symbol->scope()), flipped_(false) {
     parser_->enterScope(table_);
   }
 
-  Scope(FlowParser* parser, std::unique_ptr<SymbolTable>& table)
+  Scope(Parser* parser, std::unique_ptr<SymbolTable>& table)
       : parser_(parser), table_(table.get()), flipped_(false) {
     parser_->enterScope(table_);
   }
 
   template <typename T>
-  Scope(FlowParser* parser, std::unique_ptr<T>& symbol)
+  Scope(Parser* parser, std::unique_ptr<T>& symbol)
       : parser_(parser), table_(symbol->scope()), flipped_(false) {
     parser_->enterScope(table_);
   }
@@ -74,40 +74,40 @@ class FlowParser::Scope {
   ~Scope() { parser_->leaveScope(); }
 };
 #define scoped(SCOPED_SYMBOL) \
-  for (FlowParser::Scope _(this, (SCOPED_SYMBOL)); _.flip();)
+  for (Parser::Scope _(this, (SCOPED_SYMBOL)); _.flip();)
 // }}}
 
-FlowParser::FlowParser(diagnostics::Report* report,
+Parser::Parser(diagnostics::Report* report,
                        Runtime* runtime,
                        ImportHandler importHandler)
     : report_{*report},
-      lexer_{std::make_unique<FlowLexer>(report)},
+      lexer_{std::make_unique<Lexer>(report)},
       scopeStack_{nullptr},
       runtime_{runtime},
       importHandler_{importHandler} {
   // enterScope("global");
 }
 
-FlowParser::~FlowParser() {
+Parser::~Parser() {
   // leaveScope();
   // assert(scopeStack_ == nullptr && "scopeStack not properly unwind. probably
   // a bug.");
 }
 
-void FlowParser::openString(const std::string& content) {
+void Parser::openString(const std::string& content) {
   lexer_->openString(content);
 }
 
-void FlowParser::openLocalFile(const std::string& filename) {
+void Parser::openLocalFile(const std::string& filename) {
   lexer_->openLocalFile(filename);
 }
 
-void FlowParser::openStream(std::unique_ptr<std::istream>&& ifs,
+void Parser::openStream(std::unique_ptr<std::istream>&& ifs,
                             const std::string& filename) {
   lexer_->openStream(std::move(ifs), filename);
 }
 
-std::unique_ptr<SymbolTable> FlowParser::enterScope(const std::string& title) {
+std::unique_ptr<SymbolTable> Parser::enterScope(const std::string& title) {
   // printf("Parser::enterScope(): new top: %p \"%s\" (outer: %p \"%s\")\n", scope,
   // scope->name().c_str(), scopeStack_, scopeStack_ ?
   // scopeStack_->name().c_str() : "");
@@ -118,7 +118,7 @@ std::unique_ptr<SymbolTable> FlowParser::enterScope(const std::string& title) {
   return st;
 }
 
-SymbolTable* FlowParser::enterScope(SymbolTable* scope) {
+SymbolTable* Parser::enterScope(SymbolTable* scope) {
   // printf("Parser::enterScope(): new top: %p \"%s\" (outer: %p \"%s\")\n", scope,
   // scope->name().c_str(), scopeStack_, scopeStack_ ?
   // scopeStack_->name().c_str() : "");
@@ -129,7 +129,7 @@ SymbolTable* FlowParser::enterScope(SymbolTable* scope) {
   return scope;
 }
 
-SymbolTable* FlowParser::globalScope() const {
+SymbolTable* Parser::globalScope() const {
   if (SymbolTable* st = scopeStack_; st != nullptr) {
     while (st->outerTable()) {
       st = st->outerTable();
@@ -139,7 +139,7 @@ SymbolTable* FlowParser::globalScope() const {
   return nullptr;
 }
 
-SymbolTable* FlowParser::leaveScope() {
+SymbolTable* Parser::leaveScope() {
   SymbolTable* popped = scopeStack_;
   scopeStack_ = scopeStack_->outerTable();
 
@@ -150,7 +150,7 @@ SymbolTable* FlowParser::leaveScope() {
   return popped;
 }
 
-std::unique_ptr<UnitSym> FlowParser::parse() {
+std::unique_ptr<UnitSym> Parser::parse() {
   return unit();
 }
 
@@ -165,7 +165,7 @@ std::unique_ptr<UnitSym> FlowParser::parse() {
  * @return opcode that matches given expressions operator or EXIT if operands
  *incompatible.
  */
-Opcode makeOperator(FlowToken token, Expr* left, Expr* right) {
+Opcode makeOperator(Token token, Expr* left, Expr* right) {
   // (bool, bool)     == !=
   // (num, num)       + - * / % ** << >> & | ^ and or xor == != <= >= < >
   // (string, string) + == != <= >= < > =^ =$ in
@@ -200,51 +200,51 @@ Opcode makeOperator(FlowToken token, Expr* left, Expr* right) {
   else if (isCidr(leftType) && isCidr(rightType))
     opsig = OpSig::CidrCidr;
 
-  static const std::unordered_map<OpSig, std::unordered_map<FlowToken, Opcode>>
+  static const std::unordered_map<OpSig, std::unordered_map<Token, Opcode>>
   ops = {{OpSig::BoolBool,
-          {{FlowToken::Equal, Opcode::NCMPEQ},
-           {FlowToken::UnEqual, Opcode::NCMPNE},
-           {FlowToken::And, Opcode::BAND},
-           {FlowToken::Or, Opcode::BOR},
-           {FlowToken::Xor, Opcode::BXOR}, }},
+          {{Token::Equal, Opcode::NCMPEQ},
+           {Token::UnEqual, Opcode::NCMPNE},
+           {Token::And, Opcode::BAND},
+           {Token::Or, Opcode::BOR},
+           {Token::Xor, Opcode::BXOR}, }},
          {OpSig::NumNum,
-          {{FlowToken::Plus, Opcode::NADD},
-           {FlowToken::Minus, Opcode::NSUB},
-           {FlowToken::Mul, Opcode::NMUL},
-           {FlowToken::Div, Opcode::NDIV},
-           {FlowToken::Mod, Opcode::NREM},
-           {FlowToken::Pow, Opcode::NPOW},
-           {FlowToken::Shl, Opcode::NSHL},
-           {FlowToken::Shr, Opcode::NSHR},
-           {FlowToken::BitAnd, Opcode::NAND},
-           {FlowToken::BitOr, Opcode::NOR},
-           {FlowToken::BitXor, Opcode::NXOR},
-           {FlowToken::Equal, Opcode::NCMPEQ},
-           {FlowToken::UnEqual, Opcode::NCMPNE},
-           {FlowToken::LessOrEqual, Opcode::NCMPLT},
-           {FlowToken::GreaterOrEqual, Opcode::NCMPGT},
-           {FlowToken::Less, Opcode::NCMPLE},
-           {FlowToken::Greater, Opcode::NCMPGE}, }},
+          {{Token::Plus, Opcode::NADD},
+           {Token::Minus, Opcode::NSUB},
+           {Token::Mul, Opcode::NMUL},
+           {Token::Div, Opcode::NDIV},
+           {Token::Mod, Opcode::NREM},
+           {Token::Pow, Opcode::NPOW},
+           {Token::Shl, Opcode::NSHL},
+           {Token::Shr, Opcode::NSHR},
+           {Token::BitAnd, Opcode::NAND},
+           {Token::BitOr, Opcode::NOR},
+           {Token::BitXor, Opcode::NXOR},
+           {Token::Equal, Opcode::NCMPEQ},
+           {Token::UnEqual, Opcode::NCMPNE},
+           {Token::LessOrEqual, Opcode::NCMPLT},
+           {Token::GreaterOrEqual, Opcode::NCMPGT},
+           {Token::Less, Opcode::NCMPLE},
+           {Token::Greater, Opcode::NCMPGE}, }},
          {OpSig::StringString,
-          {{FlowToken::Plus, Opcode::SADD},
-           {FlowToken::Equal, Opcode::SCMPEQ},
-           {FlowToken::UnEqual, Opcode::SCMPNE},
-           {FlowToken::LessOrEqual, Opcode::SCMPLE},
-           {FlowToken::GreaterOrEqual, Opcode::SCMPGE},
-           {FlowToken::Less, Opcode::SCMPLT},
-           {FlowToken::Greater, Opcode::SCMPGT},
-           {FlowToken::PrefixMatch, Opcode::SCMPBEG},
-           {FlowToken::SuffixMatch, Opcode::SCMPEND},
-           {FlowToken::In, Opcode::SCONTAINS}, }},
-         {OpSig::StringRegexp, {{FlowToken::RegexMatch, Opcode::SREGMATCH}, }},
+          {{Token::Plus, Opcode::SADD},
+           {Token::Equal, Opcode::SCMPEQ},
+           {Token::UnEqual, Opcode::SCMPNE},
+           {Token::LessOrEqual, Opcode::SCMPLE},
+           {Token::GreaterOrEqual, Opcode::SCMPGE},
+           {Token::Less, Opcode::SCMPLT},
+           {Token::Greater, Opcode::SCMPGT},
+           {Token::PrefixMatch, Opcode::SCMPBEG},
+           {Token::SuffixMatch, Opcode::SCMPEND},
+           {Token::In, Opcode::SCONTAINS}, }},
+         {OpSig::StringRegexp, {{Token::RegexMatch, Opcode::SREGMATCH}, }},
          {OpSig::IpIp,
-          {{FlowToken::Equal, Opcode::PCMPEQ},
-           {FlowToken::UnEqual, Opcode::PCMPNE}, }},
-         {OpSig::IpCidr, {{FlowToken::In, Opcode::PINCIDR}, }},
+          {{Token::Equal, Opcode::PCMPEQ},
+           {Token::UnEqual, Opcode::PCMPNE}, }},
+         {OpSig::IpCidr, {{Token::In, Opcode::PINCIDR}, }},
          {OpSig::CidrCidr,
-          {{FlowToken::Equal, Opcode::NOP},    // TODO
-           {FlowToken::UnEqual, Opcode::NOP},  // TODO
-           {FlowToken::In, Opcode::NOP},       // TODO
+          {{Token::Equal, Opcode::NOP},    // TODO
+           {Token::UnEqual, Opcode::NOP},  // TODO
+           {Token::In, Opcode::NOP},       // TODO
           }}, };
 
   auto a = ops.find(opsig);
@@ -262,28 +262,28 @@ Opcode makeOperator(FlowToken token, Expr* left, Expr* right) {
  * @param source source expression to cast
  * @param target target (token) type to cast to.
  */
-Opcode makeOperator(FlowToken target, Expr* source) {
+Opcode makeOperator(Token target, Expr* source) {
   static const std::unordered_map<LiteralType,
-                                  std::unordered_map<FlowToken, Opcode>> ops =
+                                  std::unordered_map<Token, Opcode>> ops =
       {{LiteralType::Number,
-        {{FlowToken::Not, Opcode::NCMPZ},
-         {FlowToken::BitNot, Opcode::NNOT},
-         {FlowToken::Minus, Opcode::NNEG},
-         {FlowToken::StringType, Opcode::N2S},
-         {FlowToken::BoolType, Opcode::NCMPZ},
-         {FlowToken::NumberType, Opcode::NOP}, }},
+        {{Token::Not, Opcode::NCMPZ},
+         {Token::BitNot, Opcode::NNOT},
+         {Token::Minus, Opcode::NNEG},
+         {Token::StringType, Opcode::N2S},
+         {Token::BoolType, Opcode::NCMPZ},
+         {Token::NumberType, Opcode::NOP}, }},
        {LiteralType::Boolean,
-        {{FlowToken::Not, Opcode::BNOT},
-         {FlowToken::BoolType, Opcode::NOP},
-         {FlowToken::StringType, Opcode::N2S},  // XXX or better print "true" | "false" ?
+        {{Token::Not, Opcode::BNOT},
+         {Token::BoolType, Opcode::NOP},
+         {Token::StringType, Opcode::N2S},  // XXX or better print "true" | "false" ?
         }},
        {LiteralType::String,
-        {{FlowToken::Not, Opcode::SISEMPTY},
-         {FlowToken::NumberType, Opcode::S2N},
-         {FlowToken::StringType, Opcode::NOP}, }},
-       {LiteralType::IPAddress, {{FlowToken::StringType, Opcode::P2S}, }},
-       {LiteralType::Cidr, {{FlowToken::StringType, Opcode::C2S}, }},
-       {LiteralType::RegExp, {{FlowToken::StringType, Opcode::R2S}, }}, };
+        {{Token::Not, Opcode::SISEMPTY},
+         {Token::NumberType, Opcode::S2N},
+         {Token::StringType, Opcode::NOP}, }},
+       {LiteralType::IPAddress, {{Token::StringType, Opcode::P2S}, }},
+       {LiteralType::Cidr, {{Token::StringType, Opcode::C2S}, }},
+       {LiteralType::RegExp, {{Token::StringType, Opcode::R2S}, }}, };
 
   LiteralType sourceType = source->getType();
 
@@ -297,9 +297,9 @@ Opcode makeOperator(FlowToken target, Expr* source) {
 }
 // }}}
 // {{{ lexing
-FlowToken FlowParser::nextToken() const { return lexer_->nextToken(); }
+Token Parser::nextToken() const { return lexer_->nextToken(); }
 
-bool FlowParser::expect(FlowToken value) {
+bool Parser::expect(Token value) {
   if (token() != value) {
     report_.syntaxError(lastLocation(),
                         "Unexpected token '{}' (expected: '{}')",
@@ -309,14 +309,14 @@ bool FlowParser::expect(FlowToken value) {
   return true;
 }
 
-bool FlowParser::consume(FlowToken value) {
+bool Parser::consume(Token value) {
   if (!expect(value)) return false;
 
   nextToken();
   return true;
 }
 
-bool FlowParser::consumeIf(FlowToken value) {
+bool Parser::consumeIf(Token value) {
   if (token() == value) {
     nextToken();
     return true;
@@ -325,27 +325,27 @@ bool FlowParser::consumeIf(FlowToken value) {
   }
 }
 
-bool FlowParser::consumeUntil(FlowToken value) {
+bool Parser::consumeUntil(Token value) {
   for (;;) {
     if (token() == value) {
       nextToken();
       return true;
     }
 
-    if (token() == FlowToken::Eof) return false;
+    if (token() == Token::Eof) return false;
 
     nextToken();
   }
 }
 // }}}
 // {{{ decls
-std::unique_ptr<UnitSym> FlowParser::unit() {
+std::unique_ptr<UnitSym> Parser::unit() {
   auto unit = std::make_unique<UnitSym>();
 
   scoped(unit) {
     importRuntime();
 
-    while (token() == FlowToken::Import) {
+    while (token() == Token::Import) {
       if (!importDecl(unit.get())) {
         return nullptr;
       }
@@ -359,7 +359,7 @@ std::unique_ptr<UnitSym> FlowParser::unit() {
   return unit;
 }
 
-void FlowParser::importRuntime() {
+void Parser::importRuntime() {
   if (runtime_) {
     for (const auto& builtin : runtime_->builtins()) {
       declareBuiltin(builtin);
@@ -367,7 +367,7 @@ void FlowParser::importRuntime() {
   }
 }
 
-void FlowParser::declareBuiltin(const NativeCallback* native) {
+void Parser::declareBuiltin(const NativeCallback* native) {
   if (native->isHandler()) {
     createSymbol<BuiltinHandlerSym>(*native);
   } else {
@@ -375,13 +375,13 @@ void FlowParser::declareBuiltin(const NativeCallback* native) {
   }
 }
 
-std::unique_ptr<Symbol> FlowParser::decl() {
+std::unique_ptr<Symbol> Parser::decl() {
   switch (token()) {
-    case FlowToken::Var:
+    case Token::Var:
       return varDecl();
-    case FlowToken::Handler:
+    case Token::Handler:
       return handlerDecl(true);
-    case FlowToken::Ident:
+    case Token::Ident:
       return handlerDecl(false);
     default:
       return nullptr;
@@ -389,50 +389,50 @@ std::unique_ptr<Symbol> FlowParser::decl() {
 }
 
 // 'var' IDENT ['=' EXPR] ';'
-std::unique_ptr<VariableSym> FlowParser::varDecl() {
+std::unique_ptr<VariableSym> Parser::varDecl() {
   SourceLocation loc(lexer_->location());
 
-  if (!consume(FlowToken::Var)) return nullptr;
+  if (!consume(Token::Var)) return nullptr;
 
-  if (!consume(FlowToken::Ident)) return nullptr;
+  if (!consume(Token::Ident)) return nullptr;
 
   std::string name = stringValue();
 
-  if (!consume(FlowToken::Assign)) return nullptr;
+  if (!consume(Token::Assign)) return nullptr;
 
   std::unique_ptr<Expr> initializer = expr();
   if (!initializer) return nullptr;
 
   loc.update(initializer->location().end);
-  consume(FlowToken::Semicolon);
+  consume(Token::Semicolon);
 
   return std::make_unique<VariableSym>(name, std::move(initializer), loc);
 }
 
-bool FlowParser::importDecl(UnitSym* unit) {
+bool Parser::importDecl(UnitSym* unit) {
   // 'import' NAME_OR_NAMELIST ['from' PATH] ';'
   nextToken();  // skip 'import'
 
   std::list<std::string> names;
   if (!importOne(names)) {
-    consumeUntil(FlowToken::Semicolon);
+    consumeUntil(Token::Semicolon);
     return false;
   }
 
-  while (token() == FlowToken::Comma) {
+  while (token() == Token::Comma) {
     nextToken();
     if (!importOne(names)) {
-      consumeUntil(FlowToken::Semicolon);
+      consumeUntil(Token::Semicolon);
       return false;
     }
   }
 
   std::string path;
-  if (consumeIf(FlowToken::From)) {
+  if (consumeIf(Token::From)) {
     path = stringValue();
 
-    if (!consumeOne(FlowToken::String, FlowToken::RawString)) {
-      consumeUntil(FlowToken::Semicolon);
+    if (!consumeOne(Token::String, Token::RawString)) {
+      consumeUntil(Token::Semicolon);
       return false;
     }
 
@@ -460,28 +460,28 @@ bool FlowParser::importDecl(UnitSym* unit) {
     }
   }
 
-  consume(FlowToken::Semicolon);
+  consume(Token::Semicolon);
   return true;
 }
 
-bool FlowParser::importOne(std::list<std::string>& names) {
+bool Parser::importOne(std::list<std::string>& names) {
   switch (token()) {
-    case FlowToken::Ident:
-    case FlowToken::String:
-    case FlowToken::RawString:
+    case Token::Ident:
+    case Token::String:
+    case Token::RawString:
       names.push_back(stringValue());
       nextToken();
       break;
-    case FlowToken::RndOpen:
+    case Token::RndOpen:
       nextToken();
       if (!importOne(names)) return false;
 
-      while (token() == FlowToken::Comma) {
+      while (token() == Token::Comma) {
         nextToken();  // skip comma
         if (!importOne(names)) return false;
       }
 
-      if (!consume(FlowToken::RndClose)) return false;
+      if (!consume(Token::RndClose)) return false;
       break;
     default:
       report_.syntaxError(lastLocation(), "Syntax error in import declaration. Unexpected token {}.", token());
@@ -491,16 +491,16 @@ bool FlowParser::importOne(std::list<std::string>& names) {
 }
 
 // handlerDecl ::= 'handler' IDENT (';' | [do] stmt)
-std::unique_ptr<HandlerSym> FlowParser::handlerDecl(bool keyword) {
+std::unique_ptr<HandlerSym> Parser::handlerDecl(bool keyword) {
   SourceLocation loc(location());
 
   if (keyword) {
     nextToken();  // 'handler'
   }
 
-  consume(FlowToken::Ident);
+  consume(Token::Ident);
   std::string name = stringValue();
-  if (consumeIf(FlowToken::Semicolon)) {  // forward-declaration
+  if (consumeIf(Token::Semicolon)) {  // forward-declaration
     loc.update(end());
     return std::make_unique<HandlerSym>(name, loc);
   }
@@ -529,20 +529,20 @@ std::unique_ptr<HandlerSym> FlowParser::handlerDecl(bool keyword) {
 }
 // }}}
 // {{{ expr
-std::unique_ptr<Expr> FlowParser::expr() {
+std::unique_ptr<Expr> Parser::expr() {
   return logicExpr();
 }
 
-std::unique_ptr<Expr> FlowParser::logicExpr() {
+std::unique_ptr<Expr> Parser::logicExpr() {
   std::unique_ptr<Expr> lhs = notExpr();
   if (!lhs) return nullptr;
 
   for (;;) {
     switch (token()) {
-      case FlowToken::And:
-      case FlowToken::Xor:
-      case FlowToken::Or: {
-        FlowToken binop = token();
+      case Token::And:
+      case Token::Xor:
+      case Token::Or: {
+        Token binop = token();
         nextToken();
 
         std::unique_ptr<Expr> rhs = notExpr();
@@ -566,19 +566,19 @@ std::unique_ptr<Expr> FlowParser::logicExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::notExpr() {
+std::unique_ptr<Expr> Parser::notExpr() {
   size_t nots = 0;
 
   SourceLocation loc = location();
 
-  while (consumeIf(FlowToken::Not)) nots++;
+  while (consumeIf(Token::Not)) nots++;
 
   std::unique_ptr<Expr> subExpr = relExpr();
   if (!subExpr) return nullptr;
 
   if ((nots % 2) == 0) return subExpr;
 
-  Opcode op = makeOperator(FlowToken::Not, subExpr.get());
+  Opcode op = makeOperator(Token::Not, subExpr.get());
   if (op == Opcode::EXIT) {
     report_.typeError(
         lastLocation(),
@@ -590,23 +590,23 @@ std::unique_ptr<Expr> FlowParser::notExpr() {
   return std::make_unique<UnaryExpr>(op, std::move(subExpr), loc.update(end()));
 }
 
-std::unique_ptr<Expr> FlowParser::relExpr() {
+std::unique_ptr<Expr> Parser::relExpr() {
   std::unique_ptr<Expr> lhs = addExpr();
   if (!lhs)
     return nullptr;
 
   switch (token()) {
-    case FlowToken::Equal:
-    case FlowToken::UnEqual:
-    case FlowToken::Less:
-    case FlowToken::Greater:
-    case FlowToken::LessOrEqual:
-    case FlowToken::GreaterOrEqual:
-    case FlowToken::PrefixMatch:
-    case FlowToken::SuffixMatch:
-    case FlowToken::RegexMatch:
-    case FlowToken::In: {
-      FlowToken binop = token();
+    case Token::Equal:
+    case Token::UnEqual:
+    case Token::Less:
+    case Token::Greater:
+    case Token::LessOrEqual:
+    case Token::GreaterOrEqual:
+    case Token::PrefixMatch:
+    case Token::SuffixMatch:
+    case Token::RegexMatch:
+    case Token::In: {
+      Token binop = token();
       nextToken();
 
       std::unique_ptr<Expr> rhs = addExpr();
@@ -628,15 +628,15 @@ std::unique_ptr<Expr> FlowParser::relExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::addExpr() {
+std::unique_ptr<Expr> Parser::addExpr() {
   std::unique_ptr<Expr> lhs = mulExpr();
   if (!lhs) return nullptr;
 
   for (;;) {
     switch (token()) {
-      case FlowToken::Plus:
-      case FlowToken::Minus: {
-        FlowToken binop = token();
+      case Token::Plus:
+      case Token::Minus: {
+        Token binop = token();
         nextToken();
 
         std::unique_ptr<Expr> rhs = mulExpr();
@@ -660,18 +660,18 @@ std::unique_ptr<Expr> FlowParser::addExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::mulExpr() {
+std::unique_ptr<Expr> Parser::mulExpr() {
   std::unique_ptr<Expr> lhs = powExpr();
   if (!lhs) return nullptr;
 
   for (;;) {
     switch (token()) {
-      case FlowToken::Mul:
-      case FlowToken::Div:
-      case FlowToken::Mod:
-      case FlowToken::Shl:
-      case FlowToken::Shr: {
-        FlowToken binop = token();
+      case Token::Mul:
+      case Token::Div:
+      case Token::Mod:
+      case Token::Shl:
+      case Token::Shr: {
+        Token binop = token();
         nextToken();
 
         std::unique_ptr<Expr> rhs = powExpr();
@@ -695,24 +695,24 @@ std::unique_ptr<Expr> FlowParser::mulExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::powExpr() {
+std::unique_ptr<Expr> Parser::powExpr() {
   // powExpr ::= negExpr ('**' powExpr)*
   SourceLocation sloc(location());
   std::unique_ptr<Expr> lhs = negExpr();
   if (!lhs) return nullptr;
 
-  while (token() == FlowToken::Pow) {
+  while (token() == Token::Pow) {
     nextToken();
 
     std::unique_ptr<Expr> rhs = powExpr();
     if (!rhs) return nullptr;
 
-    auto opc = makeOperator(FlowToken::Pow, lhs.get(), rhs.get());
+    auto opc = makeOperator(Token::Pow, lhs.get(), rhs.get());
     if (opc == Opcode::EXIT) {
       report_.typeError(
           lastLocation(),
           "Incompatible binary expression operands ({} {} {}).",
-          lhs->getType(), FlowToken::Pow, rhs->getType());
+          lhs->getType(), Token::Pow, rhs->getType());
       return nullptr;
     }
 
@@ -722,15 +722,15 @@ std::unique_ptr<Expr> FlowParser::powExpr() {
   return lhs;
 }
 
-std::unique_ptr<Expr> FlowParser::negExpr() {
+std::unique_ptr<Expr> Parser::negExpr() {
   // negExpr ::= ['-'] primaryExpr
   SourceLocation loc = location();
 
-  if (consumeIf(FlowToken::Minus)) {
+  if (consumeIf(Token::Minus)) {
     std::unique_ptr<Expr> e = negExpr();
     if (!e) return nullptr;
 
-    Opcode op = makeOperator(FlowToken::Minus, e.get());
+    Opcode op = makeOperator(Token::Minus, e.get());
     if (op == Opcode::EXIT) {
       report_.typeError(
           lastLocation(),
@@ -746,15 +746,15 @@ std::unique_ptr<Expr> FlowParser::negExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::bitNotExpr() {
+std::unique_ptr<Expr> Parser::bitNotExpr() {
   // negExpr ::= ['~'] primaryExpr
   SourceLocation loc = location();
 
-  if (consumeIf(FlowToken::BitNot)) {
+  if (consumeIf(Token::BitNot)) {
     std::unique_ptr<Expr> e = bitNotExpr();
     if (!e) return nullptr;
 
-    Opcode op = makeOperator(FlowToken::BitNot, e.get());
+    Opcode op = makeOperator(Token::BitNot, e.get());
     if (op == Opcode::EXIT) {
       report_.typeError(
           lastLocation(),
@@ -775,23 +775,23 @@ std::unique_ptr<Expr> FlowParser::bitNotExpr() {
 //               | function '(' paramList ')'
 //               | '(' expr ')'
 //               | '[' exprList ']'
-std::unique_ptr<Expr> FlowParser::primaryExpr() {
+std::unique_ptr<Expr> Parser::primaryExpr() {
   switch (token()) {
-    case FlowToken::String:
-    case FlowToken::RawString:
-    case FlowToken::Number:
-    case FlowToken::Boolean:
-    case FlowToken::IP:
-    case FlowToken::Cidr:
-    case FlowToken::RegExp:
+    case Token::String:
+    case Token::RawString:
+    case Token::Number:
+    case Token::Boolean:
+    case Token::IP:
+    case Token::Cidr:
+    case Token::RegExp:
       return literalExpr();
-    case FlowToken::StringType:
-    case FlowToken::NumberType:
-    case FlowToken::BoolType:
+    case Token::StringType:
+    case Token::NumberType:
+    case Token::BoolType:
       return castExpr();
-    case FlowToken::InterpolatedStringFragment:
+    case Token::InterpolatedStringFragment:
       return interpolatedStr();
-    case FlowToken::Ident: {
+    case Token::Ident: {
       SourceLocation loc = location();
       std::string name = stringValue();
       nextToken();
@@ -821,9 +821,9 @@ std::unique_ptr<Expr> FlowParser::primaryExpr() {
 
         ParamList params;
         // {{{ parse call params
-        if (token() == FlowToken::RndOpen) {
+        if (token() == Token::RndOpen) {
           nextToken();
-          if (token() != FlowToken::RndClose) {
+          if (token() != Token::RndClose) {
             auto ra = paramList();
             if (!ra) {
               return nullptr;
@@ -831,14 +831,14 @@ std::unique_ptr<Expr> FlowParser::primaryExpr() {
             params = std::move(*ra);
           }
           loc.end = lastLocation().end;
-          if (!consume(FlowToken::RndClose)) {
+          if (!consume(Token::RndClose)) {
             return nullptr;
           }
-        } else if (FlowTokenTraits::isUnaryOp(token()) ||
-                   FlowTokenTraits::isLiteral(token()) ||
-                   token() == FlowToken::Ident ||
-                   token() == FlowToken::BrOpen ||
-                   token() == FlowToken::RndOpen) {
+        } else if (TokenTraits::isUnaryOp(token()) ||
+                   TokenTraits::isLiteral(token()) ||
+                   token() == Token::Ident ||
+                   token() == Token::BrOpen ||
+                   token() == Token::RndOpen) {
           auto ra = paramList();
           if (!ra) {
             return nullptr;
@@ -856,7 +856,7 @@ std::unique_ptr<Expr> FlowParser::primaryExpr() {
                         name);
       return nullptr;
     }
-    case FlowToken::Begin: {  // lambda-like inline function ref
+    case Token::Begin: {  // lambda-like inline function ref
       static unsigned long i = 0;
       ++i;
 
@@ -876,17 +876,17 @@ std::unique_ptr<Expr> FlowParser::primaryExpr() {
 
       return std::make_unique<HandlerRefExpr>(handler, loc);
     }
-    case FlowToken::RndOpen: {
+    case Token::RndOpen: {
       SourceLocation loc = location();
       nextToken();
       std::unique_ptr<Expr> e = expr();
-      consume(FlowToken::RndClose);
+      consume(Token::RndClose);
       if (e) {
         e->setLocation(loc.update(end()));
       }
       return e;
     }
-    case FlowToken::BrOpen:
+    case Token::BrOpen:
       return arrayExpr();
     default:
       report_.syntaxError(lastLocation(), "Unexpected token {}", token());
@@ -894,18 +894,18 @@ std::unique_ptr<Expr> FlowParser::primaryExpr() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::arrayExpr() {
+std::unique_ptr<Expr> Parser::arrayExpr() {
   SourceLocation loc = location();
   nextToken();  // '['
   std::vector<std::unique_ptr<Expr>> fields;
 
-  if (token() != FlowToken::BrClose) {
+  if (token() != Token::BrClose) {
     auto e = expr();
     if (!e) return nullptr;
 
     fields.push_back(std::move(e));
 
-    while (consumeIf(FlowToken::Comma)) {
+    while (consumeIf(Token::Comma)) {
       e = expr();
       if (!e) return nullptr;
 
@@ -913,7 +913,7 @@ std::unique_ptr<Expr> FlowParser::arrayExpr() {
     }
   }
 
-  consume(FlowToken::BrClose);
+  consume(Token::BrClose);
 
   if (!fields.empty()) {
     LiteralType baseType = fields.front()->getType();
@@ -948,7 +948,7 @@ std::unique_ptr<Expr> FlowParser::arrayExpr() {
   return std::make_unique<ArrayExpr>(loc.update(end()), std::move(fields));
 }
 
-std::unique_ptr<Expr> FlowParser::literalExpr() {
+std::unique_ptr<Expr> Parser::literalExpr() {
   // literalExpr  ::= NUMBER [UNIT]
   //                | BOOL
   //                | STRING
@@ -982,7 +982,7 @@ std::unique_ptr<Expr> FlowParser::literalExpr() {
   SourceLocation loc(location());
 
   switch (token()) {
-    case FlowToken::Div: {  // /REGEX/
+    case Token::Div: {  // /REGEX/
       if (lexer_->continueParseRegEx('/')) {
         auto e = std::make_unique<RegExpExpr>(util::RegExp(stringValue()),
                                               loc.update(end()));
@@ -993,11 +993,11 @@ std::unique_ptr<Expr> FlowParser::literalExpr() {
         return nullptr;
       }
     }
-    case FlowToken::Number: {  // NUMBER [UNIT]
+    case Token::Number: {  // NUMBER [UNIT]
       auto number = numberValue();
       nextToken();
 
-      if (token() == FlowToken::Ident) {
+      if (token() == Token::Ident) {
         std::string sv(stringValue());
         for (size_t i = 0; units[i].ident; ++i) {
           if (sv == units[i].ident ||
@@ -1012,32 +1012,32 @@ std::unique_ptr<Expr> FlowParser::literalExpr() {
       }
       return std::make_unique<NumberExpr>(number, loc);
     }
-    case FlowToken::Boolean: {
+    case Token::Boolean: {
       std::unique_ptr<BoolExpr> e =
           std::make_unique<BoolExpr>(booleanValue(), loc);
       nextToken();
       return std::move(e);
     }
-    case FlowToken::String:
-    case FlowToken::RawString: {
+    case Token::String:
+    case Token::RawString: {
       std::unique_ptr<StringExpr> e =
           std::make_unique<StringExpr>(stringValue(), loc);
       nextToken();
       return std::move(e);
     }
-    case FlowToken::IP: {
+    case Token::IP: {
       std::unique_ptr<IPAddressExpr> e =
           std::make_unique<IPAddressExpr>(lexer_->ipValue(), loc);
       nextToken();
       return std::move(e);
     }
-    case FlowToken::Cidr: {
+    case Token::Cidr: {
       std::unique_ptr<CidrExpr> e =
           std::make_unique<CidrExpr>(lexer_->cidr(), loc);
       nextToken();
       return std::move(e);
     }
-    case FlowToken::RegExp: {
+    case Token::RegExp: {
       std::unique_ptr<RegExpExpr> e =
           std::make_unique<RegExpExpr>(util::RegExp(stringValue()), loc);
       nextToken();
@@ -1051,11 +1051,11 @@ std::unique_ptr<Expr> FlowParser::literalExpr() {
   }
 }
 
-std::unique_ptr<ParamList> FlowParser::paramList() {
+std::unique_ptr<ParamList> Parser::paramList() {
   // paramList       ::= namedExpr *(',' namedExpr)
   //                   | expr *(',' expr)
 
-  if (token() == FlowToken::NamedParam) {
+  if (token() == Token::NamedParam) {
     std::unique_ptr<ParamList> args = std::make_unique<ParamList>(true);
     std::string name;
     std::unique_ptr<Expr> e = namedExpr(&name);
@@ -1063,10 +1063,10 @@ std::unique_ptr<ParamList> FlowParser::paramList() {
 
     args->push_back(name, std::move(e));
 
-    while (token() == FlowToken::Comma) {
+    while (token() == Token::Comma) {
       nextToken();
 
-      if (token() == FlowToken::RndClose) break;
+      if (token() == Token::RndClose) break;
 
       e = namedExpr(&name);
       if (!e) return nullptr;
@@ -1083,10 +1083,10 @@ std::unique_ptr<ParamList> FlowParser::paramList() {
 
     args->push_back(std::move(e));
 
-    while (token() == FlowToken::Comma) {
+    while (token() == Token::Comma) {
       nextToken();
 
-      if (token() == FlowToken::RndClose) break;
+      if (token() == Token::RndClose) break;
 
       e = expr();
       if (!e) return nullptr;
@@ -1097,13 +1097,13 @@ std::unique_ptr<ParamList> FlowParser::paramList() {
   }
 }
 
-std::unique_ptr<Expr> FlowParser::namedExpr(std::string* name) {
+std::unique_ptr<Expr> Parser::namedExpr(std::string* name) {
   // namedExpr       ::= NAMED_PARAM expr
 
   // FIXME: wtf? what way around?
 
   *name = stringValue();
-  if (!consume(FlowToken::NamedParam)) return nullptr;
+  if (!consume(Token::NamedParam)) return nullptr;
 
   return expr();
 }
@@ -1112,13 +1112,13 @@ std::unique_ptr<Expr> asString(std::unique_ptr<Expr>&& expr) {
   LiteralType baseType = expr->getType();
   if (baseType == LiteralType::String) return std::move(expr);
 
-  Opcode opc = makeOperator(FlowToken::StringType, expr.get());
+  Opcode opc = makeOperator(Token::StringType, expr.get());
   if (opc == Opcode::EXIT) return nullptr;  // cast error
 
   return std::make_unique<UnaryExpr>(opc, std::move(expr), expr->location());
 }
 
-std::unique_ptr<Expr> FlowParser::interpolatedStr() {
+std::unique_ptr<Expr> Parser::interpolatedStr() {
   SourceLocation sloc(location());
   std::unique_ptr<Expr> result =
       std::make_unique<StringExpr>(stringValue(), sloc.update(end()));
@@ -1136,7 +1136,7 @@ std::unique_ptr<Expr> FlowParser::interpolatedStr() {
   result = std::make_unique<BinaryExpr>(Opcode::SADD, std::move(result),
                                         std::move(e));
 
-  while (token() == FlowToken::InterpolatedStringFragment) {
+  while (token() == Token::InterpolatedStringFragment) {
     SourceLocation tloc = sloc.update(end());
     result = std::make_unique<BinaryExpr>(
         Opcode::SADD, std::move(result),
@@ -1156,7 +1156,7 @@ std::unique_ptr<Expr> FlowParser::interpolatedStr() {
                                           std::move(e));
   }
 
-  if (!expect(FlowToken::InterpolatedStringEnd)) {
+  if (!expect(Token::InterpolatedStringEnd)) {
     return nullptr;
   }
 
@@ -1174,17 +1174,17 @@ std::unique_ptr<Expr> FlowParser::interpolatedStr() {
 // castExpr ::= 'int' '(' expr ')'
 //            | 'string' '(' expr ')'
 //            | 'bool' '(' expr ')'
-std::unique_ptr<Expr> FlowParser::castExpr() {
+std::unique_ptr<Expr> Parser::castExpr() {
   SourceLocation sloc(location());
 
-  FlowToken targetTypeToken = token();
+  Token targetTypeToken = token();
   nextToken();
 
-  if (!consume(FlowToken::RndOpen)) return nullptr;
+  if (!consume(Token::RndOpen)) return nullptr;
 
   std::unique_ptr<Expr> e(expr());
 
-  if (!consume(FlowToken::RndClose)) return nullptr;
+  if (!consume(Token::RndClose)) return nullptr;
 
   if (!e) return nullptr;
 
@@ -1208,17 +1208,17 @@ std::unique_ptr<Expr> FlowParser::castExpr() {
 }
 // }}}
 // {{{ stmt
-std::unique_ptr<Stmt> FlowParser::stmt() {
+std::unique_ptr<Stmt> Parser::stmt() {
   switch (token()) {
-    case FlowToken::If:
+    case Token::If:
       return ifStmt();
-    case FlowToken::Match:
+    case Token::Match:
       return matchStmt();
-    case FlowToken::Begin:
+    case Token::Begin:
       return compoundStmt();
-    case FlowToken::Ident:
+    case Token::Ident:
       return identStmt();
-    case FlowToken::Semicolon: {
+    case Token::Semicolon: {
       SourceLocation sloc(location());
       nextToken();
       return std::make_unique<CompoundStmt>(sloc.update(end()));
@@ -1231,13 +1231,13 @@ std::unique_ptr<Stmt> FlowParser::stmt() {
   }
 }
 
-std::unique_ptr<Stmt> FlowParser::ifStmt() {
+std::unique_ptr<Stmt> Parser::ifStmt() {
   // ifStmt ::= 'if' expr ['then'] stmt ['else' stmt]
   SourceLocation sloc(location());
 
-  consume(FlowToken::If);
+  consume(Token::If);
   std::unique_ptr<Expr> cond(expr());
-  consumeIf(FlowToken::Then);
+  consumeIf(Token::Then);
 
   switch (cond->getType()) {
     case LiteralType::Boolean:
@@ -1260,7 +1260,7 @@ std::unique_ptr<Stmt> FlowParser::ifStmt() {
 
   std::unique_ptr<Stmt> elseStmt;
 
-  if (consumeIf(FlowToken::Else)) {
+  if (consumeIf(Token::Else)) {
     elseStmt = stmt();
     if (!elseStmt) {
       return nullptr;
@@ -1271,7 +1271,7 @@ std::unique_ptr<Stmt> FlowParser::ifStmt() {
                                     std::move(elseStmt), sloc.update(end()));
 }
 
-std::unique_ptr<Stmt> FlowParser::matchStmt() {
+std::unique_ptr<Stmt> Parser::matchStmt() {
   // matchStmt       ::= 'match' expr [MATCH_OP] '{' *matchCase ['else' stmt]
   // '}'
   // matchCase       ::= 'on' literalExpr *(',' 'on' literalExpr) stmt
@@ -1279,7 +1279,7 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
 
   SourceLocation sloc(location());
 
-  if (!consume(FlowToken::Match)) return nullptr;
+  if (!consume(Token::Match)) return nullptr;
 
   auto cond = addExpr();
   if (!cond) return nullptr;
@@ -1296,18 +1296,18 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
 
   // [MATCH_OP]
   MatchClass op;
-  if (FlowTokenTraits::isOperator(token())) {
+  if (TokenTraits::isOperator(token())) {
     switch (token()) {
-      case FlowToken::Equal:
+      case Token::Equal:
         op = MatchClass::Same;
         break;
-      case FlowToken::PrefixMatch:
+      case Token::PrefixMatch:
         op = MatchClass::Head;
         break;
-      case FlowToken::SuffixMatch:
+      case Token::SuffixMatch:
         op = MatchClass::Tail;
         break;
-      case FlowToken::RegexMatch:
+      case Token::RegexMatch:
         op = MatchClass::RegExp;
         break;
       default:
@@ -1325,12 +1325,12 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
   if (op == MatchClass::RegExp) matchType = LiteralType::RegExp;
 
   // '{'
-  if (!consume(FlowToken::Begin)) return nullptr;
+  if (!consume(Token::Begin)) return nullptr;
 
   // *('on' literalExpr *(',' 'on' literalExpr) stmt)
   MatchStmt::CaseList cases;
   do {
-    if (!consume(FlowToken::On)) {
+    if (!consume(Token::On)) {
       return nullptr;
     }
 
@@ -1343,8 +1343,8 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
     one.first.push_back(std::move(label));
 
     // any more labels
-    while (consumeIf(FlowToken::Comma)) {
-      if (!consume(FlowToken::On)) return nullptr;
+    while (consumeIf(Token::Comma)) {
+      if (!consume(Token::On)) return nullptr;
 
       label = literalExpr();
       if (!label) return nullptr;
@@ -1367,11 +1367,11 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
     if (!one.second) return nullptr;
 
     cases.push_back(std::move(one));
-  } while (token() == FlowToken::On);
+  } while (token() == Token::On);
 
   // ['else' stmt]
   std::unique_ptr<Stmt> elseStmt;
-  if (consumeIf(FlowToken::Else)) {
+  if (consumeIf(Token::Else)) {
     elseStmt = stmt();
     if (!elseStmt) {
       return nullptr;
@@ -1379,20 +1379,20 @@ std::unique_ptr<Stmt> FlowParser::matchStmt() {
   }
 
   // '}'
-  if (!consume(FlowToken::End)) return nullptr;
+  if (!consume(Token::End)) return nullptr;
 
   return std::make_unique<MatchStmt>(sloc.update(end()), std::move(cond), op,
                                      std::move(cases), std::move(elseStmt));
 }
 
 // compoundStmt ::= '{' varDecl* stmt* '}'
-std::unique_ptr<Stmt> FlowParser::compoundStmt() {
+std::unique_ptr<Stmt> Parser::compoundStmt() {
   SourceLocation sloc(location());
   nextToken();  // '{'
 
   std::unique_ptr<CompoundStmt> cs = std::make_unique<CompoundStmt>(sloc);
 
-  while (token() == FlowToken::Var) {
+  while (token() == Token::Var) {
     if (std::unique_ptr<VariableSym> var = varDecl())
       currentScope()->appendSymbol(std::move(var));
     else
@@ -1400,7 +1400,7 @@ std::unique_ptr<Stmt> FlowParser::compoundStmt() {
   }
 
   for (;;) {
-    if (consumeIf(FlowToken::End)) {
+    if (consumeIf(Token::End)) {
       cs->location().update(end());
       return std::unique_ptr<Stmt>(cs.release());
     }
@@ -1412,7 +1412,7 @@ std::unique_ptr<Stmt> FlowParser::compoundStmt() {
   }
 }
 
-std::unique_ptr<Stmt> FlowParser::identStmt() {
+std::unique_ptr<Stmt> Parser::identStmt() {
   // identStmt  ::= callStmt | assignStmt
   // callStmt   ::= NAME ['(' paramList ')' | paramList] (';' | LF)
   // assignStmt ::= NAME '=' expr [';' | LF]
@@ -1429,7 +1429,7 @@ std::unique_ptr<Stmt> FlowParser::identStmt() {
   if (!callee) {
     // XXX assume that given symbol is a auto forward-declared handler that's
     // being defined later in the source.
-    if (token() != FlowToken::Semicolon) {
+    if (token() != Token::Semicolon) {
       report_.typeError(lastLocation(), "Unknown symbol '{}'.", name);
       return nullptr;
     }
@@ -1441,7 +1441,7 @@ std::unique_ptr<Stmt> FlowParser::identStmt() {
 
   switch (callee->type()) {
     case Symbol::Variable: {  // var '=' expr (';' | LF)
-      if (!consume(FlowToken::Assign)) return nullptr;
+      if (!consume(Token::Assign)) return nullptr;
 
       std::unique_ptr<Expr> value = expr();
       if (!value) return nullptr;
@@ -1481,17 +1481,17 @@ std::unique_ptr<Stmt> FlowParser::identStmt() {
   // postscript statement handling
 
   switch (token()) {
-    case FlowToken::If:
-    case FlowToken::Unless:
+    case Token::If:
+    case Token::Unless:
       return postscriptStmt(std::move(stmt));
   }
 
-  if (!consume(FlowToken::Semicolon)) return nullptr;
+  if (!consume(Token::Semicolon)) return nullptr;
 
   return stmt;
 }
 
-std::unique_ptr<CallExpr> FlowParser::callStmt(
+std::unique_ptr<CallExpr> Parser::callStmt(
     const std::list<Symbol*>& symbols) {
   // callStmt ::= NAME ['(' paramList ')' | paramList] (';' | LF)
   // namedArg ::= NAME ':' expr
@@ -1512,9 +1512,9 @@ std::unique_ptr<CallExpr> FlowParser::callStmt(
   SourceLocation loc = location();
 
   // {{{ parse call params
-  if (token() == FlowToken::RndOpen) {
+  if (token() == Token::RndOpen) {
     nextToken();
-    if (token() != FlowToken::RndClose) {
+    if (token() != Token::RndClose) {
       auto ra = paramList();
       if (!ra) {
         return nullptr;
@@ -1522,11 +1522,11 @@ std::unique_ptr<CallExpr> FlowParser::callStmt(
       params = std::move(*ra);
     }
     loc.end = lastLocation().end;
-    if (!consume(FlowToken::RndClose)) {
+    if (!consume(Token::RndClose)) {
       return nullptr;
     }
-  } else if (token() != FlowToken::Semicolon && token() != FlowToken::If &&
-             token() != FlowToken::Unless) {
+  } else if (token() != Token::Semicolon && token() != Token::If &&
+             token() != Token::Unless) {
     auto ra = paramList();
     if (!ra) {
       return nullptr;
@@ -1554,7 +1554,7 @@ Signature makeSignature(const CallableSym* callee, const ParamList& params) {
   return sig;
 };
 
-std::unique_ptr<CallExpr> FlowParser::resolve(
+std::unique_ptr<CallExpr> Parser::resolve(
     const std::list<CallableSym*>& callables, ParamList&& params) {
   Signature inputSignature = makeSignature(callables.front(), params);
 
@@ -1605,12 +1605,12 @@ std::unique_ptr<CallExpr> FlowParser::resolve(
                                     std::move(params));
 }
 
-std::unique_ptr<Stmt> FlowParser::postscriptStmt(
+std::unique_ptr<Stmt> Parser::postscriptStmt(
     std::unique_ptr<Stmt> baseStmt) {
-  FlowToken op = token();
+  Token op = token();
   switch (op) {
-    case FlowToken::If:
-    case FlowToken::Unless:
+    case Token::If:
+    case Token::Unless:
       break;
     default:
       return baseStmt;
@@ -1626,8 +1626,8 @@ std::unique_ptr<Stmt> FlowParser::postscriptStmt(
   std::unique_ptr<Expr> condExpr = expr();
   if (!condExpr) return nullptr;
 
-  if (op == FlowToken::Unless) {
-    auto opc = makeOperator(FlowToken::Not, condExpr.get());
+  if (op == Token::Unless) {
+    auto opc = makeOperator(Token::Not, condExpr.get());
     if (opc == Opcode::EXIT) {
       report_.typeError(
           lastLocation(),
@@ -1640,7 +1640,7 @@ std::unique_ptr<Stmt> FlowParser::postscriptStmt(
     condExpr = std::make_unique<UnaryExpr>(opc, std::move(condExpr), sloc);
   }
 
-  if (!consume(FlowToken::Semicolon)) return nullptr;
+  if (!consume(Token::Semicolon)) return nullptr;
 
   return std::make_unique<CondStmt>(std::move(condExpr), std::move(baseStmt),
                                     nullptr, sloc.update(end()));

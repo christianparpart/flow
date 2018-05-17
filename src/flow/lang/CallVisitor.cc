@@ -5,29 +5,30 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/lang/FlowCallVisitor.h>
 #include <flow/lang/AST.h>
+#include <flow/lang/CallVisitor.h>
+
 #include <algorithm>
 #include <cassert>
 
 namespace flow::lang {
 
-FlowCallVisitor::FlowCallVisitor(ASTNode* root) : calls_() { visit(root); }
+CallVisitor::CallVisitor(ASTNode* root) : calls_() { visit(root); }
 
-FlowCallVisitor::~FlowCallVisitor() {}
+CallVisitor::~CallVisitor() {}
 
-void FlowCallVisitor::visit(ASTNode* node) {
+void CallVisitor::visit(ASTNode* node) {
   if (node) {
     node->visit(*this);
   }
 }
 
 // {{{ symbols
-void FlowCallVisitor::accept(VariableSym& variable) {
+void CallVisitor::accept(VariableSym& variable) {
   visit(variable.initializer());
 }
 
-void FlowCallVisitor::accept(HandlerSym& handler) {
+void CallVisitor::accept(HandlerSym& handler) {
   if (handler.scope()) {
     for (std::unique_ptr<Symbol>& sym : *handler.scope()) {
       visit(sym.get());
@@ -37,25 +38,25 @@ void FlowCallVisitor::accept(HandlerSym& handler) {
   visit(handler.body());
 }
 
-void FlowCallVisitor::accept(BuiltinFunctionSym& v) {}
+void CallVisitor::accept(BuiltinFunctionSym& v) {}
 
-void FlowCallVisitor::accept(BuiltinHandlerSym& v) {}
+void CallVisitor::accept(BuiltinHandlerSym& v) {}
 
-void FlowCallVisitor::accept(UnitSym& unit) {
+void CallVisitor::accept(UnitSym& unit) {
   for (std::unique_ptr<Symbol>& s : *unit.scope()) {
     visit(s.get());
   }
 }
 // }}}
 // {{{ expressions
-void FlowCallVisitor::accept(UnaryExpr& expr) { visit(expr.subExpr()); }
+void CallVisitor::accept(UnaryExpr& expr) { visit(expr.subExpr()); }
 
-void FlowCallVisitor::accept(BinaryExpr& expr) {
+void CallVisitor::accept(BinaryExpr& expr) {
   visit(expr.leftExpr());
   visit(expr.rightExpr());
 }
 
-void FlowCallVisitor::accept(CallExpr& call) {
+void CallVisitor::accept(CallExpr& call) {
   for (const auto& arg : call.args().values()) {
     visit(arg.get());
   }
@@ -65,44 +66,44 @@ void FlowCallVisitor::accept(CallExpr& call) {
   }
 }
 
-void FlowCallVisitor::accept(VariableExpr& expr) {}
+void CallVisitor::accept(VariableExpr& expr) {}
 
-void FlowCallVisitor::accept(HandlerRefExpr& expr) {}
+void CallVisitor::accept(HandlerRefExpr& expr) {}
 
-void FlowCallVisitor::accept(StringExpr& expr) {}
+void CallVisitor::accept(StringExpr& expr) {}
 
-void FlowCallVisitor::accept(NumberExpr& expr) {}
+void CallVisitor::accept(NumberExpr& expr) {}
 
-void FlowCallVisitor::accept(BoolExpr& expr) {}
+void CallVisitor::accept(BoolExpr& expr) {}
 
-void FlowCallVisitor::accept(RegExpExpr& expr) {}
+void CallVisitor::accept(RegExpExpr& expr) {}
 
-void FlowCallVisitor::accept(IPAddressExpr& expr) {}
+void CallVisitor::accept(IPAddressExpr& expr) {}
 
-void FlowCallVisitor::accept(CidrExpr& expr) {}
+void CallVisitor::accept(CidrExpr& expr) {}
 
-void FlowCallVisitor::accept(ArrayExpr& array) {
+void CallVisitor::accept(ArrayExpr& array) {
   for (const auto& e : array.values()) {
     visit(e.get());
   }
 }
 
-void FlowCallVisitor::accept(ExprStmt& stmt) { visit(stmt.expression()); }
+void CallVisitor::accept(ExprStmt& stmt) { visit(stmt.expression()); }
 // }}}
 // {{{ stmt
-void FlowCallVisitor::accept(CompoundStmt& compound) {
+void CallVisitor::accept(CompoundStmt& compound) {
   for (const auto& stmt : compound) {
     visit(stmt.get());
   }
 }
 
-void FlowCallVisitor::accept(CondStmt& condStmt) {
+void CallVisitor::accept(CondStmt& condStmt) {
   visit(condStmt.condition());
   visit(condStmt.thenStmt());
   visit(condStmt.elseStmt());
 }
 
-void FlowCallVisitor::accept(MatchStmt& stmt) {
+void CallVisitor::accept(MatchStmt& stmt) {
   visit(stmt.condition());
   for (auto& one : stmt.cases()) {
     for (auto& label : one.first) visit(label.get());
@@ -112,7 +113,7 @@ void FlowCallVisitor::accept(MatchStmt& stmt) {
   visit(stmt.elseStmt());
 }
 
-void FlowCallVisitor::accept(AssignStmt& assignStmt) {
+void CallVisitor::accept(AssignStmt& assignStmt) {
   visit(assignStmt.expression());
 }
 // }}}

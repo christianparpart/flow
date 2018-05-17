@@ -12,7 +12,7 @@
 #include <flow/Signature.h>
 #include <flow/SourceLocation.h>
 #include <flow/lang/ASTVisitor.h>
-#include <flow/lang/FlowToken.h>
+#include <flow/lang/Token.h>
 #include <flow/vm/Instruction.h>  // Opcode
 
 #include <fmt/format.h>

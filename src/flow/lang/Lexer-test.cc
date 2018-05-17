@@ -5,7 +5,7 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
-#include <flow/FlowLexer.h>
+#include <flow/Lexer.h>
 #include <flow/Diagnostics.h>
 #include <flow/FlowToken.h>
 #include <xzero/testing.h>
@@ -13,9 +13,9 @@
 using namespace xzero;
 using namespace flow;
 
-TEST(FlowLexer, eof) {
+TEST(Lexer, eof) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("");
 
   ASSERT_EQ(FlowToken::Eof, lexer.token());
@@ -25,9 +25,9 @@ TEST(FlowLexer, eof) {
   ASSERT_EQ(1, lexer.column());
 }
 
-TEST(FlowLexer, token_keywords) {
+TEST(Lexer, token_keywords) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("handler");
 
   ASSERT_EQ(FlowToken::Handler, lexer.token());
@@ -35,9 +35,9 @@ TEST(FlowLexer, token_keywords) {
   ASSERT_EQ(7, lexer.column());
 }
 
-TEST(FlowLexer, composed) {
+TEST(Lexer, composed) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("handler main {}");
 
   ASSERT_EQ(FlowToken::Handler, lexer.token());
@@ -55,9 +55,9 @@ TEST(FlowLexer, composed) {
   ASSERT_EQ(FlowToken::Eof, lexer.nextToken());
 }
 
-TEST(FlowLexer, interpolatedString) {
+TEST(Lexer, interpolatedString) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("\"head#{middle}tail\"");
 
   ASSERT_EQ(FlowToken::InterpolatedStringFragment, lexer.token());
@@ -72,9 +72,9 @@ TEST(FlowLexer, interpolatedString) {
   ASSERT_EQ("tail", lexer.stringValue());
 }
 
-TEST(FlowLexer, interpolatedString_withoutHead) {
+TEST(Lexer, interpolatedString_withoutHead) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("\"#{middle}tail\"");
 
   ASSERT_EQ(FlowToken::InterpolatedStringFragment, lexer.token());
@@ -89,9 +89,9 @@ TEST(FlowLexer, interpolatedString_withoutHead) {
   ASSERT_EQ("tail", lexer.stringValue());
 }
 
-TEST(FlowLexer, interpolatedString_withoutTail) {
+TEST(Lexer, interpolatedString_withoutTail) {
   diagnostics::Report report;
-  FlowLexer lexer(&report);
+  Lexer lexer(&report);
   lexer.openString("\"head#{middle}\"");
 
   ASSERT_EQ(FlowToken::InterpolatedStringFragment, lexer.token());

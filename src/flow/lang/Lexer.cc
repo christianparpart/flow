@@ -6,7 +6,7 @@
 // the License at: http://opensource.org/licenses/MIT
 
 #include <flow/Diagnostics.h>
-#include <flow/lang/FlowLexer.h>
+#include <flow/lang/Lexer.h>
 #include <flow/util/IPAddress.h>
 
 #include <sstream>
@@ -76,49 +76,49 @@ static inline std::string unescape(const std::string& value)  // {{{
 }
 // }}}
 
-FlowLexer::FlowLexer(diagnostics::Report* report)
+Lexer::Lexer(diagnostics::Report* report)
     : report_{*report},
       contexts_(),
       currentChar_(EOF),
       ipv6HexDigits_(0),
       location_(),
-      token_(FlowToken::Eof),
+      token_(Token::Eof),
       stringValue_(),
       ipValue_(),
       numberValue_(0),
       interpolationDepth_(0) {}
 
-FlowLexer::Scope::Scope()
+Lexer::Scope::Scope()
     : filename(), basedir(), stream(), currPos(), nextPos() {}
 
-void FlowLexer::Scope::setStream(const std::string& filename,
+void Lexer::Scope::setStream(const std::string& filename,
                                  std::unique_ptr<std::istream>&& istream) {
   this->filename = filename;
   this->stream = std::move(istream);
   this->basedir = "TODO";
 }
 
-FlowLexer::~FlowLexer() {}
+Lexer::~Lexer() {}
 
-void FlowLexer::openLocalFile(const std::string& filename) {
+void Lexer::openLocalFile(const std::string& filename) {
   enterScope(filename);
   nextToken();
 }
 
-void FlowLexer::openString(const std::string& content) {
+void Lexer::openString(const std::string& content) {
   auto sstr = std::make_unique<std::stringstream>();
   (*sstr) << content;
   openStream(std::move(sstr), "<string>");
 }
 
-void FlowLexer::openStream(
+void Lexer::openStream(
     std::unique_ptr<std::istream>&& ifs,
     const std::string& filename) {
   enterScope(std::move(ifs), filename);
   nextToken();
 }
 
-FlowLexer::Scope* FlowLexer::enterScope(
+Lexer::Scope* Lexer::enterScope(
     std::unique_ptr<std::istream>&& ifs,
     const std::string& filename) {
   std::unique_ptr<Scope> cx = std::make_unique<Scope>();
@@ -136,7 +136,7 @@ FlowLexer::Scope* FlowLexer::enterScope(
   return contexts_.front().get();
 }
 
-FlowLexer::Scope* FlowLexer::enterScope(const std::string& filename) {
+Lexer::Scope* Lexer::enterScope(const std::string& filename) {
   auto ifs = std::make_unique<std::ifstream>();
 
   ifs->open(filename);
@@ -146,18 +146,18 @@ FlowLexer::Scope* FlowLexer::enterScope(const std::string& filename) {
   return enterScope(std::move(ifs), filename);
 }
 
-void FlowLexer::leaveScope() {
+void Lexer::leaveScope() {
   currentChar_ = scope()->backupChar;
   contexts_.pop_front();
 }
 
-int FlowLexer::peekChar() { return scope()->stream->peek(); }
+int Lexer::peekChar() { return scope()->stream->peek(); }
 
-bool FlowLexer::eof() const {
+bool Lexer::eof() const {
   return currentChar_ == EOF || scope()->stream->eof();
 }
 
-int FlowLexer::nextChar(bool interscope) {
+int Lexer::nextChar(bool interscope) {
   if (currentChar_ == EOF) return currentChar_;
 
   location_.end = scope()->currPos;
@@ -187,7 +187,7 @@ int FlowLexer::nextChar(bool interscope) {
   return currentChar_;
 }
 
-bool FlowLexer::consume(char ch) {
+bool Lexer::consume(char ch) {
   bool result = currentChar() == ch;
   nextChar();
   return result;
@@ -197,7 +197,7 @@ bool FlowLexer::consume(char ch) {
  * @retval true data pending
  * @retval false EOF reached
  */
-bool FlowLexer::consumeSpace() {
+bool Lexer::consumeSpace() {
   // skip spaces
   for (;; nextChar()) {
     if (eof()) return false;
@@ -220,9 +220,9 @@ bool FlowLexer::consumeSpace() {
     // skip chars until EOL
     for (;;) {
       if (eof()) {
-        token_ = FlowToken::Eof;
+        token_ = Token::Eof;
         if (maybeCommand) processCommand(line);
-        return token_ != FlowToken::Eof;
+        return token_ != Token::Eof;
       }
 
       if (currentChar() == '\n') {
@@ -241,7 +241,7 @@ bool FlowLexer::consumeSpace() {
 
     for (;;) {
       if (eof()) {
-        token_ = FlowToken::Eof;
+        token_ = Token::Eof;
         // reportError(Error::UnexpectedEof);
         return false;
       }
@@ -261,7 +261,7 @@ bool FlowLexer::consumeSpace() {
   return true;
 }
 
-void FlowLexer::processCommand(const std::string& line) {
+void Lexer::processCommand(const std::string& line) {
   // `#include "glob"`
 
   if (strncmp(line.c_str(), "include", 7) != 0) return;
@@ -308,8 +308,8 @@ void FlowLexer::processCommand(const std::string& line) {
 #endif
 }
 
-FlowToken FlowLexer::nextToken() {
-  if (!consumeSpace()) return token_ = FlowToken::Eof;
+Token Lexer::nextToken() {
+  if (!consumeSpace()) return token_ = Token::Eof;
 
   lastLocation_ = location_;
 
@@ -319,150 +319,150 @@ FlowToken FlowLexer::nextToken() {
   switch (currentChar()) {
     case '~':
       nextChar();
-      return token_ = FlowToken::BitNot;
+      return token_ = Token::BitNot;
     case '=':
       switch (nextChar()) {
         case '=':
           nextChar();
-          return token_ = FlowToken::Equal;
+          return token_ = Token::Equal;
         case '^':
           nextChar();
-          return token_ = FlowToken::PrefixMatch;
+          return token_ = Token::PrefixMatch;
         case '$':
           nextChar();
-          return token_ = FlowToken::SuffixMatch;
+          return token_ = Token::SuffixMatch;
         case '~':
           nextChar();
-          return token_ = FlowToken::RegexMatch;
+          return token_ = Token::RegexMatch;
         case '>':
           nextChar();
-          return token_ = FlowToken::HashRocket;
+          return token_ = Token::HashRocket;
         default:
-          return token_ = FlowToken::Assign;
+          return token_ = Token::Assign;
       }
     case '<':
       switch (nextChar()) {
         case '<':
           nextChar();
-          return token_ = FlowToken::Shl;
+          return token_ = Token::Shl;
         case '=':
           nextChar();
-          return token_ = FlowToken::LessOrEqual;
+          return token_ = Token::LessOrEqual;
         default:
-          return token_ = FlowToken::Less;
+          return token_ = Token::Less;
       }
     case '>':
       switch (nextChar()) {
         case '>':
           nextChar();
-          return token_ = FlowToken::Shr;
+          return token_ = Token::Shr;
         case '=':
           nextChar();
-          return token_ = FlowToken::GreaterOrEqual;
+          return token_ = Token::GreaterOrEqual;
         default:
-          return token_ = FlowToken::Greater;
+          return token_ = Token::Greater;
       }
     case '^':
       nextChar();
-      return token_ = FlowToken::BitXor;
+      return token_ = Token::BitXor;
     case '|':
       switch (nextChar()) {
         case '|':
           nextChar();
-          return token_ = FlowToken::Or;
+          return token_ = Token::Or;
         case '=':
           nextChar();
-          return token_ = FlowToken::OrAssign;
+          return token_ = Token::OrAssign;
         default:
-          return token_ = FlowToken::BitOr;
+          return token_ = Token::BitOr;
       }
     case '&':
       switch (nextChar()) {
         case '&':
           nextChar();
-          return token_ = FlowToken::And;
+          return token_ = Token::And;
         case '=':
           nextChar();
-          return token_ = FlowToken::AndAssign;
+          return token_ = Token::AndAssign;
         default:
-          return token_ = FlowToken::BitAnd;
+          return token_ = Token::BitAnd;
       }
     case '.':
       if (nextChar() == '.') {
         if (nextChar() == '.') {
           nextChar();
-          return token_ = FlowToken::Ellipsis;
+          return token_ = Token::Ellipsis;
         }
-        return token_ = FlowToken::DblPeriod;
+        return token_ = Token::DblPeriod;
       }
-      return token_ = FlowToken::Period;
+      return token_ = Token::Period;
     case ':':
       if (peekChar() == ':') {
         stringValue_.clear();
         return continueParseIPv6(false);
       } else {
         nextChar();
-        return token_ = FlowToken::Colon;
+        return token_ = Token::Colon;
       }
     case ';':
       nextChar();
-      return token_ = FlowToken::Semicolon;
+      return token_ = Token::Semicolon;
     case ',':
       nextChar();
-      return token_ = FlowToken::Comma;
+      return token_ = Token::Comma;
     case '{':
       nextChar();
-      return token_ = FlowToken::Begin;
+      return token_ = Token::Begin;
     case '}':
       if (interpolationDepth_) {
         return token_ = parseInterpolationFragment(false);
       } else {
         nextChar();
-        return token_ = FlowToken::End;
+        return token_ = Token::End;
       }
     case '(':
       nextChar();
-      return token_ = FlowToken::RndOpen;
+      return token_ = Token::RndOpen;
     case ')':
       nextChar();
-      return token_ = FlowToken::RndClose;
+      return token_ = Token::RndClose;
     case '[':
       nextChar();
-      return token_ = FlowToken::BrOpen;
+      return token_ = Token::BrOpen;
     case ']':
       nextChar();
-      return token_ = FlowToken::BrClose;
+      return token_ = Token::BrClose;
     case '+':
       nextChar();
-      return token_ = FlowToken::Plus;
+      return token_ = Token::Plus;
     case '-':
       nextChar();
-      return token_ = FlowToken::Minus;
+      return token_ = Token::Minus;
     case '*':
       switch (nextChar()) {
         case '*':
           nextToken();
-          return token_ = FlowToken::Pow;
+          return token_ = Token::Pow;
         default:
-          return token_ = FlowToken::Mul;
+          return token_ = Token::Mul;
       }
     case '/':
       // if (expectsValue) {
-      //   return token_ = parseString('/', FlowToken::RegExp);
+      //   return token_ = parseString('/', Token::RegExp);
       // }
 
       nextChar();
-      return token_ = FlowToken::Div;
+      return token_ = Token::Div;
     case '%':
       nextChar();
-      return token_ = FlowToken::Mod;
+      return token_ = Token::Mod;
     case '!':
       switch (nextChar()) {
         case '=':
           nextChar();
-          return token_ = FlowToken::UnEqual;
+          return token_ = Token::UnEqual;
         default:
-          return token_ = FlowToken::Not;
+          return token_ = Token::Not;
       }
     case '$':
       return token_ = parseEnvVar();
@@ -492,13 +492,13 @@ FlowToken FlowLexer::nextToken() {
                          escape(currentChar()), (int)(currentChar() & 0xFF));
 
       nextChar();
-      return token_ = FlowToken::Unknown;
+      return token_ = Token::Unknown;
   }
 
   return token_;
 }
 
-FlowToken FlowLexer::parseEnvVar() {
+Token Lexer::parseEnvVar() {
   stringValue_.clear();
   nextChar(); // skip leading '$'
 
@@ -513,19 +513,19 @@ FlowToken FlowLexer::parseEnvVar() {
     stringValue_.clear();
   }
 
-  return FlowToken::String;
+  return Token::String;
 }
 
-FlowToken FlowLexer::parseRawString() {
-  FlowToken result = parseString(FlowToken::String);
+Token Lexer::parseRawString() {
+  Token result = parseString(Token::String);
 
-  if (result == FlowToken::String)
+  if (result == Token::String)
     stringValue_ = unescape(stringValue_);
 
   return result;
 }
 
-FlowToken FlowLexer::parseString(FlowToken result) {
+Token Lexer::parseString(Token result) {
   int delim = currentChar();
   int last = -1;
 
@@ -545,10 +545,10 @@ FlowToken FlowLexer::parseString(FlowToken result) {
     return token_ = result;
   }
 
-  return token_ = FlowToken::Unknown;
+  return token_ = Token::Unknown;
 }
 
-FlowToken FlowLexer::parseInterpolationFragment(bool start) {
+Token Lexer::parseInterpolationFragment(bool start) {
   int last = -1;
   stringValue_.clear();
 
@@ -556,19 +556,19 @@ FlowToken FlowLexer::parseInterpolationFragment(bool start) {
   nextChar();
 
   for (;;) {
-    if (eof()) return token_ = FlowToken::Eof;
+    if (eof()) return token_ = Token::Eof;
 
     if (currentChar() == '"' && last != '\\') {
       nextChar();
       --interpolationDepth_;
       return token_ =
-                 start ? FlowToken::String : FlowToken::InterpolatedStringEnd;
+                 start ? Token::String : Token::InterpolatedStringEnd;
     }
 
     if (currentChar() == '\\') {
       nextChar();
 
-      if (eof()) return token_ = FlowToken::Eof;
+      if (eof()) return token_ = Token::Eof;
 
       switch (currentChar()) {
         case 'r':
@@ -592,7 +592,7 @@ FlowToken FlowLexer::parseInterpolationFragment(bool start) {
       nextChar();
       if (currentChar() == '{') {
         nextChar();
-        return token_ = FlowToken::InterpolatedStringFragment;
+        return token_ = Token::InterpolatedStringFragment;
       } else {
         stringValue_ += '#';
       }
@@ -606,7 +606,7 @@ FlowToken FlowLexer::parseInterpolationFragment(bool start) {
   }
 }
 
-FlowToken FlowLexer::parseNumber(int base) {
+Token Lexer::parseNumber(int base) {
   stringValue_.clear();
   numberValue_ = 0;
 
@@ -625,7 +625,7 @@ FlowToken FlowLexer::parseNumber(int base) {
     return continueParseIPv6(false);
 
   if (currentChar() != '.')
-    return token_ = FlowToken::Number;
+    return token_ = Token::Number;
 
   // 2nd IP component
   stringValue_ += '.';
@@ -636,7 +636,7 @@ FlowToken FlowLexer::parseNumber(int base) {
   }
 
   // 3rd IP component
-  if (!consume('.')) return token_ = FlowToken::Unknown;
+  if (!consume('.')) return token_ = Token::Unknown;
 
   stringValue_ += '.';
   while (std::isdigit(currentChar())) {
@@ -645,7 +645,7 @@ FlowToken FlowLexer::parseNumber(int base) {
   }
 
   // 4th IP component
-  if (!consume('.')) return token_ = FlowToken::Unknown;
+  if (!consume('.')) return token_ = Token::Unknown;
 
   stringValue_ += '.';
   while (std::isdigit(currentChar())) {
@@ -655,13 +655,13 @@ FlowToken FlowLexer::parseNumber(int base) {
 
   ipValue_.set(stringValue_.c_str(), util::IPAddress::Family::V4);
 
-  if (currentChar() != '/') return token_ = FlowToken::IP;
+  if (currentChar() != '/') return token_ = Token::IP;
 
   // IPv4 CIDR
   return continueCidr(32);
 }
 
-FlowToken FlowLexer::parseIdent() {
+Token Lexer::parseIdent() {
   stringValue_.clear();
   stringValue_ += static_cast<char>(currentChar());
   bool isHex = isHexChar();
@@ -678,7 +678,7 @@ FlowToken FlowLexer::parseIdent() {
 
   if (currentChar() == ':' && !isHex) {
     nextChar();  // skip ':'
-    return FlowToken::NamedParam;
+    return Token::NamedParam;
   }
 
   // ipv6HexDigit4 *(':' ipv6HexDigit4) ['::' [ipv6HexSeq]]
@@ -690,52 +690,52 @@ FlowToken FlowLexer::parseIdent() {
 
   static struct {
     const char* symbol;
-    FlowToken token;
-  } keywords[] = {{"in", FlowToken::In},
-                  {"var", FlowToken::Var},
-                  {"match", FlowToken::Match},
-                  {"on", FlowToken::On},
-                  {"for", FlowToken::For},
-                  {"do", FlowToken::Do},
-                  {"if", FlowToken::If},
-                  {"then", FlowToken::Then},
-                  {"else", FlowToken::Else},
-                  {"unless", FlowToken::Unless},
-                  {"import", FlowToken::Import},
-                  {"from", FlowToken::From},
-                  {"handler", FlowToken::Handler},
-                  {"and", FlowToken::And},
-                  {"or", FlowToken::Or},
-                  {"xor", FlowToken::Xor},
-                  {"not", FlowToken::Not},
-                  {"shl", FlowToken::Shl},
-                  {"shr", FlowToken::Shr},
-                  {"bool", FlowToken::BoolType},
-                  {"int", FlowToken::NumberType},
-                  {"string", FlowToken::StringType},
-                  {0, FlowToken::Unknown}};
+    Token token;
+  } keywords[] = {{"in", Token::In},
+                  {"var", Token::Var},
+                  {"match", Token::Match},
+                  {"on", Token::On},
+                  {"for", Token::For},
+                  {"do", Token::Do},
+                  {"if", Token::If},
+                  {"then", Token::Then},
+                  {"else", Token::Else},
+                  {"unless", Token::Unless},
+                  {"import", Token::Import},
+                  {"from", Token::From},
+                  {"handler", Token::Handler},
+                  {"and", Token::And},
+                  {"or", Token::Or},
+                  {"xor", Token::Xor},
+                  {"not", Token::Not},
+                  {"shl", Token::Shl},
+                  {"shr", Token::Shr},
+                  {"bool", Token::BoolType},
+                  {"int", Token::NumberType},
+                  {"string", Token::StringType},
+                  {0, Token::Unknown}};
 
   for (auto i = keywords; i->symbol; ++i)
     if (strcmp(i->symbol, stringValue_.c_str()) == 0) return token_ = i->token;
 
   if (stringValue_ == "true" || stringValue_ == "yes") {
     numberValue_ = 1;
-    return token_ = FlowToken::Boolean;
+    return token_ = Token::Boolean;
   }
 
   if (stringValue_ == "false" || stringValue_ == "no") {
     numberValue_ = 0;
-    return token_ = FlowToken::Boolean;
+    return token_ = Token::Boolean;
   }
 
-  return token_ = FlowToken::Ident;
+  return token_ = Token::Ident;
 }
 // {{{ IPv6 address parser
 // IPv6_HexPart ::= IPv6_HexSeq                        # (1)
 //                | IPv6_HexSeq "::" [IPv6_HexSeq]     # (2)
 //                            | "::" [IPv6_HexSeq]     # (3)
 //
-bool FlowLexer::ipv6HexPart() {
+bool Lexer::ipv6HexPart() {
   bool rv;
 
   if (currentChar() == ':' && peekChar() == ':') {  // (3)
@@ -758,7 +758,7 @@ bool FlowLexer::ipv6HexPart() {
 }
 
 // 1*4HEXDIGIT *(':' 1*4HEXDIGIT)
-bool FlowLexer::ipv6HexSeq() {
+bool Lexer::ipv6HexSeq() {
   if (!ipv6HexDigit4()) return false;
 
   while (currentChar() == ':' && peekChar() != ':') {
@@ -772,7 +772,7 @@ bool FlowLexer::ipv6HexSeq() {
 }
 
 // 1*4HEXDIGIT
-bool FlowLexer::ipv6HexDigit4() {
+bool Lexer::ipv6HexDigit4() {
   size_t i = ipv6HexDigits_;
 
   while (isHexChar()) {
@@ -786,7 +786,7 @@ bool FlowLexer::ipv6HexDigit4() {
   return i >= 1 && i <= 4;
 }
 
-bool FlowLexer::continueParseRegEx(char delim) {
+bool Lexer::continueParseRegEx(char delim) {
   int last = -1;
 
   stringValue_.clear();
@@ -799,17 +799,17 @@ bool FlowLexer::continueParseRegEx(char delim) {
 
   if (currentChar() == delim) {
     nextChar();
-    token_ = FlowToken::RegExp;
+    token_ = Token::RegExp;
     return true;
   }
 
-  token_ = FlowToken::Unknown;
+  token_ = Token::Unknown;
   return false;
 }
 
 // ipv6HexDigit4 *(':' ipv6HexDigit4) ['::' [ipv6HexSeq]]
 // where the first component, ipv6HexDigit4 is already parsed
-FlowToken FlowLexer::continueParseIPv6(bool firstComplete) {
+Token Lexer::continueParseIPv6(bool firstComplete) {
   bool rv = true;
   if (firstComplete) {
     while (currentChar() == ':' && peekChar() != ':') {
@@ -817,7 +817,7 @@ FlowToken FlowLexer::continueParseIPv6(bool firstComplete) {
       nextChar();
 
       if (!ipv6HexDigit4()) {
-        return token_ = FlowToken::Unknown;
+        return token_ = Token::Unknown;
       }
     }
 
@@ -845,18 +845,18 @@ FlowToken FlowLexer::continueParseIPv6(bool firstComplete) {
 
   if (!rv)
     // Invalid IPv6
-    return token_ = FlowToken::Unknown;
+    return token_ = Token::Unknown;
 
   if (!ipValue_.set(stringValue_.c_str(), util::IPAddress::Family::V6))
     // Invalid IPv6
-    return token_ = FlowToken::Unknown;
+    return token_ = Token::Unknown;
 
-  if (currentChar_ != '/') return token_ = FlowToken::IP;
+  if (currentChar_ != '/') return token_ = Token::IP;
 
   return continueCidr(128);
 }
 
-FlowToken FlowLexer::continueCidr(size_t range) {
+Token Lexer::continueCidr(size_t range) {
   // IPv6 CIDR
   nextChar();  // consume '/'
 
@@ -867,7 +867,7 @@ FlowToken FlowLexer::continueCidr(size_t range) {
         line(),
         column(),
         (int)(currentChar() & 0xFF));
-    return token_ = FlowToken::Unknown;
+    return token_ = Token::Unknown;
   }
 
   numberValue_ = 0;
@@ -882,10 +882,10 @@ FlowToken FlowLexer::continueCidr(size_t range) {
     report_.tokenError(lastLocation(),
                        "{}[{}:{}]: CIDR prefix out of range.",
                        location_.filename, line(), column());
-    return token_ = FlowToken::Unknown;
+    return token_ = Token::Unknown;
   }
 
-  return token_ = FlowToken::Cidr;
+  return token_ = Token::Cidr;
 }
 // }}}
 

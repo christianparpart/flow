@@ -16,13 +16,13 @@ namespace flow::lang {
 
 class ASTNode;
 
-class FlowCallVisitor : public ASTVisitor {
+class CallVisitor : public ASTVisitor {
  private:
   std::vector<CallExpr*> calls_;
 
  public:
-  explicit FlowCallVisitor(ASTNode* root = nullptr);
-  ~FlowCallVisitor();
+  explicit CallVisitor(ASTNode* root = nullptr);
+  ~CallVisitor();
 
   void visit(ASTNode* root);
 

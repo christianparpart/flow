@@ -9,7 +9,7 @@
 
 #include <flow/SourceLocation.h>
 #include <flow/LiteralType.h>
-#include <flow/lang/FlowToken.h>
+#include <flow/lang/Token.h>
 #include <flow/util/IPAddress.h>
 #include <flow/util/Cidr.h>
 
@@ -28,10 +28,10 @@ namespace flow::lang {
 //! \addtogroup Flow
 //@{
 
-class FlowLexer {
+class Lexer {
  public:
-  explicit FlowLexer(diagnostics::Report* report);
-  ~FlowLexer();
+  explicit Lexer(diagnostics::Report* report);
+  ~Lexer();
 
   void openLocalFile(const std::string& filename);
 
@@ -44,11 +44,11 @@ class FlowLexer {
   bool eof() const;
 
   // processing
-  FlowToken nextToken();
+  Token nextToken();
   bool continueParseRegEx(char delim);
 
   // current parser state
-  FlowToken token() const { return token_; }
+  Token token() const { return token_; }
   const SourceLocation& lastLocation() const { return lastLocation_; }
   const SourceLocation& location() const { return location_; }
 
@@ -79,15 +79,15 @@ class FlowLexer {
   bool consumeSpace();  // potentially enters new or leaves current context
   void processCommand(const std::string& line);
 
-  FlowToken parseNumber(int base);
-  FlowToken parseEnvVar();
-  FlowToken parseRawString();
-  FlowToken parseString(FlowToken result);
-  FlowToken parseInterpolationFragment(bool start);
-  FlowToken parseIdent();
+  Token parseNumber(int base);
+  Token parseEnvVar();
+  Token parseRawString();
+  Token parseString(Token result);
+  Token parseInterpolationFragment(bool start);
+  Token parseIdent();
 
-  FlowToken continueParseIPv6(bool firstComplete);
-  FlowToken continueCidr(size_t range);
+  Token continueParseIPv6(bool firstComplete);
+  Token continueCidr(size_t range);
   bool ipv6HexPart();
   bool ipv6HexSeq();
   bool ipv6HexDigit4();
@@ -101,7 +101,7 @@ class FlowLexer {
 
   SourceLocation lastLocation_;
   SourceLocation location_;
-  FlowToken token_;
+  Token token_;
   std::string stringValue_;
   util::IPAddress ipValue_;
   FlowNumber numberValue_;
@@ -109,7 +109,7 @@ class FlowLexer {
   int interpolationDepth_;
 };
 
-struct FlowLexer::Scope {
+struct Lexer::Scope {
   std::string filename;
   std::string basedir;
   std::unique_ptr<std::istream> stream;
@@ -125,11 +125,11 @@ struct FlowLexer::Scope {
 };
 
 // {{{ inlines
-inline bool FlowLexer::isHexChar() const { return std::isxdigit(currentChar_); }
+inline bool Lexer::isHexChar() const { return std::isxdigit(currentChar_); }
 
-inline int FlowLexer::currentChar() const { return currentChar_; }
+inline int Lexer::currentChar() const { return currentChar_; }
 
-inline FlowLexer::Scope* FlowLexer::scope() const {
+inline Lexer::Scope* Lexer::scope() const {
   return !contexts_.empty() ? contexts_.front().get() : nullptr;
 }
 // }}}

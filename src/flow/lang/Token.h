@@ -18,7 +18,7 @@ namespace flow::lang {
 //! \addtogroup Flow
 //@{
 
-enum class FlowToken {
+enum class Token {
   Unknown,
 
   // literals
@@ -109,20 +109,20 @@ enum class FlowToken {
   COUNT
 };
 
-class FlowTokenTraits {
+class TokenTraits {
  public:
-  static bool isKeyword(FlowToken t);
-  static bool isReserved(FlowToken t);
-  static bool isLiteral(FlowToken t);
-  static bool isType(FlowToken t);
+  static bool isKeyword(Token t);
+  static bool isReserved(Token t);
+  static bool isLiteral(Token t);
+  static bool isType(Token t);
 
-  static bool isOperator(FlowToken t);
-  static bool isUnaryOp(FlowToken t);
-  static bool isPrimaryOp(FlowToken t);
-  static bool isRelOp(FlowToken t);
+  static bool isOperator(Token t);
+  static bool isUnaryOp(Token t);
+  static bool isPrimaryOp(Token t);
+  static bool isRelOp(Token t);
 };
 
-std::string to_string(FlowToken t);
+std::string to_string(Token t);
 
 //!@}
 
@@ -130,8 +130,8 @@ std::string to_string(FlowToken t);
 
 namespace std {
   template <>
-  struct hash<flow::lang::FlowToken> {
-    uint32_t operator()(flow::lang::FlowToken v) const {
+  struct hash<flow::lang::Token> {
+    uint32_t operator()(flow::lang::Token v) const {
       return static_cast<uint32_t>(v);
     }
   };
@@ -139,12 +139,12 @@ namespace std {
 
 namespace fmt {
   template<>
-  struct formatter<flow::lang::FlowToken> {
+  struct formatter<flow::lang::Token> {
     template <typename ParseContext>
     constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
     template <typename FormatContext>
-    constexpr auto format(const flow::lang::FlowToken& v, FormatContext &ctx) {
+    constexpr auto format(const flow::lang::Token& v, FormatContext &ctx) {
       return format_to(ctx.begin(), to_string(v));
     }
   };

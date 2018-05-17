@@ -8,8 +8,8 @@
 
 #include <flow/Diagnostics.h>
 #include <flow/lang/AST.h>  // SymbolTable
-#include <flow/lang/FlowLexer.h>
-#include <flow/lang/FlowToken.h>
+#include <flow/lang/Lexer.h>
+#include <flow/lang/Token.h>
 
 #include <list>
 #include <vector>
@@ -27,16 +27,16 @@ namespace flow::lang {
 //! \addtogroup Flow
 //@{
 
-class FlowLexer;
+class Lexer;
 
-class FlowParser {
+class Parser {
  public:
   using ImportHandler = std::function<bool(const std::string&,
                                            const std::string&,
                                            std::vector<NativeCallback*>*)>;
 
-  FlowParser(diagnostics::Report* report, Runtime* runtime, ImportHandler importHandler);
-  ~FlowParser();
+  Parser(diagnostics::Report* report, Runtime* runtime, ImportHandler importHandler);
+  ~Parser();
 
   void openString(const std::string& content);
   void openLocalFile(const std::string& filename);
@@ -50,16 +50,16 @@ class FlowParser {
   class Scope;
 
   // lexing
-  FlowToken token() const { return lexer_->token(); }
+  Token token() const { return lexer_->token(); }
   const SourceLocation& lastLocation() { return lexer_->lastLocation(); }
   const SourceLocation& location() { return lexer_->location(); }
   const FilePos& end() const { return lexer_->lastLocation().end; }
-  FlowToken nextToken() const;
+  Token nextToken() const;
   bool eof() const { return lexer_->eof(); }
-  bool expect(FlowToken token);
-  bool consume(FlowToken);
-  bool consumeIf(FlowToken);
-  bool consumeUntil(FlowToken);
+  bool expect(Token token);
+  bool consume(Token);
+  bool consumeIf(Token);
+  bool consumeUntil(Token);
 
   template <typename A1, typename... Args>
   bool consumeOne(A1 token, Args... tokens);
@@ -145,7 +145,7 @@ class FlowParser {
   std::unique_ptr<Stmt> postscriptStmt(std::unique_ptr<Stmt> baseStmt);
 
  private:
-  std::unique_ptr<FlowLexer> lexer_;
+  std::unique_ptr<Lexer> lexer_;
   SymbolTable* scopeStack_;
   Runtime* runtime_;
   ImportHandler importHandler_;
@@ -154,7 +154,7 @@ class FlowParser {
 
 // {{{ inlines
 template <typename A1, typename... Args>
-inline bool FlowParser::consumeOne(A1 a1, Args... tokens) {
+inline bool Parser::consumeOne(A1 a1, Args... tokens) {
   if (!testTokens(a1, tokens...)) {
     report_.syntaxError(lastLocation(), "Unexpected token {}", token());
     return false;
@@ -165,12 +165,12 @@ inline bool FlowParser::consumeOne(A1 a1, Args... tokens) {
 }
 
 template <typename A1>
-inline bool FlowParser::testTokens(A1 a1) const {
+inline bool Parser::testTokens(A1 a1) const {
   return token() == a1;
 }
 
 template <typename A1, typename... Args>
-inline bool FlowParser::testTokens(A1 a1, Args... tokens) const {
+inline bool Parser::testTokens(A1 a1, Args... tokens) const {
   if (token() == a1) return true;
 
   return testTokens(tokens...);

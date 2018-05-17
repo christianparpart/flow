@@ -1,6 +1,6 @@
 #include <flow/flowtest.h>
 
-#include <flow/lang/FlowParser.h>
+#include <flow/lang/Parser.h>
 #include <flow/lang/IRGenerator.h>
 #include <flow/SourceLocation.h>
 #include <flow/NativeCallback.h>
@@ -180,9 +180,9 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   fmt::print("testing {}\n", filename);
 
   constexpr bool optimize = true;
-  flow::lang::FlowParser parser(report,
-                                this,
-                                [this](auto x, auto y, auto z) { return import(x, y, z); });
+  flow::lang::Parser parser(report,
+                            this,
+                            [this](auto x, auto y, auto z) { return import(x, y, z); });
   parser.openStream(std::make_unique<std::ifstream>(filename), filename);
   std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 

@@ -122,11 +122,11 @@ install(
 add_library(FlowLang STATIC
             src/flow/lang/AST.cc
             src/flow/lang/ASTPrinter.cc
-            src/flow/lang/FlowCallVisitor.cc
-            src/flow/lang/FlowLexer.cc
-            src/flow/lang/FlowParser.cc
-            src/flow/lang/FlowToken.cc
+            src/flow/lang/CallVisitor.cc
             src/flow/lang/IRGenerator.cc
+            src/flow/lang/Lexer.cc
+            src/flow/lang/Parser.cc
+            src/flow/lang/Token.cc
             )
 
 set_target_properties(FlowLang PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
