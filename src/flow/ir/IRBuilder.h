@@ -44,7 +44,7 @@ class IRBuilder {
 
  public:
   IRBuilder();
-  ~IRBuilder();
+  ~IRBuilder() = default;
 
   std::string makeName(const std::string& name);
 

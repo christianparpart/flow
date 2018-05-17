@@ -55,9 +55,6 @@ Program::Program(ConstantPool&& cp)
   setup();
 }
 
-Program::~Program() {
-}
-
 Handler* Program::handler(size_t index) const {
   return handlers_[index].get();
 }

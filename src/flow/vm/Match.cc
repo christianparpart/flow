@@ -16,9 +16,6 @@ namespace flow {
 Match::Match(const MatchDef& def)
     : def_(def) {
 }
-
-Match::~Match() {
-}
 // }}} Match
 // {{{ MatchSame
 MatchSame::MatchSame(const MatchDef& def, Program* program)
@@ -27,9 +24,6 @@ MatchSame::MatchSame(const MatchDef& def, Program* program)
   for (const auto& one : def.cases) {
     map_[program->constants().getString(one.label)] = one.pc;
   }
-}
-
-MatchSame::~MatchSame() {
 }
 
 uint64_t MatchSame::evaluate(const FlowString* condition, Runner* env) const {
@@ -49,9 +43,6 @@ MatchHead::MatchHead(const MatchDef& def, Program* program)
   }
 }
 
-MatchHead::~MatchHead() {
-}
-
 uint64_t MatchHead::evaluate(const FlowString* condition, Runner* env) const {
   uint64_t result;
   if (map_.lookup(*condition, &result))
@@ -69,9 +60,6 @@ MatchTail::MatchTail(const MatchDef& def, Program* program)
   }
 }
 
-MatchTail::~MatchTail() {
-}
-
 uint64_t MatchTail::evaluate(const FlowString* condition, Runner* env) const {
   uint64_t result;
   if (map_.lookup(*condition, &result))
@@ -84,16 +72,12 @@ uint64_t MatchTail::evaluate(const FlowString* condition, Runner* env) const {
 MatchRegEx::MatchRegEx(const MatchDef& def, Program* program)
     : Match(def), map_() {
   for (const auto& one : def.cases) {
-    map_.push_back(
-        std::make_pair(program->constants().getRegExp(one.label), one.pc));
+    map_.emplace_back(program->constants().getRegExp(one.label), one.pc);
   }
 }
 
-MatchRegEx::~MatchRegEx() {
-}
-
 uint64_t MatchRegEx::evaluate(const FlowString* condition, Runner* env) const {
-  util::RegExpContext* cx = (util::RegExpContext*)env->userdata();
+  util::RegExpContext* cx = reinterpret_cast<util::RegExpContext*>(env->userdata());
   util::RegExp::Result* rs = cx ? cx->regexMatch() : nullptr;
   for (const std::pair<util::RegExp, uint64_t>& one : map_) {
     if (one.first.match(*condition, rs)) {

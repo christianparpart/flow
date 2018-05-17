@@ -39,9 +39,9 @@ Lexer::Lexer()
     : Lexer("", "") {
 }
 
-Lexer::Lexer(const std::string& filename, const std::string& contents)
-    : filename_{filename},
-      source_{contents},
+Lexer::Lexer(std::string filename, std::string contents)
+    : filename_{std::move(filename)},
+      source_{std::move(contents)},
       startOffset_{0},
       currentToken_{Token::Eof},
       currentPos_{},
@@ -225,8 +225,8 @@ void Lexer::consumeOneOf(std::initializer_list<Token>&& tokens) {
 // parser
 
 
-Parser::Parser(const std::string& filename, const std::string& source)
-    : lexer_{filename, source} {
+Parser::Parser(std::string filename, std::string source)
+    : lexer_{std::move(filename), std::move(source)} {
 }
 
 std::error_code Parser::parse(flow::diagnostics::Report* report) {

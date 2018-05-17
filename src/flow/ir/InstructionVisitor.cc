@@ -40,9 +40,9 @@ IsSameInstruction::IsSameInstruction(Instr* a)
 }
 
 // {{{ impl
-#define IS_SAME_INSTR_IMPL(type)            \
-  void IsSameInstruction::visit(type&) {    \
-    result_ = dynamic_cast<type*>(other_);  \
+#define IS_SAME_INSTR_IMPL(Type)              \
+  void IsSameInstruction::visit(Type&) {      \
+    result_ = dynamic_cast<Type*>(other_);    \
   }
 
 IS_SAME_INSTR_IMPL(NopInstr);

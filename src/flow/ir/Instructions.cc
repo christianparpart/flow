@@ -176,7 +176,7 @@ std::vector<std::pair<Constant*, BasicBlock*>> MatchInstr::cases() const {
     auto label = static_cast<Constant*>(operand(2 + 2 * i + 0));
     auto code = static_cast<BasicBlock*>(operand(2 + 2 * i + 1));
 
-    out.push_back(std::make_pair(label, code));
+    out.emplace_back(label, code);
   }
 
   return out;

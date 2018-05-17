@@ -47,11 +47,16 @@ set(CLANG_TIDY_CHECKS "\
 ,cppcoreguidelines-*\
 ,modernize-*\
 ,performance-*\
+,-bugprone-macro-parentheses\
 ,-cppcoreguidelines-pro-bounds-array-to-pointer-decay\
 ,-cppcoreguidelines-pro-bounds-constant-array-index\
+,-cppcoreguidelines-pro-bounds-pointer-arithmetic\
+,-cppcoreguidelines-pro-type-cstyle-cast\
+,-cppcoreguidelines-pro-type-reinterpret-cast\
+,-cppcoreguidelines-pro-type-static-cast-downcast\
 ,-cppcoreguidelines-pro-type-union-access\
 ,-cppcoreguidelines-pro-type-vararg\
-,-cppcoreguidelines-pro-bounds-pointer-arithmetic\
+,-modernize-use-auto\
 "
 CACHE STRING "clang-tidy checks to enable/disable")
 message("Clang Tidy Checks: ${CLANG_TIDY_CHECKS}")

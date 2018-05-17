@@ -393,17 +393,12 @@ void TargetCodeGenerator::visit(MatchInstr& matchInstr) {
   matchHints_.emplace_back(&matchInstr, matchId);
 
   for (const auto& one : matchInstr.cases()) {
-    switch (one.first->type()) {
-      case LiteralType::String:
-        matchDef.cases.emplace_back(
-            cp_.makeString(static_cast<ConstantString*>(one.first)->get()));
-        break;
-      case LiteralType::RegExp:
-        matchDef.cases.emplace_back(
-            cp_.makeRegExp(static_cast<ConstantRegExp*>(one.first)->get()));
-        break;
-      default:
-        FLOW_ASSERT(false, "BUG: unsupported label type");
+    if (auto str = dynamic_cast<ConstantString*>(one.first)) {
+      matchDef.cases.emplace_back(cp_.makeString(str->get()));
+    } else if (auto regex = dynamic_cast<ConstantRegExp*>(one.first)) {
+      matchDef.cases.emplace_back(cp_.makeRegExp(regex->get()));
+    } else {
+      FLOW_ASSERT(false, "BUG: unsupported label type");
     }
   }
 
@@ -595,8 +590,8 @@ void TargetCodeGenerator::visit(SCmpGTInstr& scmpgt) {
 }
 
 void TargetCodeGenerator::visit(SCmpREInstr& scmpre) {
-  ConstantRegExp* re = static_cast<ConstantRegExp*>(scmpre.operand(1));
-  assert(re != nullptr && "RHS must be a ConstantRegExp");
+  auto re = dynamic_cast<ConstantRegExp*>(scmpre.operand(1));
+  FLOW_ASSERT(re != nullptr, "flow: RHS must be a ConstantRegExp");
 
   emitLoad(scmpre.operand(0));
   emitInstr(Opcode::SREGMATCH, cp_.makeRegExp(re->get()));

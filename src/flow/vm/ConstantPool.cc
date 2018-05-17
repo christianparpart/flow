@@ -9,9 +9,10 @@
 #include <flow/ir/IRBuiltinFunction.h>
 #include <flow/ir/IRBuiltinHandler.h>
 #include <flow/ir/IRHandler.h>
-#include <iostream>
+
+#include <cinttypes>
 #include <iomanip>
-#include <inttypes.h>
+#include <iostream>
 
 namespace flow {
 
@@ -70,28 +71,6 @@ inline size_t ensureValue(std::vector<T>& table, const U& literal) {
 }
 // }}}
 
-ConstantPool::ConstantPool() {}
-
-ConstantPool::ConstantPool(ConstantPool&& from)
-    : numbers_(std::move(from.numbers_)),
-      strings_(std::move(from.strings_)),
-      ipaddrs_(std::move(from.ipaddrs_)),
-      cidrs_(std::move(from.cidrs_)),
-      regularExpressions_(std::move(from.regularExpressions_)),
-      intArrays_(std::move(from.intArrays_)),
-      stringArrays_(std::move(from.stringArrays_)),
-      ipaddrArrays_(std::move(from.ipaddrArrays_)),
-      cidrArrays_(std::move(from.cidrArrays_)),
-      modules_(std::move(from.modules_)),
-      handlers_(std::move(from.handlers_)),
-      matchDefs_(std::move(from.matchDefs_)),
-      nativeHandlerSignatures_(std::move(from.nativeHandlerSignatures_)),
-      nativeFunctionSignatures_(std::move(from.nativeFunctionSignatures_)) {}
-
-ConstantPool& ConstantPool::operator=(ConstantPool&& v) { return *this; }
-
-ConstantPool::~ConstantPool() {}
-
 size_t ConstantPool::makeInteger(FlowNumber value) {
   return ensureValue(numbers_, value);
 }
@@ -142,7 +121,7 @@ size_t ConstantPool::makeCidrArray(const std::vector<util::Cidr>& elements) {
 }
 
 size_t ConstantPool::makeMatchDef() {
-  matchDefs_.push_back(MatchDef());
+  matchDefs_.emplace_back();
   return matchDefs_.size() - 1;
 }
 

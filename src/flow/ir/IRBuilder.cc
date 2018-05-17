@@ -12,9 +12,9 @@
 #include <flow/ir/Instructions.h>
 #include <flow/util/strings.h>
 
-#include <assert.h>
-#include <inttypes.h>
-#include <math.h>
+#include <cassert>
+#include <cinttypes>
+#include <cmath>
 
 namespace flow {
 
@@ -23,9 +23,6 @@ IRBuilder::IRBuilder()
       handler_(nullptr),
       insertPoint_(nullptr),
       nameStore_() {}
-
-IRBuilder::~IRBuilder() {
-}
 
 // {{{ name management
 std::string IRBuilder::makeName(const std::string& name) {

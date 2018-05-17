@@ -9,10 +9,10 @@
 #include <flow/lang/Lexer.h>
 #include <flow/util/IPAddress.h>
 
+#include <cstring>
 #include <sstream>
-#include <unordered_map>
 #include <system_error>
-#include <string.h>
+#include <unordered_map>
 
 #if defined(HAVE_GLOB_H)
 #include <glob.h>
@@ -89,7 +89,7 @@ Lexer::Lexer(diagnostics::Report* report)
       interpolationDepth_(0) {}
 
 Lexer::Scope::Scope()
-    : filename(), basedir(), stream(), currPos(), nextPos() {}
+    : filename(), basedir(), stream(), currPos(), nextPos(), backupChar() {}
 
 void Lexer::Scope::setStream(const std::string& filename,
                                  std::unique_ptr<std::istream>&& istream) {
@@ -97,8 +97,6 @@ void Lexer::Scope::setStream(const std::string& filename,
   this->stream = std::move(istream);
   this->basedir = "TODO";
 }
-
-Lexer::~Lexer() {}
 
 void Lexer::openLocalFile(const std::string& filename) {
   enterScope(filename);
@@ -713,7 +711,7 @@ Token Lexer::parseIdent() {
                   {"bool", Token::BoolType},
                   {"int", Token::NumberType},
                   {"string", Token::StringType},
-                  {0, Token::Unknown}};
+                  {nullptr, Token::Unknown}};
 
   for (auto i = keywords; i->symbol; ++i)
     if (strcmp(i->symbol, stringValue_.c_str()) == 0) return token_ = i->token;
@@ -776,7 +774,7 @@ bool Lexer::ipv6HexDigit4() {
   size_t i = ipv6HexDigits_;
 
   while (isHexChar()) {
-    stringValue_ += currentChar();
+    stringValue_ += static_cast<char>(currentChar());
     nextChar();
     ++i;
   }

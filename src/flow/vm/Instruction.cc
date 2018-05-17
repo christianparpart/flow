@@ -27,6 +27,10 @@ struct InstructionInfo {
 
   InstructionInfo() = default;
   InstructionInfo(const InstructionInfo&) = default;
+  InstructionInfo(InstructionInfo&&) noexcept = default;
+  InstructionInfo& operator=(const InstructionInfo&) = default;
+  InstructionInfo& operator=(InstructionInfo&&) noexcept = default;
+  ~InstructionInfo() = default;
 
   InstructionInfo(Opcode opc, const char* const m, OperandSig opsig,
                   int _stackChange, LiteralType _stackOutput)
@@ -378,14 +382,12 @@ std::string disassemble(Instruction pc, size_t ip, size_t sp, const ConstantPool
 
   int stackChange = getStackChange(pc);
 
-  const uint8_t* b = (uint8_t*)&pc;
   word = fmt::format("; ip={:>3} sp={:>2} ({}{})",
                      ip, sp,
                      stackChange > 0 ? '+' :
                          stackChange < 0 ? '-' : ' ',
                      std::abs(stackChange));
   line << word;
-  n += word.size();
 
   return line.str();
 }

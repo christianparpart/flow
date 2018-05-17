@@ -53,7 +53,7 @@ class SyntaxError : public std::runtime_error {
 class Lexer {
  public:
   Lexer();
-  Lexer(const std::string& filename, const std::string& contents); 
+  Lexer(std::string filename, std::string contents); 
 
   const std::string& source() const noexcept { return source_; }
   std::string getPrefixText() const { return source_.substr(0, startOffset_); }
@@ -113,7 +113,7 @@ using FilePos = flow::FilePos;
  */
 class Parser {
  public:
-  Parser(const std::string& filename, const std::string& contents);
+  Parser(std::string filename, std::string contents);
 
   std::error_code parse(flow::diagnostics::Report* report);
 

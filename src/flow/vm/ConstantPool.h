@@ -32,10 +32,9 @@ class ConstantPool {
   ConstantPool(const ConstantPool& v) = delete;
   ConstantPool& operator=(const ConstantPool& v) = delete;
 
-  ConstantPool();
-  ConstantPool(ConstantPool&& from);
-  ConstantPool& operator=(ConstantPool&& v);
-  ~ConstantPool();
+  ConstantPool() = default;
+  ConstantPool(ConstantPool&& from) noexcept = default;
+  ConstantPool& operator=(ConstantPool&& v) noexcept = default;
 
   // builder
   size_t makeInteger(FlowNumber value);

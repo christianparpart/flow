@@ -71,6 +71,11 @@ class Parser::Scope {
     return flipped_;
   }
 
+  Scope(const Scope&) = delete;
+  Scope(Scope&&) = delete;
+  Scope& operator=(const Scope&) = delete;
+  Scope& operator=(Scope&&) = delete;
+
   ~Scope() { parser_->leaveScope(); }
 };
 #define scoped(SCOPED_SYMBOL) \
@@ -84,7 +89,7 @@ Parser::Parser(diagnostics::Report* report,
       lexer_{std::make_unique<Lexer>(report)},
       scopeStack_{nullptr},
       runtime_{runtime},
-      importHandler_{importHandler} {
+      importHandler_{std::move(importHandler)} {
   // enterScope("global");
 }
 
@@ -447,13 +452,13 @@ bool Parser::importDecl(UnitSym* unit) {
     }
   }
 
-  for (auto i = names.begin(), e = names.end(); i != e; ++i) {
+  for (const std::string& name: names) {
     std::vector<NativeCallback*> builtins;
 
-    if (importHandler_ && !importHandler_(*i, path, &builtins))
+    if (importHandler_ && !importHandler_(name, path, &builtins))
       return false;
 
-    unit->import(*i, path);
+    unit->import(name, path);
 
     for (NativeCallback* native : builtins) {
       declareBuiltin(native);
@@ -1479,14 +1484,11 @@ std::unique_ptr<Stmt> Parser::identStmt() {
   }
 
   // postscript statement handling
-
-  switch (token()) {
-    case Token::If:
-    case Token::Unless:
+  if (testTokens(Token::If, Token::Unless))
       return postscriptStmt(std::move(stmt));
-  }
 
-  if (!consume(Token::Semicolon)) return nullptr;
+  if (!consume(Token::Semicolon))
+    return nullptr;
 
   return stmt;
 }
@@ -1576,7 +1578,7 @@ std::unique_ptr<CallExpr> Parser::resolve(
     if (callee->tryMatch(params, &msg)) {
       result.push_back(callee);
     } else {
-      matchErrors.push_back(std::make_pair(callee, msg));
+      matchErrors.emplace_back(callee, msg);
     }
   }
 

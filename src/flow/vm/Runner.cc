@@ -15,14 +15,14 @@
 #include <flow/vm/Runner.h>
 #include <flow/sysconfig.h>
 
-#include <vector>
-#include <utility>
-#include <memory>
+#include <cinttypes>
+#include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
-#include <cmath>
-#include <inttypes.h>
+#include <memory>
+#include <utility>
+#include <vector>
 
 // XXX Visual Studio doesn't support computed goto statements
 #if defined(_MSC_VER)
@@ -76,7 +76,7 @@ static FlowString* t = nullptr;
 
 Runner::Runner(const Handler* handler, void* userdata, TraceLogger traceLogger)
     : handler_(handler),
-      traceLogger_{traceLogger ? traceLogger : [](Instruction, size_t, size_t) {}},
+      traceLogger_{traceLogger ? std::move(traceLogger) : [](Instruction, size_t, size_t) {}},
       program_(handler->program()),
       userdata_(userdata),
       regexpContext_(),
@@ -87,8 +87,6 @@ Runner::Runner(const Handler* handler, void* userdata, TraceLogger traceLogger)
   // initialize emptyString()
   t = newString("");
 }
-
-Runner::~Runner() {}
 
 FlowString* Runner::newString(std::string value) {
   stringGarbage_.emplace_back(std::move(value));
@@ -193,7 +191,7 @@ bool Runner::loop() {
 #endif
   // }}}
 #endif
-  const auto* pc = code.data();
+  decltype(code.data()) pc;
   set_pc(ip_);
 
   LOOP_BEGIN()
@@ -566,11 +564,13 @@ bool Runner::loop() {
   }
 
   instr(SREGGROUP) {
-    FlowNumber position = getNumber(-1);
-    util::RegExp::Result& rr = *regexpContext_.regexMatch();
-    const std::string& match = rr[position];
+    {
+      FlowNumber position = getNumber(-1);
+      util::RegExp::Result& rr = *regexpContext_.regexMatch();
+      const std::string& match = rr[position];
 
-    SP(-1) = (Value) newString(match);
+      SP(-1) = (Value) newString(rr[position]);
+    }
     next;
   }
   // }}}

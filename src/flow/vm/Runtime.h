@@ -27,7 +27,7 @@ class Runtime {
  public:
   using Value = uint64_t;
 
-  virtual ~Runtime();
+  virtual ~Runtime() = default;
 
   virtual bool import(const std::string& name, const std::string& path,
                       std::vector<NativeCallback*>* builtins) = 0;

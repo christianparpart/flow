@@ -18,8 +18,8 @@ class IRProgram;
 
 class PassManager {
  public:
-  PassManager();
-  ~PassManager();
+  PassManager() = default;
+  ~PassManager() = default;
 
   /** registers given pass to the pass manager.
    */

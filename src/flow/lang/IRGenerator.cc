@@ -375,8 +375,9 @@ void IRGenerator::accept(ArrayExpr& arrayExpr) {
 
   if (isConstant(values)) {
     std::vector<Constant*> constants;
+    constants.reserve(values.size());
     for (Value* value : values)
-      constants.push_back(static_cast<Constant*>(value));
+      constants.emplace_back(static_cast<Constant*>(value));
 
     result_ = get(constants);
   } else {

@@ -11,12 +11,6 @@
 
 namespace flow {
 
-PassManager::PassManager() {
-}
-
-PassManager::~PassManager() {
-}
-
 void PassManager::registerPass(std::unique_ptr<HandlerPass>&& handlerPass) {
   handlerPasses_.push_back(std::move(handlerPass));
 }

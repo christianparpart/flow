@@ -62,7 +62,7 @@ std::unique_ptr<Instr> BasicBlock::remove(Instr* instr) {
   if (instr == getTerminator()) {
     // then unlink all successors also
     for (Value* operand : instr->operands()) {
-      if (BasicBlock* bb = dynamic_cast<BasicBlock*>(operand)) {
+      if (auto bb = dynamic_cast<BasicBlock*>(operand)) {
         unlinkSuccessor(bb);
       }
     }
@@ -120,8 +120,8 @@ Instr* BasicBlock::push_back(std::unique_ptr<Instr> instr) {
   // are we're now adding the terminate instruction?
   if (dynamic_cast<TerminateInstr*>(instr.get())) {
     // then check for possible successors
-    for (auto operand : instr->operands()) {
-      if (BasicBlock* bb = dynamic_cast<BasicBlock*>(operand)) {
+    for (Value* operand : instr->operands()) {
+      if (auto bb = dynamic_cast<BasicBlock*>(operand)) {
         linkSuccessor(bb);
       }
     }
@@ -143,8 +143,8 @@ void BasicBlock::merge_back(BasicBlock* bb) {
     instr->setParent(this);
     if (dynamic_cast<TerminateInstr*>(instr.get())) {
       // then check for possible successors
-      for (auto operand : instr->operands()) {
-        if (BasicBlock* succ = dynamic_cast<BasicBlock*>(operand)) {
+      for (Value* operand : instr->operands()) {
+        if (auto succ = dynamic_cast<BasicBlock*>(operand)) {
           bb->unlinkSuccessor(succ);
           linkSuccessor(succ);
         }

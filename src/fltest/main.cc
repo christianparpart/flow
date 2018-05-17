@@ -105,7 +105,7 @@ void Tester::flow_sum(flow::Params& args) {
 
 void Tester::flow_assert(flow::Params& args) {
   const bool condition = args.getBool(1);
-  const std::string description = args.getString(2);
+  const std::string& description = args.getString(2);
 
   if (!condition) {
     if (description.empty())

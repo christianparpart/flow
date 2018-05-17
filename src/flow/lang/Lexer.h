@@ -31,7 +31,7 @@ namespace flow::lang {
 class Lexer {
  public:
   explicit Lexer(diagnostics::Report* report);
-  ~Lexer();
+  ~Lexer() = default;
 
   void openLocalFile(const std::string& filename);
 

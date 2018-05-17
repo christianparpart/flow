@@ -10,7 +10,7 @@
 #include <flow/ir/Instructions.h>
 #include <flow/util/assert.h>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 namespace flow {
 

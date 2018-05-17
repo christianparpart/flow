@@ -13,14 +13,11 @@
 
 namespace flow {
 
-Handler::Handler() {
-}
-
 Handler::Handler(Program* program,
-                 const std::string& name,
-                 const std::vector<Instruction>& code)
+                 std::string name,
+                 std::vector<Instruction> code)
     : program_(program),
-      name_(name),
+      name_(std::move(name)),
       stackSize_(),
       code_()
 #if defined(ENABLE_FLOW_DIRECT_THREADED_VM)
@@ -28,46 +25,12 @@ Handler::Handler(Program* program,
       directThreadedCode_()
 #endif
 {
-  setCode(code);
+  setCode(std::move(code));
 }
 
-Handler::Handler(const Handler& v)
-    : program_(v.program_),
-      name_(v.name_),
-      stackSize_(v.stackSize_),
-      code_(v.code_)
-#if defined(ENABLE_FLOW_DIRECT_THREADED_VM)
-      ,
-      directThreadedCode_(v.directThreadedCode_)
-#endif
-{
-}
-
-Handler::Handler(Handler&& v)
-    : program_(std::move(v.program_)),
-      name_(std::move(v.name_)),
-      stackSize_(std::move(v.stackSize_)),
-      code_(std::move(v.code_))
-#if defined(ENABLE_FLOW_DIRECT_THREADED_VM)
-      ,
-      directThreadedCode_(std::move(v.directThreadedCode_))
-#endif
-{
-}
-
-Handler::~Handler() {
-}
-
-void Handler::setCode(const std::vector<Instruction>& code) {
-  code_ = code;
-  if (opcode(code_.back()) != Opcode::EXIT)
-    code_.push_back(makeInstruction(Opcode::EXIT, false));
-
-  stackSize_ = computeStackSize(code_.data(), code_.size());
-}
-
-void Handler::setCode(std::vector<Instruction>&& code) {
+void Handler::setCode(std::vector<Instruction> code) {
   code_ = std::move(code);
+
   if (opcode(code_.back()) != Opcode::EXIT)
     code_.push_back(makeInstruction(Opcode::EXIT, false));
 

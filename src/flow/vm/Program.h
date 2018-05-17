@@ -38,7 +38,7 @@ class Program {
   explicit Program(ConstantPool&& cp);
   Program(Program&) = delete;
   Program& operator=(Program&) = delete;
-  ~Program();
+  ~Program() = default;
 
   const ConstantPool& constants() const noexcept { return cp_; }
   ConstantPool& constants() noexcept { return cp_; }

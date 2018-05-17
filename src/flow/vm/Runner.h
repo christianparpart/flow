@@ -106,7 +106,7 @@ class Runner {
 
  public:
   Runner(const Handler* handler, void* userdata, TraceLogger logger);
-  ~Runner();
+  ~Runner() = default;
 
   const Handler* handler() const noexcept { return handler_; }
   const Program* program() const noexcept { return program_; }
@@ -175,7 +175,6 @@ class Runner {
   State state_;     //!< current VM state
   size_t ip_;       //!< last saved program execution offset
 
-  size_t sp_;       //!< current stack depth (XXX used in debugging only)
   Stack stack_;     //!< runtime stack
 
   std::list<std::string> stringGarbage_;

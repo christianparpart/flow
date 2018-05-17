@@ -9,7 +9,8 @@
 #include <flow/ir/IRHandler.h>
 #include <flow/ir/HandlerPass.h>
 #include <flow/ir/ConstantArray.h>
-#include <assert.h>
+
+#include <cassert>
 
 namespace flow {
 

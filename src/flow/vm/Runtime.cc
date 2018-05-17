@@ -14,9 +14,6 @@
 
 namespace flow {
 
-Runtime::~Runtime() {
-}
-
 NativeCallback& Runtime::registerHandler(const std::string& name) {
   builtins_.push_back(std::make_unique<NativeCallback>(this, name));
   return *builtins_[builtins_.size() - 1];
@@ -50,18 +47,18 @@ bool Runtime::verifyNativeCalls(IRProgram* program, IRBuilder* builder) {
       for (Instr* instr : bb->instructions()) {
         if (auto ci = dynamic_cast<CallInstr*>(instr)) {
           if (auto native = find(ci->callee()->signature())) {
-            calls.push_back(std::make_pair(instr, native));
+            calls.emplace_back(instr, native);
           }
         } else if (auto hi = dynamic_cast<HandlerCallInstr*>(instr)) {
           if (auto native = find(hi->callee()->signature())) {
-            calls.push_back(std::make_pair(instr, native));
+            calls.emplace_back(instr, native);
           }
         }
       }
     }
   }
 
-  for (auto call : calls) {
+  for (const std::pair<Instr*, NativeCallback*>& call : calls) {
     if (!call.second->verify(call.first, builder)) {
       return false;
     }

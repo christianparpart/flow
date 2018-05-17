@@ -11,10 +11,12 @@
 #include <flow/ir/IRBuiltinHandler.h>
 #include <flow/ir/IRBuiltinFunction.h>
 #include <flow/ir/BasicBlock.h>
+
 #include <fmt/format.h>
+
+#include <cassert>
+#include <cinttypes>
 #include <utility>
-#include <assert.h>
-#include <inttypes.h>
 
 namespace flow {
 

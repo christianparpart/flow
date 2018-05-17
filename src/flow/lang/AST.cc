@@ -20,8 +20,8 @@
 namespace flow::lang {
 
 // {{{ SymbolTable
-SymbolTable::SymbolTable(SymbolTable* outer, const std::string& name)
-    : symbols_(), outerTable_(outer), name_(name) {}
+SymbolTable::SymbolTable(SymbolTable* outer, std::string name)
+    : symbols_(), outerTable_(outer), name_(std::move(name)) {}
 
 SymbolTable::~SymbolTable() {
 }

@@ -21,13 +21,15 @@ class Runner;
 
 class Handler {
  public:
-  Handler();
   Handler(Program* program,
-          const std::string& name,
-          const std::vector<Instruction>& instructions);
-  Handler(const Handler& handler);
-  Handler(Handler&& handler);
-  ~Handler();
+          std::string name,
+          std::vector<Instruction> instructions);
+  Handler() = default;
+  Handler(const Handler& handler) = default;
+  Handler(Handler&& handler) noexcept = default;
+  Handler& operator=(const Handler& handler) = default;
+  Handler& operator=(Handler&& handler) noexcept = default;
+  ~Handler() = default;
 
   Program* program() const noexcept { return program_; }
 
@@ -37,8 +39,7 @@ class Handler {
   size_t stackSize() const noexcept { return stackSize_; }
 
   const std::vector<Instruction>& code() const noexcept { return code_; }
-  void setCode(const std::vector<Instruction>& code);
-  void setCode(std::vector<Instruction>&& code);
+  void setCode(std::vector<Instruction> code);
 
 #if defined(FLOW_DIRECT_THREADED_VM)
   const std::vector<uint64_t>& directThreadedCode() const noexcept { return directThreadedCode_; }

@@ -94,7 +94,7 @@ class SymbolTable {
   typedef list_type::const_iterator const_iterator;
 
  public:
-  SymbolTable(SymbolTable* outer, const std::string& name);
+  SymbolTable(SymbolTable* outer, std::string name);
   ~SymbolTable();
 
   // nested scoping
