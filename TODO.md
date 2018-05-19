@@ -1,5 +1,6 @@
 # incomplete TODO
 
+- [ ] IRGenerator: fix error handling (use diagnostics::Report[internalError?] instead)
 - [ ] ensure SourceLocation is properly containing [begin, end] of the source code representation of the given AST
 - [ ] ensure the AST always contains the right SourceLocation
 - [ ] ensure SourceLocation is passed to IR (Value)
