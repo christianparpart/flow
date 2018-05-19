@@ -41,7 +41,7 @@ bool Interpreter::compile(const std::string& path,
   if (report->errorCount() > 0)
     return false;
 
-  IRGenerator irgen{};
+  IRGenerator irgen{report};
   std::shared_ptr<IRProgram> programIR = irgen.generate(unit.get());
 
   {

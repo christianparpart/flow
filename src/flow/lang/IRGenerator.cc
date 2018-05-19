@@ -5,6 +5,7 @@
 // file except in compliance with the License. You may obtain a copy of
 // the License at: http://opensource.org/licenses/MIT
 
+#include <flow/Diagnostics.h>
 #include <flow/NativeCallback.h>
 #include <flow/ir/ConstantArray.h>
 #include <flow/ir/IRHandler.h>
@@ -19,22 +20,18 @@
 
 namespace flow::lang {
 
-IRGenerator::IRGenerator()
-    : IRGenerator{ErrorHandler{}, {}} {}
+IRGenerator::IRGenerator(diagnostics::Report* report) : IRGenerator{report, {}} {
+}
 
-IRGenerator::IRGenerator(ErrorHandler eh, std::vector<std::string> exports)
-    : IRBuilder(),
-      ASTVisitor(),
-      exports_(std::move(exports)),
-      scope_(std::make_unique<Scope>()),
-      result_(nullptr),
-      handlerStack_(),
-      errorCount_(0),
-      onError_(std::move(eh)) {}
-
-std::unique_ptr<IRProgram> IRGenerator::generate(
-    UnitSym* unit, const std::vector<std::string>& exportedHandlers) {
-  return IRGenerator{ErrorHandler{}, exportedHandlers}.generate(unit);
+IRGenerator::IRGenerator(diagnostics::Report* report, std::vector<std::string> exports)
+    : IRBuilder{},
+      ASTVisitor{},
+      exports_{std::move(exports)},
+      scope_{std::make_unique<Scope>()},
+      result_{nullptr},
+      handlerStack_{},
+      errorCount_{0},
+      report_{report} {
 }
 
 std::unique_ptr<IRProgram> IRGenerator::generate(UnitSym* unit) {
@@ -130,8 +127,8 @@ void IRGenerator::accept(HandlerSym& handlerSym) {
 void IRGenerator::codegenInline(HandlerSym& handlerSym) {
   auto i = std::find(handlerStack_.begin(), handlerStack_.end(), &handlerSym);
   if (i != handlerStack_.end()) {
-    reportError("Cannot recursively call handler %s.",
-                handlerSym.name().c_str());
+    report_->typeError(handlerSym.location(),
+                       "Cannot recursively call handler {}.", handlerSym.name());
 
     return;
   }
@@ -146,8 +143,9 @@ void IRGenerator::codegenInline(HandlerSym& handlerSym) {
   }
 
   if (handlerSym.body() == nullptr) {
-    reportError("Forward declared handler '%s' is missing implementation.",
-                handlerSym.name().c_str());
+    report_->typeError(handlerSym.location(),
+                       "Forward declared handler '{}' is missing implementation.",
+                       handlerSym.name());
   }
 
   // emit body
@@ -381,9 +379,7 @@ void IRGenerator::accept(ArrayExpr& arrayExpr) {
 
     result_ = get(constants);
   } else {
-    // TODO: print line:col hint where this exact message occured.
-    // via: reportError(arrayExpr, "VariableSym array elements not allowed.");
-    reportError("VariableSym array elements not allowed.");
+    report_->typeError(arrayExpr.location(), "VariableSym array elements not allowed.");
     result_ = nullptr;
   }
 }
@@ -423,8 +419,9 @@ Constant* IRGenerator::getConstant(Expr* expr) {
   else if (auto e = dynamic_cast<RegExpExpr*>(expr))
     return get(e->value());
   else {
-    reportError("FIXME: Invalid (unsupported) literal type <%s> in match case.",
-                tos(expr->getType()).c_str());
+    report_->typeError(expr->location(),
+                       "FIXME: Invalid (unsupported) literal type <{}> in match case.",
+                       expr->getType());
     return nullptr;
   }
 }
@@ -466,17 +463,6 @@ void IRGenerator::accept(AssignStmt& assignStmt) {
   assert(lhs->type() == rhs->type() && "Type of lhs and rhs must be equal.");
 
   result_ = createStore(lhs, rhs, "assignment");
-}
-
-void IRGenerator::reportError(const std::string& message) {
-  ++errorCount_;
-
-  if (onError_) {
-    onError_(message);
-  } else {
-    // default to print to stderr instead
-    fprintf(stderr, "%s\n", message.c_str());
-  }
 }
 
 }  // namespace flow::lang
