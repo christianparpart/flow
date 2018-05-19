@@ -14,6 +14,10 @@
 #include <string>
 #include <vector>
 
+namespace flow::diagnostics {
+  class Report;
+}
+
 namespace flow::lang {
 
 //! \addtogroup Flow
@@ -27,11 +31,8 @@ class IRGenerator : public IRBuilder, public ASTVisitor {
  public:
   using ErrorHandler = std::function<void(const std::string&)>;
 
-  IRGenerator();
-  IRGenerator(ErrorHandler eh, std::vector<std::string> exports);
-
-  static std::unique_ptr<IRProgram> generate(
-      UnitSym* unit, const std::vector<std::string>& exportedHandlers);
+  explicit IRGenerator(diagnostics::Report* report);
+  IRGenerator(diagnostics::Report* report, std::vector<std::string> exports);
 
   std::unique_ptr<IRProgram> generate(UnitSym* unit);
 
@@ -44,7 +45,7 @@ class IRGenerator : public IRBuilder, public ASTVisitor {
   std::deque<HandlerSym*> handlerStack_;
 
   size_t errorCount_;
-  std::function<void(const std::string&)> onError_;
+  diagnostics::Report* report_;
 
  private:
   Value* codegen(Expr* expr);
@@ -84,11 +85,6 @@ class IRGenerator : public IRBuilder, public ASTVisitor {
   void accept(CondStmt& stmt) override;
   void accept(MatchStmt& stmt) override;
   void accept(AssignStmt& stmt) override;
-
-  // error handling
-  void reportError(const std::string& message);
-  template <typename... Args>
-  void reportError(const std::string& fmt, Args&&...);
 };
 
 // {{{ class IRGenerator::Scope
@@ -121,19 +117,6 @@ class IRGenerator::Scope {
     }
   }
 };
-// }}}
-
-// {{{ IRGenerator inlines
-template <typename... Args>
-inline void IRGenerator::reportError(const std::string& fmt, Args&&... args) {
-  char buf[1024];
-  ssize_t n =
-      snprintf(buf, sizeof(buf), fmt.c_str(), std::forward<Args>(args)...);
-
-  if (n > 0) {
-    reportError(buf);
-  }
-}
 // }}}
 
 //!@}
