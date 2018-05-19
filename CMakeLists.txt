@@ -159,10 +159,11 @@ if(FLOW_ENABLE_TESTS)
   if(CLANG_TIDY_EXE)
     set_target_properties(fltest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
-  target_link_libraries(fltest FlowLang FlowCore)
 
+  target_link_libraries(fltest PRIVATE fmt::fmt-header-only)
+  target_link_libraries(fltest PRIVATE FlowLang FlowCore)
   if(UNIX)
-    target_link_libraries(fltest stdc++fs)
+    target_link_libraries(fltest PRIVATE stdc++fs)
   endif()
 endif()
 # }}}
