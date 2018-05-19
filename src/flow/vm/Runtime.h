@@ -30,7 +30,7 @@ class Runtime {
   virtual ~Runtime() = default;
 
   virtual bool import(const std::string& name, const std::string& path,
-                      std::vector<NativeCallback*>* builtins) = 0;
+                      std::vector<NativeCallback*>* builtins);
 
   NativeCallback* find(const std::string& signature) const noexcept;
   NativeCallback* find(const Signature& signature) const noexcept;

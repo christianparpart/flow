@@ -14,6 +14,11 @@
 
 namespace flow {
 
+bool Runtime::import(const std::string& name, const std::string& path,
+                     std::vector<NativeCallback*>* builtins) {
+  return false;
+}
+
 NativeCallback& Runtime::registerHandler(const std::string& name) {
   builtins_.push_back(std::make_unique<NativeCallback>(this, name));
   return *builtins_[builtins_.size() - 1];

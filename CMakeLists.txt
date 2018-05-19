@@ -127,6 +127,7 @@ add_library(FlowLang STATIC
             src/flow/lang/AST.cc
             src/flow/lang/ASTPrinter.cc
             src/flow/lang/CallVisitor.cc
+            src/flow/lang/Interpreter.cc
             src/flow/lang/IRGenerator.cc
             src/flow/lang/Lexer.cc
             src/flow/lang/Parser.cc
