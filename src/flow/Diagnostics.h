@@ -85,6 +85,8 @@ class Report {
     return std::count_if(begin(), end(), [](const Message& m) { return m.type != Type::Warning; });
   }
 
+  bool containsFailures() const noexcept { return errorCount() != 0; }
+
   bool operator==(const Report& other) const noexcept;
   bool operator!=(const Report& other) const noexcept { return !(*this == other); }
 
@@ -93,6 +95,8 @@ class Report {
  private:
   MessageList messages_;
 };
+
+std::ostream& operator<<(std::ostream& os, const Report& report);
 
 using DifferenceReport = std::pair<MessageList, MessageList>;
 

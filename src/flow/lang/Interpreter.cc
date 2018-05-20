@@ -22,20 +22,36 @@
 
 namespace flow::lang {
 
-Interpreter::Interpreter(Runtime* runtime)
-    : runtime_{runtime} {
+Interpreter::Interpreter() : program_{} {
 }
 
-bool Interpreter::compile(const std::string& path,
+bool Interpreter::compileString(const std::string& source,
+                                diagnostics::Report* report,
+                                int optimizationLevel) {
+  Parser parser(report,
+                this,
+                std::bind(&Runtime::import, this, std::placeholders::_1,
+                                                  std::placeholders::_2,
+                                                  std::placeholders::_3));
+  parser.openString(source);
+  return compile(std::move(parser), report, optimizationLevel);
+}
+
+bool Interpreter::compileLocalFile(const std::string& path,
+                                   diagnostics::Report* report,
+                                   int optimizationLevel) {
+  Parser parser(report,
+                this,
+                std::bind(&Runtime::import, this, std::placeholders::_1,
+                                                  std::placeholders::_2,
+                                                  std::placeholders::_3));
+  parser.openLocalFile(path);
+  return compile(std::move(parser), report, optimizationLevel);
+}
+
+bool Interpreter::compile(Parser&& parser,
                           diagnostics::Report* report,
                           int optimizationLevel) {
-  Parser parser(report,
-                runtime_,
-                std::bind(&Runtime::import, runtime_, std::placeholders::_1,
-                                                      std::placeholders::_2,
-                                                      std::placeholders::_3));
-
-  parser.openLocalFile(path);
   std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 
   if (report->errorCount() > 0)
@@ -61,7 +77,7 @@ bool Interpreter::compile(const std::string& path,
   }
 
   std::unique_ptr<Program> program = TargetCodeGenerator().generate(programIR.get());
-  program->link(runtime_, report);
+  program->link(this, report);
   if (report->errorCount() > 0)
     return false;
 

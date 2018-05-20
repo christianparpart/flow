@@ -7,6 +7,7 @@
 
 #include <flow/Diagnostics.h>
 #include <fmt/format.h>
+#include <iostream>
 
 namespace flow::diagnostics {
 
@@ -76,6 +77,20 @@ DifferenceReport difference(const Report& first, const Report& second) {
       diff.second.push_back(m);
 
   return diff;
+}
+
+std::ostream& operator<<(std::ostream& os, const Report& report) {
+  for (const Message& message: report) {
+    switch (message.type) {
+      case Type::Warning:
+        os << fmt::format("Warning: {}\n", message);
+        break;
+      default:
+        os << fmt::format("Error: {}\n", message);
+        break;
+    }
+  }
+  return os;
 }
 
 } // namespace flow::diagnostics

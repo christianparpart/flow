@@ -168,3 +168,16 @@ if(FLOW_ENABLE_TESTS)
   endif()
 endif()
 # }}}
+# {{{ examples
+if(FLOW_ENABLE_EXAMPLES)
+  add_executable(hello examples/hello.cc)
+
+  set_target_properties(hello PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  if(CLANG_TIDY_EXE)
+    set_target_properties(hello PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+  endif()
+
+  target_link_libraries(hello PRIVATE fmt::fmt-header-only)
+  target_link_libraries(hello PRIVATE FlowLang FlowCore)
+endif()
+# }}}

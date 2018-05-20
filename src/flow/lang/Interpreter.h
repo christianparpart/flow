@@ -6,38 +6,42 @@
 // the License at: http://opensource.org/licenses/MIT
 #pragma once
 
+#include <flow/NativeCallback.h>
+#include <flow/Params.h>
 #include <flow/vm/Program.h>
 #include <flow/vm/Runner.h>
+#include <flow/vm/Runtime.h>
+
 #include <memory>
 
 namespace flow::diagnostics {
   class Report;
 }
 
-namespace flow {
-  class Runtime;
-}
-
 namespace flow::lang {
+
+class Parser;
 
 /**
  * Convenience API for compiling and running Flow scripts.
  */
-class Interpreter {
+class Interpreter : public Runtime {
  public:
   using TraceLogger = Runner::TraceLogger;
 
-  //! Constructs an Interpreter for the given @p runtime.
-  explicit Interpreter(Runtime* runtime);
+  Interpreter();
 
-  bool compile(const std::string& path, diagnostics::Report* report, int optimizationLevel = 0);
+  bool compileString(const std::string& path, diagnostics::Report* report, int optimizationLevel = 0);
+  bool compileLocalFile(const std::string& path, diagnostics::Report* report, int optimizationLevel = 0);
 
-  bool run(const std::string& handlerName, void* userdata, TraceLogger trace = TraceLogger{}) const;
+  bool run(const std::string& handlerName, void* userdata = nullptr, TraceLogger trace = TraceLogger{}) const;
 
   Program* program() const noexcept { return program_.get(); }
 
  private:
-  Runtime* runtime_;
+  bool compile(Parser&& parser, diagnostics::Report* report, int optimizationLevel);
+
+ private:
   std::unique_ptr<Program> program_;
 };
 

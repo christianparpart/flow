@@ -37,6 +37,7 @@ class Runtime {
   auto builtins() { return util::unbox(builtins_); }
 
   NativeCallback& registerHandler(const std::string& name);
+  NativeCallback& registerFunction(const std::string& name);
   NativeCallback& registerFunction(const std::string& name, LiteralType returnType);
 
   void invoke(int id, int argc, Value* argv, Runner* cx);
