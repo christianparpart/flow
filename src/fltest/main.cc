@@ -193,8 +193,7 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   parser.openStream(std::make_unique<std::ifstream>(filename), filename);
   std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 
-  flow::lang::IRGenerator irgen([this] (const std::string& msg) { reportError(msg); },
-                                {"main"});
+  flow::lang::IRGenerator irgen(report, {"main"});
   std::shared_ptr<flow::IRProgram> programIR = irgen.generate(unit.get());
 
   if (optimize) {
