@@ -105,7 +105,7 @@ add_library(FlowCore STATIC
             src/flow/vm/Runtime.cc
             )
 
-target_link_libraries(FlowCore PRIVATE fmt::fmt-header-only)
+target_link_libraries(FlowCore PUBLIC fmt::fmt-header-only)
 set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
@@ -161,7 +161,7 @@ if(FLOW_ENABLE_TESTS)
     set_target_properties(fltest PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
 
-  target_link_libraries(fltest PRIVATE fmt::fmt-header-only)
+  target_link_libraries(fltest PUBLIC fmt::fmt-header-only)
   target_link_libraries(fltest PRIVATE FlowLang FlowCore)
   if(UNIX)
     target_link_libraries(fltest PRIVATE stdc++fs)
@@ -170,14 +170,13 @@ endif()
 # }}}
 # {{{ examples
 if(FLOW_ENABLE_EXAMPLES)
-  add_executable(hello examples/hello.cc)
+  add_executable(example_hello examples/hello.cc)
 
-  set_target_properties(hello PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  set_target_properties(example_hello PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
   if(CLANG_TIDY_EXE)
-    set_target_properties(hello PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+    set_target_properties(example_hello PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
 
-  target_link_libraries(hello PRIVATE fmt::fmt-header-only)
-  target_link_libraries(hello PRIVATE FlowLang FlowCore)
+  target_link_libraries(example_hello PRIVATE FlowLang FlowCore)
 endif()
 # }}}
