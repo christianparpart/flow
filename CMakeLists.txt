@@ -95,6 +95,7 @@ add_library(FlowCore STATIC
             src/flow/transform/MergeBlockPass.cc
             src/flow/transform/UnusedBlockPass.cc
             src/flow/util/Cidr.cc
+            src/flow/util/Flags.cc
             src/flow/util/RegExp.cc
             src/flow/vm/ConstantPool.cc
             src/flow/vm/Handler.cc
