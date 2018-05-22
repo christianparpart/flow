@@ -1,0 +1,17 @@
+#! /usr/bin/env afk
+
+# globals (can only be declared above any handler)
+line_count = 0;
+sink = file.open("/tmp/logfile", "a");
+
+# handler on(REGEXP) {}
+on /^(\w) .*$/ {
+  line_count = line_count + 1;
+  write(sink, LINE);
+}
+
+# handler finally() {}
+finally {
+  print("Line Count: #{line_count}"
+  close(sink);
+}
