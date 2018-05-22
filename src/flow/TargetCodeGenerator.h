@@ -107,6 +107,11 @@ class TargetCodeGenerator : public InstructionVisitor {
   size_t getInstructionPointer() const { return code_.size(); }
 
   /**
+   * Finds given variable on global storage and returns its absolute offset if found or -1 if not.
+   */
+  ssize_t findGlobal(const Value* variable) const;
+
+  /**
    * Retrieves the current number of elements on the stack.
    *
    * This also means, this value will be the absolute index for the next value
@@ -214,6 +219,9 @@ class TargetCodeGenerator : public InstructionVisitor {
 
   /** target stack during target code generation */
   std::deque<const Value*> stack_;
+
+  /** global scope mapping */
+  std::deque<const Value*> globals_;
 
   // target program output
   ConstantPool cp_;

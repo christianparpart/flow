@@ -29,6 +29,10 @@ enum Opcode : uint16_t {
   ALLOCA,   // ALLOCA imm         ; pushes A default-initialized items onto the stack
   DISCARD,  // DISCARD imm        ; pops A items from the stack
 
+  GALLOCA,  // GALLOCA imm        ; appends A default-initialized items to the global scope
+  GLOAD,    // GLOAD imm          ; stack[sp++] = globals[imm]
+  GSTORE,   // GSTORE imm         ; globals[imm] = stack[--sp]
+
   // control
   EXIT,     // EXIT imm           ; exit program
   JMP,      // JMP imm            ; unconditional jump to A

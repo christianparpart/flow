@@ -22,7 +22,10 @@
 
 namespace flow::lang {
 
-Interpreter::Interpreter() : program_{} {
+Interpreter::Interpreter()
+    : programIR_{},
+      initialized_{false},
+      program_{} {
 }
 
 bool Interpreter::compileString(const std::string& source,
@@ -76,22 +79,33 @@ bool Interpreter::compile(Parser&& parser,
     pm.run(programIR.get());
   }
 
-  std::unique_ptr<Program> program = TargetCodeGenerator().generate(programIR.get());
+  programIR_ = std::move(programIR);
+
+  std::unique_ptr<Program> program = TargetCodeGenerator().generate(programIR_.get());
   program->link(this, report);
   if (report->errorCount() > 0)
     return false;
 
-  programIR_ = std::move(programIR);
   program_ = std::move(program);
+  initialized_ = false;
   return true;
 }
 
+#define GLOBAL_SCOPE_INIT_NAME "@__global_init__"
+
 bool Interpreter::run(const std::string& handlerName, void* userdata, TraceLogger trace) const {
+  if (!initialized_) {
+    initialized_ = true;
+    if (Handler* handler = program_->findHandler(GLOBAL_SCOPE_INIT_NAME); handler != nullptr) {
+      Runner{handler, userdata, &globals_, trace}.run();
+    }
+  }
+
   Handler* handler = program_->findHandler(handlerName);
   if (!handler)
     return false;
 
-  return Runner{handler, userdata, trace}.run();
+  return Runner{handler, userdata, &globals_, trace}.run();
 }
 
 } // namespace flow::lang

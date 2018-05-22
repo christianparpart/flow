@@ -67,6 +67,7 @@ class IRBuilder {
   }
 
   IRHandler* getHandler(const std::string& name);
+  IRHandler* findHandler(const std::string& name);
 
   // literals
   ConstantBoolean* getBoolean(bool literal) {

@@ -36,6 +36,8 @@ class IRHandler : public Constant {
 
   void dump() override;
 
+  bool empty() const noexcept { return blocks_.empty(); }
+
   auto basicBlocks() { return util::unbox(blocks_); }
 
   BasicBlock* getEntryBlock() const { return blocks_.front().get(); }

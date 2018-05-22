@@ -27,6 +27,8 @@
 
 namespace flow {
 
+#define GLOBAL_SCOPE_INIT_NAME "@__global_init__"
+
 template <typename T, typename S>
 std::vector<T> convert(const std::vector<Constant*>& source) {
   std::vector<T> target(source.size());
@@ -48,8 +50,14 @@ TargetCodeGenerator::TargetCodeGenerator()
 }
 
 std::unique_ptr<Program> TargetCodeGenerator::generate(IRProgram* programIR) {
+  // generate target code for global scope initialization, if any
+  IRHandler* init = programIR->findHandler(GLOBAL_SCOPE_INIT_NAME);
+  if (init != nullptr)
+    generate(init);
+
   for (IRHandler* handler : programIR->handlers())
-    generate(handler);
+    if (handler != init)
+      generate(handler);
 
   cp_.setModules(programIR->modules());
 
@@ -185,12 +193,32 @@ void TargetCodeGenerator::visit(NopInstr& nopInstr) {
 }
 
 void TargetCodeGenerator::visit(AllocaInstr& allocaInstr) {
-  emitInstr(Opcode::ALLOCA, 1);
-  push(&allocaInstr);
+  if (allocaInstr.getBasicBlock()->getHandler()->name() == GLOBAL_SCOPE_INIT_NAME) {
+    emitInstr(Opcode::GALLOCA, 1);
+    globals_.push_back(&allocaInstr);
+  } else {
+    emitInstr(Opcode::ALLOCA, 1);
+    push(&allocaInstr);
+  }
+}
+
+ssize_t TargetCodeGenerator::findGlobal(const Value* variable) const {
+  for (size_t i = 0, e = globals_.size(); i != e; ++i)
+    if (globals_[i] == variable)
+      return static_cast<ssize_t>(i);
+
+  return -1;
 }
 
 // variable = expression
 void TargetCodeGenerator::visit(StoreInstr& storeInstr) {
+  if (ssize_t gi = findGlobal(storeInstr.variable()); gi != -1) {
+    emitLoad(storeInstr.source());
+    emitInstr(Opcode::GSTORE, gi);
+    changeStack(1, nullptr);
+    return;
+  }
+
   StackPointer di = getStackPointer(storeInstr.variable());
   FLOW_ASSERT(di != size_t(-1), "BUG: StoreInstr.variable not found on stack");
 
@@ -205,6 +233,12 @@ void TargetCodeGenerator::visit(StoreInstr& storeInstr) {
 }
 
 void TargetCodeGenerator::visit(LoadInstr& loadInstr) {
+  if (ssize_t gi = findGlobal(loadInstr.variable()); gi != -1) {
+    emitInstr(Opcode::GLOAD, gi);
+    changeStack(0, &loadInstr);
+    return;
+  }
+
 	StackPointer si = getStackPointer(loadInstr.variable());
 	FLOW_ASSERT(si != static_cast<size_t>(-1),
               "BUG: emitLoad: LoadInstr with variable() not yet on the stack.");

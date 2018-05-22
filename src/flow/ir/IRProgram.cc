@@ -28,8 +28,24 @@ IRProgram::IRProgram()
       handlers_() {
 }
 
+#define GLOBAL_SCOPE_INIT_NAME "@__global_init__"
+
 IRProgram::~IRProgram() {
-  handlers_.clear();
+  // first reset all standard handlers and *then* the global-scope initialization handler
+  // in order to not cause confusion upon resource release
+  {
+    std::unique_ptr<IRHandler> global;
+    auto gh = std::find_if(handlers_.begin(), handlers_.end(), [](auto& handler) {
+        return handler->name() == GLOBAL_SCOPE_INIT_NAME;
+    });
+    if (gh != handlers_.end()) {
+      global = std::move(*gh);
+      handlers_.erase(gh);
+    }
+    handlers_.clear();
+    global.reset(nullptr);
+  }
+
   constantArrays_.clear();
   numbers_.clear();
   strings_.clear();

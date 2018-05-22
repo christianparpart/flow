@@ -20,6 +20,8 @@
 
 namespace flow::lang {
 
+#define GLOBAL_SCOPE_INIT_NAME "@__global_init__"
+
 IRGenerator::IRGenerator(diagnostics::Report* report) : IRGenerator{report, {}} {
 }
 
@@ -67,7 +69,25 @@ void IRGenerator::accept(UnitSym& unit) {
   program()->setModules(unit.modules());
 
   for (const std::unique_ptr<Symbol>& sym : *unit.scope()) {
-    codegen(sym.get());
+    if (auto var = dynamic_cast<VariableSym*>(sym.get())) {
+      // creates handler and entry BasicBlock for global scope initialization
+      setHandler(getHandler(GLOBAL_SCOPE_INIT_NAME));
+      if (handler()->empty())
+        setInsertPoint(createBlock("EntryPoint"));
+      else
+        setInsertPoint(handler()->getEntryBlock());
+
+      codegen(var);
+    } else {
+      codegen(sym.get());
+    }
+  }
+
+  // finalize global scope init handler, if defined
+  if (IRHandler* init = findHandler(GLOBAL_SCOPE_INIT_NAME); init != nullptr) {
+    setHandler(init);
+    setInsertPoint(init->getEntryBlock());
+    createRet(get(false));
   }
 }
 

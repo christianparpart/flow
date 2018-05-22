@@ -83,6 +83,10 @@ IRHandler* IRBuilder::getHandler(const std::string& name) {
 
   return program_->createHandler(name);
 }
+
+IRHandler* IRBuilder::findHandler(const std::string& name) {
+  return program_->findHandler(name);
+}
 // }}}
 // {{{ value management
 /**

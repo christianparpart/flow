@@ -39,6 +39,7 @@ class Runner {
   };
 
   using Value = uint64_t;
+  using Globals = std::vector<Value>;
 
   using TraceLogger = std::function<void(Instruction instr, size_t ip, size_t sp)>;
 
@@ -105,7 +106,7 @@ class Runner {
   // }}}
 
  public:
-  Runner(const Handler* handler, void* userdata, TraceLogger logger);
+  Runner(const Handler* handler, void* userdata, Globals* globals, TraceLogger logger);
   ~Runner() = default;
 
   const Handler* handler() const noexcept { return handler_; }
@@ -176,6 +177,8 @@ class Runner {
   size_t ip_;       //!< last saved program execution offset
 
   Stack stack_;     //!< runtime stack
+
+  Globals& globals_;  //!< runtime global scope
 
   std::list<std::string> stringGarbage_;
 };

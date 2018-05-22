@@ -74,7 +74,7 @@ namespace flow {
 
 static FlowString* t = nullptr;
 
-Runner::Runner(const Handler* handler, void* userdata, TraceLogger traceLogger)
+Runner::Runner(const Handler* handler, void* userdata, Globals* globals, TraceLogger traceLogger)
     : handler_(handler),
       traceLogger_{traceLogger ? std::move(traceLogger) : [](Instruction, size_t, size_t) {}},
       program_(handler->program()),
@@ -83,6 +83,7 @@ Runner::Runner(const Handler* handler, void* userdata, TraceLogger traceLogger)
       state_(Inactive),
       ip_(0),
       stack_(handler_->stackSize()),
+      globals_{*globals},
       stringGarbage_() {
   // initialize emptyString()
   t = newString("");
@@ -126,6 +127,7 @@ bool Runner::loop() {
   static const void* const ops[] = {
       // misc
       label(NOP),       label(ALLOCA),    label(DISCARD),
+      label(GALLOCA),   label(GLOAD),     label(GSTORE),
 
       // control
       label(EXIT),
@@ -209,6 +211,21 @@ bool Runner::loop() {
 
   instr(DISCARD) {
     stack_.discard(A);
+    next;
+  }
+
+  instr(GALLOCA) {
+    globals_.push_back(0);
+    next;
+  }
+
+  instr(GLOAD) {
+    push(globals_[A]);
+    next;
+  }
+
+  instr(GSTORE) {
+    globals_[A] = pop();
     next;
   }
   // }}}

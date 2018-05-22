@@ -45,6 +45,8 @@ class Interpreter : public Runtime {
 
  private:
   std::unique_ptr<IRProgram> programIR_;
+  mutable bool initialized_;
+  mutable Runner::Globals globals_;
   std::unique_ptr<Program> program_;
 };
 

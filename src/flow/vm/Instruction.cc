@@ -53,6 +53,10 @@ static InstructionInfo instructionInfos[] = {
   IIDEF(ALLOCA,    I,  0, Void),
   IIDEF(DISCARD,   I,  0, Void),
 
+  IIDEF(GALLOCA,   I,  0, Void),
+  IIDEF(GLOAD,     I,  1, Void),
+  IIDEF(GSTORE,    I, -1, Void),
+
   // control
   IIDEF(EXIT,      I,  0, Void),
   IIDEF(JMP,       I,  0, Void),
