@@ -58,7 +58,7 @@ bool Interpreter::compile(Parser&& parser,
     return false;
 
   IRGenerator irgen{report};
-  std::shared_ptr<IRProgram> programIR = irgen.generate(unit.get());
+  std::unique_ptr<IRProgram> programIR = irgen.generate(unit.get());
 
   {
     flow::PassManager pm;
@@ -81,6 +81,7 @@ bool Interpreter::compile(Parser&& parser,
   if (report->errorCount() > 0)
     return false;
 
+  programIR_ = std::move(programIR);
   program_ = std::move(program);
   return true;
 }

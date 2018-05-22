@@ -74,7 +74,8 @@ int main(int argc, const char* argv[]) {
   flow::util::Flags flags;
   flags.defineString("file", 'f', "PROGRAM_FILE", "Path to program to execute");
   flags.defineBool("help", 'h', "Shows this help and then exits");
-  flags.defineBool("dump", 'd', "Prints program target code at the beginning");
+  flags.defineBool("dump-tc", 'd', "Prints program target code and exits.");
+  flags.defineBool("dump-ir", 0, "Prints program IR at the beginning and exits.");
   flags.defineBool("trace", 't', "Prints program target code during execution");
   flags.enableParameters("INPUT_FILE ...", "Files to be processed");
   flags.parse(argc, argv);
@@ -96,8 +97,14 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  if (flags.getBool("dump")) {
+  if (flags.getBool("dump-ir")) {
+    afk.programIR()->dump();
+    return EXIT_SUCCESS;
+  }
+
+  if (flags.getBool("dump-tc")) {
     afk.program()->dump();
+    return EXIT_SUCCESS;
   }
 
   afk.initialize();

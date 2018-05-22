@@ -8,6 +8,7 @@
 
 #include <flow/NativeCallback.h>
 #include <flow/Params.h>
+#include <flow/ir/IRProgram.h>
 #include <flow/vm/Program.h>
 #include <flow/vm/Runner.h>
 #include <flow/vm/Runtime.h>
@@ -37,11 +38,13 @@ class Interpreter : public Runtime {
   bool run(const std::string& handlerName, void* userdata = nullptr, TraceLogger trace = TraceLogger{}) const;
 
   Program* program() const noexcept { return program_.get(); }
+  IRProgram* programIR() const noexcept { return programIR_.get(); }
 
  private:
   bool compile(Parser&& parser, diagnostics::Report* report, int optimizationLevel);
 
  private:
+  std::unique_ptr<IRProgram> programIR_;
   std::unique_ptr<Program> program_;
 };
 
