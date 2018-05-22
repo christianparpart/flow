@@ -16,7 +16,6 @@ class AfkProcessor : public flow::lang::Interpreter {
  public:
   explicit AfkProcessor(bool trace);
 
-  void dump();
   void initialize();
   void process(std::string line);
   void finalize();
@@ -29,10 +28,6 @@ class AfkProcessor : public flow::lang::Interpreter {
   bool trace_;
   std::string currentLine_;
 };
-
-void AfkProcessor::dump() {
-  program()->dump();
-}
 
 AfkProcessor::AfkProcessor(bool debug)
     : trace_{debug},
