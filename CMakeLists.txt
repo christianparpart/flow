@@ -172,12 +172,17 @@ endif()
 # {{{ examples
 if(FLOW_ENABLE_EXAMPLES)
   add_executable(example_hello examples/hello.cc)
-
+  target_link_libraries(example_hello PRIVATE FlowLang FlowCore)
   set_target_properties(example_hello PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
   if(CLANG_TIDY_EXE)
     set_target_properties(example_hello PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
   endif()
 
-  target_link_libraries(example_hello PRIVATE FlowLang FlowCore)
+  add_executable(afk examples/afk.cc)
+  target_link_libraries(afk PRIVATE FlowLang FlowCore)
+  set_target_properties(afk PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+  if(CLANG_TIDY_EXE)
+    set_target_properties(afk PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+  endif()
 endif()
 # }}}
