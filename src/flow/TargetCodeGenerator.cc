@@ -344,10 +344,20 @@ void TargetCodeGenerator::emitLoad(Value* value) {
   StackPointer si = getStackPointer(value);
   FLOW_ASSERT(si != static_cast<size_t>(-1),
               "BUG: emitLoad: value not yet on the stack but referenced as operand.");
-  FLOW_ASSERT(si == getStackPointer() - 1, "BUG: emitLoad: value must be on top of stack");
 
-  // emitInstr(Opcode::LOAD, si);
-  // changeStack(0, value);
+  if (si == getStackPointer() - 1)
+    return;
+
+  if (value->useCount() == 1) {
+    // XXX only used once, so move value to stack top
+    //
+    // FIXME: currently don't do anything, hence, we
+    // dup (below) and generate a stack resource leak.
+  }
+
+  // XXX duplicate value onto stack top
+  emitInstr(Opcode::LOAD, si);
+  push(value);
 }
 
 void TargetCodeGenerator::visit(PhiNode& phiInstr) {

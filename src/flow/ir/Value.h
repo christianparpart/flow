@@ -55,6 +55,8 @@ class Value {
    */
   const std::vector<Instr*>& uses() const { return uses_; }
 
+  size_t useCount() const { return uses_.size(); }
+
   /**
    * Replaces all uses of \c this value as operand with value \p newUse instead.
    *
