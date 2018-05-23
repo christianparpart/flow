@@ -1,0 +1,67 @@
+
+   Flow Language Syntax
+==============================================================================
+
+   SYNTAX
+------------------------------------------------------------------------------
+
+unit              ::= importDecl* (varDecl | handlerDecl)*
+importDecl        ::= 'import' STRING ['from' STRING]
+varDecl           ::= 'var' SYMBOL '=' expr ';'
+handlerDecl       ::= ['handler'] SYMBOL '{' varDecl* stmt '}'
+
+stmt              ::= ifStmt | whileStmt | matchStmt | compoundStmt
+                    | assignStmt
+ifStmt            ::= 'if' expr stmt ['else' stmt]
+whileStmt         ::= 'while' expr stmt
+matchStmt         ::= 'match' expr [MATCH_OP] '{'
+                      ('on' expr stmt)*
+                      ['else' stmt]
+                      '}'
+compoundStmt      ::= '{' stmt '}'
+
+expr              ::= logicExpr
+logicExpr         ::= notExpr (('and' | 'xor' | 'or) notExpr)*
+notExpr           ::= '!'* relExpr
+relExpr           ::= addExpr (REL_OP addExpr)*
+addExpr           ::= mulExpr (ADD_OP mulExpr)*
+mulExpr           ::= powExpr (MUL_OP powExpr)*
+powExpr           ::= negExpr (POW_OP powExpr)*
+negExpr           ::= ['-'] bitNotExpr
+bitNotExpr        ::= '~'* primaryExpr
+primaryExpr       ::= literalExpr
+                    | castExpr
+                    | interpolatedStringExpr
+                    | lambdaExpr
+                    | variableExpr
+                    | callExpr
+                    | '(' expr ')'
+                    | arrayExpr
+interpolatedExpr  ::= <Ruby-style interpolated string>
+arrayExpr         ::= '[' arrayExpr ']'
+lambdaExpr        ::= '{' stmt '}'
+variableExpr      ::= SYMBOL
+literalExpr       ::= STRING
+                    | RAW_STRING
+                    | NUMBER
+                    | BOOLEAN
+                    | IP
+                    | CIDR
+                    | REGEXP
+
+   LEXIC
+------------------------------------------------------------------------------
+
+SYMBOL            ::= [_a-zA-Z][_a-zA-Z0-9]*
+NUMBER            ::= [0-9]+
+STRING            ::= <double quote delimited>
+RAW_STRING        ::= <single quote delimited>
+REGEXP            ::= <slash delimited>
+
+REL_OP            ::= '==' | '!=' | '<=' | '>=' | '<' | '>' 
+                    | '=^' | '=$' | '=~' | 'in'
+ADD_OP            ::= '+' | '-'
+MUL_OP            ::= '*' | '/' | '%' | 'shl' | 'shr'
+POW_OP            ::= '**'
+MATCH_OP          ::= '==' | '=^' | '=$' | '=~'
+
