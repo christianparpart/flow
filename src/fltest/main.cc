@@ -187,10 +187,11 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   fmt::print("testing {}\n", filename);
 
   constexpr bool optimize = true;
-  flow::lang::Parser parser({}, // features
+  flow::lang::Parser parser{{ flow::lang::Feature::GlobalScope,
+                              flow::lang::Feature::WhileLoop },
                             report,
                             this,
-                            [this](auto x, auto y, auto z) { return import(x, y, z); });
+                            [this](auto x, auto y, auto z) { return import(x, y, z); }};
   parser.openStream(std::make_unique<std::ifstream>(filename), filename);
   std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 

@@ -31,7 +31,7 @@ Interpreter::Interpreter()
 bool Interpreter::compileString(const std::string& source,
                                 diagnostics::Report* report,
                                 int optimizationLevel) {
-  Parser parser({Feature::GlobalScope},
+  Parser parser({Feature::GlobalScope, Feature::WhileLoop},
                 report,
                 this,
                 std::bind(&Runtime::import, this, std::placeholders::_1,
@@ -44,7 +44,7 @@ bool Interpreter::compileString(const std::string& source,
 bool Interpreter::compileLocalFile(const std::string& path,
                                    diagnostics::Report* report,
                                    int optimizationLevel) {
-  Parser parser({Feature::GlobalScope},
+  Parser parser({Feature::GlobalScope, Feature::WhileLoop},
                 report,
                 this,
                 std::bind(&Runtime::import, this, std::placeholders::_1,
