@@ -187,7 +187,8 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   fmt::print("testing {}\n", filename);
 
   constexpr bool optimize = true;
-  flow::lang::Parser parser(report,
+  flow::lang::Parser parser({}, // features
+                            report,
                             this,
                             [this](auto x, auto y, auto z) { return import(x, y, z); });
   parser.openStream(std::make_unique<std::ifstream>(filename), filename);
