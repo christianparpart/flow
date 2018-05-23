@@ -28,6 +28,7 @@ enum Opcode : uint16_t {
   NOP = 0,  // NOP                 ; no operation
   ALLOCA,   // ALLOCA imm         ; pushes A default-initialized items onto the stack
   DISCARD,  // DISCARD imm        ; pops A items from the stack
+  STACKROT, // STACKROT imm       ; rotate stack at stack[imm], moving stack[imm] to top
 
   GALLOCA,  // GALLOCA imm        ; appends A default-initialized items to the global scope
   GLOAD,    // GLOAD imm          ; stack[sp++] = globals[imm]

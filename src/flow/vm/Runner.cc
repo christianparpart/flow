@@ -72,6 +72,17 @@ namespace flow {
 #endif
 // }}}
 
+// {{{
+void Runner::Stack::rotate(size_t n) {
+  // moves stack[n] to stack[top], and shifts stack[n+1..] to stack[n..]
+  Value tmp = stack_[n];
+  while (n + 1 < stack_.size()) {
+    stack_[n] = stack_[n + 1];
+    n++;
+  }
+  stack_[stack_.size() - 1] = tmp;
+}
+// }}}
 static FlowString* t = nullptr;
 
 Runner::Runner(const Handler* handler, void* userdata, Globals* globals, TraceLogger traceLogger)
@@ -126,7 +137,7 @@ bool Runner::loop() {
 #define label(opcode) &&l_##opcode
   static const void* const ops[] = {
       // misc
-      label(NOP),       label(ALLOCA),    label(DISCARD),
+      label(NOP),       label(ALLOCA),    label(DISCARD),   label(STACKROT),
       label(GALLOCA),   label(GLOAD),     label(GSTORE),
 
       // control
@@ -212,6 +223,10 @@ bool Runner::loop() {
   instr(DISCARD) {
     stack_.discard(A);
     next;
+  }
+
+  instr(STACKROT) {
+    stack_.rotate(A);
   }
 
   instr(GALLOCA) {

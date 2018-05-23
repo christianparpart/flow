@@ -384,9 +384,8 @@ void TargetCodeGenerator::emitLoad(Value* value) {
 
   if (value->useCount() == 1) {
     // XXX only used once, so move value to stack top
-    //
-    // FIXME: currently don't do anything, hence, we
-    // dup (below) and generate a stack resource leak.
+    emitInstr(Opcode::STACKROT, si);
+    return;
   }
 
   // XXX duplicate value onto stack top

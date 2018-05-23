@@ -66,6 +66,8 @@ class Runner {
       stack_.resize(stack_.size() - n);
     }
 
+    void rotate(size_t n);
+
     size_t size() const { return stack_.size(); }
 
     Value operator[](int relativeIndex) const {
