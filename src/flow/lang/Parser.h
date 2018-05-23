@@ -155,6 +155,7 @@ class Parser {
   // syntax: statements
   std::unique_ptr<Stmt> stmt();
   std::unique_ptr<Stmt> ifStmt();
+  std::unique_ptr<Stmt> whileStmt();
   std::unique_ptr<Stmt> matchStmt();
   std::unique_ptr<Stmt> compoundStmt();
   std::unique_ptr<Stmt> identStmt();

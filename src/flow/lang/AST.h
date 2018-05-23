@@ -551,6 +551,22 @@ class CondStmt : public Stmt {
   void visit(ASTVisitor&) override;
 };
 
+class WhileStmt : public Stmt {
+ public:
+  WhileStmt(SourceLocation loc, std::unique_ptr<Expr> cond, std::unique_ptr<Stmt> bodyStmt)
+      : Stmt{std::move(loc)},
+        cond_{std::move(cond)},
+        bodyStmt_{std::move(bodyStmt)} {}
+
+  Expr* condition() const { return cond_.get(); }
+  Stmt* bodyStmt() const { return bodyStmt_.get(); }
+
+  void visit(ASTVisitor&) override;
+
+ private:
+  std::unique_ptr<Expr> cond_;
+  std::unique_ptr<Stmt> bodyStmt_;
+};
 
 class MatchStmt : public Stmt {
  public:

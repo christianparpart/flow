@@ -510,6 +510,8 @@ void VariableExpr::visit(ASTVisitor& v) { v.accept(*this); }
 
 void CondStmt::visit(ASTVisitor& v) { v.accept(*this); }
 
+void WhileStmt::visit(ASTVisitor& v) { v.accept(*this); }
+
 void AssignStmt::visit(ASTVisitor& v) { v.accept(*this); }
 
 void BuiltinHandlerSym::visit(ASTVisitor& v) { v.accept(*this); }

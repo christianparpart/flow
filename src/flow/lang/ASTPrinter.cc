@@ -216,6 +216,12 @@ void ASTPrinter::accept(CondStmt& cond) {
   print("elseStmt", cond.elseStmt());
 }
 
+void ASTPrinter::accept(WhileStmt& whileStmt) {
+  printf("WhileStmt\n");
+  print("condition", whileStmt.condition());
+  print("bodyStmt", whileStmt.bodyStmt());
+}
+
 void ASTPrinter::accept(MatchStmt& match) {
   printf("MatchStmt: %s\n", tos(match.op()).c_str());
   print("cond", match.condition());

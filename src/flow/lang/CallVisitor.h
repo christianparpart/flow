@@ -57,6 +57,7 @@ class CallVisitor : public ASTVisitor {
   void accept(ExprStmt& stmt) override;
   void accept(CompoundStmt& stmt) override;
   void accept(CondStmt& stmt) override;
+  void accept(WhileStmt& stmt) override;
   void accept(MatchStmt& stmt) override;
   void accept(AssignStmt& stmt) override;
 };

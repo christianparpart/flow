@@ -14,6 +14,7 @@ bool TokenTraits::isKeyword(Token t) {
   switch (t) {
     case Token::Var:
     case Token::On:
+    case Token::While:
     case Token::For:
     case Token::Do:
     case Token::If:
@@ -256,6 +257,8 @@ std::string to_string(Token t) {
       return "match";
     case Token::On:
       return "on";
+    case Token::While:
+      return "while";
     case Token::For:
       return "for";
     case Token::Import:

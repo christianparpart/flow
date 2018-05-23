@@ -89,6 +89,7 @@ enum class Token {
   Unless,
   Match,
   On,
+  While,
   For,
   Import,
   From,

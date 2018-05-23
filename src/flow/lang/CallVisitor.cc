@@ -103,6 +103,11 @@ void CallVisitor::accept(CondStmt& condStmt) {
   visit(condStmt.elseStmt());
 }
 
+void CallVisitor::accept(WhileStmt& whileStmt) {
+  visit(whileStmt.condition());
+  visit(whileStmt.bodyStmt());
+}
+
 void CallVisitor::accept(MatchStmt& stmt) {
   visit(stmt.condition());
   for (auto& one : stmt.cases()) {

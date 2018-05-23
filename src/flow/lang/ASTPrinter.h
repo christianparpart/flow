@@ -61,6 +61,7 @@ class ASTPrinter : public ASTVisitor {
 
   void accept(CompoundStmt& stmt) override;
   void accept(CondStmt& stmt) override;
+  void accept(WhileStmt& stmt) override;
   void accept(MatchStmt& stmt) override;
   void accept(AssignStmt& stmt) override;
 };

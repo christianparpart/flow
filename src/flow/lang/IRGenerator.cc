@@ -433,6 +433,24 @@ void IRGenerator::accept(CondStmt& condStmt) {
   setInsertPoint(contBlock);
 }
 
+void IRGenerator::accept(WhileStmt& whileStmt) {
+  BasicBlock* bodyBlock = createBlock("while.body");
+  BasicBlock* condBlock = createBlock("while.cond");
+  BasicBlock* doneBlock = createBlock("while.done");
+
+  createBr(condBlock);
+
+  setInsertPoint(bodyBlock);
+  codegen(whileStmt.bodyStmt());
+  createBr(condBlock);
+
+  setInsertPoint(condBlock);
+  Value* cond = codegen(whileStmt.condition());
+  createCondBr(cond, bodyBlock, doneBlock);
+
+  setInsertPoint(doneBlock);
+}
+
 Constant* IRGenerator::getConstant(Expr* expr) {
   if (auto e = dynamic_cast<StringExpr*>(expr))
     return get(e->value());

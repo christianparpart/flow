@@ -1225,6 +1225,8 @@ std::unique_ptr<Stmt> Parser::stmt() {
   switch (token()) {
     case Token::If:
       return ifStmt();
+    case Token::While:
+      return whileStmt();
     case Token::Match:
       return matchStmt();
     case Token::Begin:
@@ -1242,6 +1244,20 @@ std::unique_ptr<Stmt> Parser::stmt() {
                           token());
       return nullptr;
   }
+}
+
+std::unique_ptr<Stmt> Parser::whileStmt() {
+  // whileStmt ::= 'while' expr stmt
+  SourceLocation sloc(location());
+
+  consume(Token::While);
+  std::unique_ptr<Expr> cond = expr();
+  std::unique_ptr<Stmt> body = stmt();
+
+  if (!hasFeature(Feature::WhileLoop))
+    report_.syntaxError(sloc, "While-loop feature not enabled.");
+
+  return std::make_unique<WhileStmt>(sloc.update(end()), std::move(cond), std::move(body));
 }
 
 std::unique_ptr<Stmt> Parser::ifStmt() {

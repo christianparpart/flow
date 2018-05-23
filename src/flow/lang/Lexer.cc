@@ -698,6 +698,7 @@ Token Lexer::parseIdent() {
                   {"if", Token::If},
                   {"then", Token::Then},
                   {"else", Token::Else},
+                  {"while", Token::While},
                   {"unless", Token::Unless},
                   {"import", Token::Import},
                   {"from", Token::From},
