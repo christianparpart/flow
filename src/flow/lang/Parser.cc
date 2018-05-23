@@ -82,10 +82,12 @@ class Parser::Scope {
   for (Parser::Scope _(this, (SCOPED_SYMBOL)); _.flip();)
 // }}}
 
-Parser::Parser(diagnostics::Report* report,
-                       Runtime* runtime,
-                       ImportHandler importHandler)
-    : report_{*report},
+Parser::Parser(std::set<Feature> features,
+               diagnostics::Report* report,
+               Runtime* runtime,
+               ImportHandler importHandler)
+    : features_{std::move(features)},
+      report_{*report},
       lexer_{std::make_unique<Lexer>(report)},
       scopeStack_{nullptr},
       runtime_{runtime},
@@ -357,7 +359,13 @@ std::unique_ptr<UnitSym> Parser::unit() {
     }
 
     while (std::unique_ptr<Symbol> symbol = decl()) {
-      currentScope()->appendSymbol(std::move(symbol));
+      if (!dynamic_cast<VariableSym*>(symbol.get())) {
+        currentScope()->appendSymbol(std::move(symbol));
+      } else if (hasFeature(Feature::GlobalScope)) {
+        currentScope()->appendSymbol(std::move(symbol));
+      } else {
+        report_.syntaxError(symbol->location(), "Global-scope feature not enabled.");
+      }
     }
   }
 

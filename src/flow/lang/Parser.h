@@ -12,6 +12,7 @@
 #include <flow/lang/Token.h>
 
 #include <list>
+#include <set>
 #include <vector>
 #include <string>
 #include <memory>
@@ -29,13 +30,29 @@ namespace flow::lang {
 
 class Lexer;
 
+//! Language Feature Flags
+enum class Feature {
+  //! Enables variables in global scoped
+  GlobalScope,
+
+  //! Enables for-loop over iterators
+  IteratorLoop, //!< TODO
+
+  //! Enables while-loop
+  WhileLoop,
+};
+
 class Parser {
  public:
   using ImportHandler = std::function<bool(const std::string&,
                                            const std::string&,
                                            std::vector<NativeCallback*>*)>;
 
-  Parser(diagnostics::Report* report, Runtime* runtime, ImportHandler importHandler);
+  Parser(std::set<Feature> enabledFeatures,
+         diagnostics::Report* report,
+         Runtime* runtime,
+         ImportHandler importHandler);
+
   ~Parser();
 
   void openString(const std::string& content);
@@ -45,6 +62,8 @@ class Parser {
   std::unique_ptr<UnitSym> parse();
 
   Runtime* runtime() const { return runtime_; }
+
+  bool hasFeature(Feature f) const { return features_.find(f) != features_.end(); }
 
  private:
   class Scope;
@@ -145,6 +164,7 @@ class Parser {
   std::unique_ptr<Stmt> postscriptStmt(std::unique_ptr<Stmt> baseStmt);
 
  private:
+  std::set<Feature> features_;
   std::unique_ptr<Lexer> lexer_;
   SymbolTable* scopeStack_;
   Runtime* runtime_;
