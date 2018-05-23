@@ -111,9 +111,14 @@ int main(int argc, const char* argv[]) {
 
   for (const std::string& inputFileName: flags.parameters()) {
     std::ifstream source{inputFileName};
-    std::string line;
-    for (std::getline(source, line); !source.eof(); std::getline(source, line)) {
-      afk.process(std::move(line));
+    if (source.good()) {
+      std::string line;
+      for (std::getline(source, line); !source.eof(); std::getline(source, line)) {
+        afk.process(std::move(line));
+      }
+    } else {
+      std::cerr << "Failed opening file: " << inputFileName << "\n";
+      return EXIT_FAILURE;
     }
   }
 
