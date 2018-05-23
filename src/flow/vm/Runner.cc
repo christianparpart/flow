@@ -227,6 +227,7 @@ bool Runner::loop() {
 
   instr(STACKROT) {
     stack_.rotate(A);
+    next;
   }
 
   instr(GALLOCA) {
