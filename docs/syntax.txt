@@ -33,6 +33,7 @@ negExpr           ::= ['-'] bitNotExpr
 bitNotExpr        ::= '~'* primaryExpr
 primaryExpr       ::= literalExpr
                     | castExpr
+                    | REGEXP_GROUP
                     | interpolatedStringExpr
                     | lambdaExpr
                     | variableExpr
@@ -56,6 +57,7 @@ literalExpr       ::= STRING
 
 SYMBOL            ::= [_a-zA-Z][_a-zA-Z0-9]*
 NUMBER            ::= [0-9]+
+REGEXP_GROUP      ::= $[0-9]+
 STRING            ::= <double quote delimited>
 RAW_STRING        ::= <single quote delimited>
 REGEXP            ::= <slash delimited>
