@@ -7,23 +7,33 @@
 
 #pragma once
 
+#include <functional>
 #include <list>
 #include <memory>
+#include <utility>
+
+#include <fmt/format.h>
 
 namespace flow {
 
-class HandlerPass;
 class IRHandler;
 class IRProgram;
 
 class PassManager {
  public:
+  using HandlerPass = std::function<bool(IRHandler* handler)>;
+
   PassManager() = default;
   ~PassManager() = default;
 
   /** registers given pass to the pass manager.
+   *
+   * @param name uniquely identifyable name of the handler pass
+   * @param handler callback to invoke to handle the transformation pass
+   *
+   * The handler must return @c true if it modified its input, @c false otherwise.
    */
-  void registerPass(std::unique_ptr<HandlerPass>&& handlerPass);
+  void registerPass(std::string name, HandlerPass handler);
 
   /** runs passes on a complete program.
    */
@@ -33,8 +43,15 @@ class PassManager {
    */
   void run(IRHandler* handler);
 
+  template<typename... Args>
+  void logDebug(const char* fmt, Args... args) {
+    logDebug(fmt::format(fmt, args...));
+  }
+
+  void logDebug(const std::string& msg);
+
  private:
-  std::list<std::unique_ptr<HandlerPass>> handlerPasses_;
+  std::list<std::pair<std::string, HandlerPass>> handlerPasses_;
 };
 
 }  // namespace flow

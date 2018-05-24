@@ -13,9 +13,9 @@
 
 #include <list>
 
-namespace flow {
+namespace flow::transform {
 
-bool UnusedBlockPass::run(IRHandler* handler) {
+bool eliminateUnusedBlocks(IRHandler* handler) {
   std::list<BasicBlock*> unused;
 
   for (BasicBlock* bb : handler->basicBlocks()) {
@@ -36,4 +36,4 @@ bool UnusedBlockPass::run(IRHandler* handler) {
   return !unused.empty();
 }
 
-}  // namespace flow
+} // namespace flow::transform

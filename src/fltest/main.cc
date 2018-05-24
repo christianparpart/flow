@@ -211,10 +211,14 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
 
   if (optimize) {
     flow::PassManager pm;
-    pm.registerPass(std::make_unique<flow::EmptyBlockElimination>());
-    pm.registerPass(std::make_unique<flow::InstructionElimination>());
-    pm.registerPass(std::make_unique<flow::MergeBlockPass>());
-    pm.registerPass(std::make_unique<flow::UnusedBlockPass>());
+
+    pm.registerPass("eliminate-empty-blocks", &flow::transform::emptyBlockElimination);
+    pm.registerPass("eliminate-linear-br", &flow::transform::eliminateLinearBr);
+    pm.registerPass("eliminate-unused-blocks", &flow::transform::eliminateUnusedBlocks);
+    pm.registerPass("eliminate-unused-instr", &flow::transform::eliminateUnusedInstr);
+    pm.registerPass("fold-constant-condbr", &flow::transform::foldConstantCondBr);
+    pm.registerPass("rewrite-br-to-exit", &flow::transform::rewriteBrToExit);
+    pm.registerPass("rewrite-cond-br-to-same-branches", &flow::transform::rewriteCondBrToSameBranches);
 
     pm.run(programIR.get());
   }

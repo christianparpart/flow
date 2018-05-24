@@ -11,9 +11,9 @@
 #include <flow/ir/Instructions.h>
 #include <list>
 
-namespace flow {
+namespace flow::transform {
 
-bool EmptyBlockElimination::run(IRHandler* handler) {
+bool emptyBlockElimination(IRHandler* handler) {
   std::list<BasicBlock*> eliminated;
 
   for (BasicBlock* bb : handler->basicBlocks()) {
@@ -41,4 +41,4 @@ bool EmptyBlockElimination::run(IRHandler* handler) {
   return eliminated.size() > 0;
 }
 
-}  // namespace flow
+}  // namespace flow::transform

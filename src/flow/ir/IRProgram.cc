@@ -7,7 +7,6 @@
 
 #include <flow/ir/IRProgram.h>
 #include <flow/ir/IRHandler.h>
-#include <flow/ir/HandlerPass.h>
 #include <flow/ir/ConstantArray.h>
 
 #include <cassert>

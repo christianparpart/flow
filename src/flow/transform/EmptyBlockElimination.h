@@ -7,18 +7,15 @@
 
 #pragma once
 
-#include <flow/ir/HandlerPass.h>
-
 namespace flow {
+  class IRHandler;
+}
+
+namespace flow::transform {
 
 /**
  * Eliminates empty blocks, that are just jumping to the next block.
  */
-class EmptyBlockElimination : public HandlerPass {
- public:
-  EmptyBlockElimination() : HandlerPass("EmptyBlockElimination") {}
+bool emptyBlockElimination(IRHandler* handler);
 
-  bool run(IRHandler* handler) override;
-};
-
-}  // namespace flow
+}  // namespace flow::transform

@@ -111,8 +111,6 @@ class IRProgram {
 
   /**
    * Performs given transformation on all handlers by given type.
-   *
-   * @see HandlerPass
    */
   template <typename TheHandlerPass, typename... Args>
   size_t transform(Args&&... args) {

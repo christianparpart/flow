@@ -56,8 +56,6 @@ class IRHandler : public Constant {
 
   /**
    * Performs given transformation on this handler.
-   *
-   * @see HandlerPass
    */
   template <typename TheHandlerPass, typename... Args>
   size_t transform(Args&&... args) {

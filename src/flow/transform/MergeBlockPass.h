@@ -7,23 +7,18 @@
 
 #pragma once
 
-#include <flow/ir/HandlerPass.h>
-
 namespace flow {
+  class IRHandler;
+}
 
-class BasicBlock;
+namespace flow::transform {
 
 /**
  * Merges equal blocks into one, eliminating duplicated blocks.
  *
  * A block is equal if their instructions and their successors are equal.
  */
-class MergeBlockPass : public HandlerPass {
- public:
-  MergeBlockPass() : HandlerPass("MergeBlockPass") {}
+bool mergeSameBlocks(IRHandler* handler);
 
-  bool run(IRHandler* handler) override;
-};
-
-}  // namespace flow
+} // namespace flow::transform
 

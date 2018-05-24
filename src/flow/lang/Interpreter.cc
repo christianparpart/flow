@@ -65,17 +65,20 @@ bool Interpreter::compile(Parser&& parser,
   IRGenerator irgen{report};
   std::unique_ptr<IRProgram> programIR = irgen.generate(unit.get());
 
-  {
+  if (optimizationLevel > 0) {
     flow::PassManager pm;
 
     // mandatory passes
-    pm.registerPass(std::make_unique<flow::UnusedBlockPass>());
+    pm.registerPass("eliminate-empty-blocks", &transform::emptyBlockElimination);
 
     // optional passes
     if (optimizationLevel >= 1) {
-      pm.registerPass(std::make_unique<flow::MergeBlockPass>());
-      pm.registerPass(std::make_unique<flow::EmptyBlockElimination>());
-      pm.registerPass(std::make_unique<flow::InstructionElimination>());
+      pm.registerPass("eliminate-linear-br", &transform::eliminateLinearBr);
+      pm.registerPass("eliminate-unused-blocks", &transform::eliminateUnusedBlocks);
+      pm.registerPass("eliminate-unused-instr", &transform::eliminateUnusedInstr);
+      pm.registerPass("fold-constant-condbr", &transform::foldConstantCondBr);
+      pm.registerPass("rewrite-br-to-exit", &transform::rewriteBrToExit);
+      pm.registerPass("rewrite-cond-br-to-same-branches", &transform::rewriteCondBrToSameBranches);
     }
 
     pm.run(programIR.get());

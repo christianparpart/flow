@@ -15,7 +15,7 @@
 
 namespace flow {
 
-bool isSameInstructions(BasicBlock* a, BasicBlock* b) {
+static bool isSameInstructions(BasicBlock* a, BasicBlock* b) {
   if (a->size() != b->size())
     return false;
 
@@ -26,7 +26,7 @@ bool isSameInstructions(BasicBlock* a, BasicBlock* b) {
   return true;
 }
 
-bool isSameSuccessors(BasicBlock* a, BasicBlock* b) {
+static bool isSameSuccessors(BasicBlock* a, BasicBlock* b) {
   if (a->successors().size() != b->successors().size())
     return false;
 
@@ -37,7 +37,7 @@ bool isSameSuccessors(BasicBlock* a, BasicBlock* b) {
   return true;
 }
 
-bool MergeBlockPass::run(IRHandler* handler) {
+bool mergeSameBlocks(IRHandler* handler) {
   std::list<std::list<BasicBlock*>> uniques;
 
   for (BasicBlock* bb : handler->basicBlocks()) {

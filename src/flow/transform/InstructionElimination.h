@@ -7,27 +7,16 @@
 
 #pragma once
 
-#include <flow/ir/HandlerPass.h>
-
 namespace flow {
+  class IRHandler;
+}
 
-class BasicBlock;
+namespace flow::transform {
 
-/**
- * Eliminates empty blocks, that are just jumping to the next block.
- */
-class InstructionElimination : public HandlerPass {
- public:
-  InstructionElimination() : HandlerPass("InstructionElimination") {}
+bool rewriteCondBrToSameBranches(IRHandler* handler);
+bool eliminateUnusedInstr(IRHandler* handler);
+bool eliminateLinearBr(IRHandler* handler);
+bool foldConstantCondBr(IRHandler* handler);
+bool rewriteBrToExit(IRHandler* handler);
 
-  bool run(IRHandler* handler) override;
-
- private:
-  bool rewriteCondBrToSameBranches(BasicBlock* bb);
-  bool eliminateUnusedInstr(BasicBlock* bb);
-  bool eliminateLinearBr(BasicBlock* bb);
-  bool foldConstantCondBr(BasicBlock* bb);
-  bool branchToExit(BasicBlock* bb);
-};
-
-}  // namespace flow
+}  // namespace flow::transform
