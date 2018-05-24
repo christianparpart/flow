@@ -145,6 +145,9 @@ class TargetCodeGenerator : public InstructionVisitor {
   void visit(RetInstr& instr) override;
   void visit(MatchInstr& instr) override;
 
+  // regexp
+  void visit(RegExpGroupInstr& instr) override;
+
   // type cast
   void visit(CastInstr& instr) override;
 

@@ -78,6 +78,7 @@ class CondBrInstr;
 class BrInstr;
 class RetInstr;
 class MatchInstr;
+class RegExpGroupInstr;
 class CastInstr;
 
 template <const UnaryOperator Operator, const LiteralType ResultType>
@@ -156,6 +157,9 @@ class InstructionVisitor {
   virtual void visit(BrInstr& instr) = 0;
   virtual void visit(RetInstr& instr) = 0;
   virtual void visit(MatchInstr& instr) = 0;
+
+  // regexp
+  virtual void visit(RegExpGroupInstr& instr) = 0;
 
   // type cast
   virtual void visit(CastInstr& instr) = 0;
@@ -240,6 +244,9 @@ class IsSameInstruction : public InstructionVisitor {
   void visit(BrInstr& instr) override;
   void visit(RetInstr& instr) override;
   void visit(MatchInstr& instr) override;
+
+  // regexp
+  void visit(RegExpGroupInstr& instr) override;
 
   // type cast
   void visit(CastInstr& instr) override;

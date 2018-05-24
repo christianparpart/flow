@@ -322,6 +322,10 @@ void IRGenerator::accept(CallExpr& call) {
   }
 }
 
+void IRGenerator::accept(RegExpGroupExpr& expr) {
+  result_ = createRegExpGroup(get(expr.groupId()));
+}
+
 void IRGenerator::accept(VariableExpr& expr) {
   // loads the value of the given variable
 

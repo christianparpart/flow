@@ -332,6 +332,23 @@ std::string StoreInstr::to_string() const {
 std::unique_ptr<Instr> StoreInstr::clone() {
   return std::make_unique<StoreInstr>(variable(), index(), source(), name());
 }
+
+void RegExpGroupInstr::dump() {
+  dumpOne("reggroup");
+}
+
+std::string RegExpGroupInstr::to_string() const {
+  return formatOne("reggroup");
+}
+
+std::unique_ptr<Instr> RegExpGroupInstr::clone() {
+  return std::make_unique<RegExpGroupInstr>(groupId(), name());
+}
+
+void RegExpGroupInstr::accept(InstructionVisitor& v) {
+  return v.visit(*this);
+}
+
 // }}}
 
 }  // namespace flow

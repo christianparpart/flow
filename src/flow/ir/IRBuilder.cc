@@ -563,6 +563,11 @@ Value* IRBuilder::createPInCidr(Value* lhs, Value* rhs,
   return insert<PInCidrInstr>(lhs, rhs, makeName(name));
 }
 // }}}
+// {{{ RegExp
+RegExpGroupInstr* IRBuilder::createRegExpGroup(ConstantInt* groupId, const std::string& name) {
+  return insert<RegExpGroupInstr>(groupId, makeName(name));
+}
+// }}}
 // {{{ cast ops
 Value* IRBuilder::createB2S(Value* rhs, const std::string& name) {
   assert(rhs->type() == LiteralType::Boolean);

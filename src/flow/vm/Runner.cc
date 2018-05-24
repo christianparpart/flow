@@ -598,11 +598,11 @@ bool Runner::loop() {
 
   instr(SREGGROUP) {
     {
-      FlowNumber position = getNumber(-1);
+      FlowNumber position = A;
       util::RegExp::Result& rr = *regexpContext_.regexMatch();
-      const std::string& match = rr[position];
+      std::string match = rr[position];
 
-      SP(-1) = (Value) newString(rr[position]);
+      push((Value) newString(std::move(match)));
     }
     next;
   }

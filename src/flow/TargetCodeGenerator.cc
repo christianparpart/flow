@@ -466,6 +466,12 @@ void TargetCodeGenerator::visit(MatchInstr& matchInstr) {
   }
 }
 
+void TargetCodeGenerator::visit(RegExpGroupInstr& regexGroupInstr) {
+  FlowNumber groupId = regexGroupInstr.groupId()->get();
+  emitInstr(Opcode::SREGGROUP, groupId);
+  push(&regexGroupInstr);
+}
+
 void TargetCodeGenerator::visit(CastInstr& castInstr) {
   // map of (target, source, opcode)
   static const std::unordered_map<

@@ -612,7 +612,7 @@ LiteralType LiteralExpr<std::string>::getType() const {
 
 LiteralType CallExpr::getType() const { return callee_->signature().returnType(); }
 
-void RegExpGroupExpr::visit(ASTVisitor& v) override {
+void RegExpGroupExpr::visit(ASTVisitor& v) {
   v.accept(*this);
 }
 

@@ -93,6 +93,19 @@ class StoreInstr : public Instr {
   void accept(InstructionVisitor& v) override;
 };
 
+class RegExpGroupInstr : public Instr {
+ public:
+  RegExpGroupInstr(ConstantInt* groupId, const std::string& name)
+      : Instr{LiteralType::String, {groupId}, name} {}
+
+  ConstantInt* groupId() const { return static_cast<ConstantInt*>(operand(0)); }
+
+  void dump() override;
+  std::string to_string() const override;
+  std::unique_ptr<Instr> clone() override;
+  void accept(InstructionVisitor& v) override;
+};
+
 class LoadInstr : public Instr {
  public:
   LoadInstr(Value* variable, const std::string& name)

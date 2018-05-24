@@ -62,8 +62,8 @@ class IRBuilder {
   Instr* insert(std::unique_ptr<Instr> instr);
 
   template<typename T, typename... Args>
-  Instr* insert(Args&&... args) {
-    return insert(std::make_unique<T>(std::move(args)...));
+  T* insert(Args&&... args) {
+    return static_cast<T*>(insert(std::make_unique<T>(std::move(args)...)));
   }
 
   IRHandler* getHandler(const std::string& name);
@@ -172,7 +172,7 @@ class IRBuilder {
   // ...
 
   // regexp
-  // ...
+  RegExpGroupInstr* createRegExpGroup(ConstantInt* groupId, const std::string& name = "");
 
   // cast
   Value* createConvert(LiteralType ty, Value* rhs,

@@ -68,6 +68,7 @@ class IRGenerator : public IRBuilder, public ASTVisitor {
   void accept(UnaryExpr& expr) override;
   void accept(BinaryExpr& expr) override;
   void accept(CallExpr& expr) override;
+  void accept(RegExpGroupExpr& expr) override;
   void accept(VariableExpr& expr) override;
   void accept(HandlerRefExpr& expr) override;
 

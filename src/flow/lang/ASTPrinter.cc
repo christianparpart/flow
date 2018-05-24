@@ -155,6 +155,10 @@ void ASTPrinter::accept(CallExpr& call) {
   }
 }
 
+void ASTPrinter::accept(RegExpGroupExpr& expr) {
+  printf("RegExpGroupExpr: %li\n", expr.groupId());
+}
+
 void ASTPrinter::accept(VariableExpr& expr) {
   printf("VariableExpr: %s\n", expr.variable()->name().c_str());
 }

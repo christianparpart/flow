@@ -134,7 +134,7 @@ static InstructionInfo instructionInfos[] = {
 
   // regex
   IIDEF(SREGMATCH, I,  0, Boolean),
-  IIDEF(SREGGROUP, V,  0, String),
+  IIDEF(SREGGROUP, I,  1, String),
 
   // cast
   IIDEF(N2S,       V,  0, String),

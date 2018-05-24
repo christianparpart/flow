@@ -1072,7 +1072,7 @@ std::unique_ptr<Expr> Parser::regexpGroup() {
   SourceLocation loc = location();
   consume(Token::RegExpGroup);
 
-  return std::make_unique<RegExpGroupExpr>(loc.update(), groupId);
+  return std::make_unique<RegExpGroupExpr>(loc.update(end()), groupId);
 }
 
 std::unique_ptr<ParamList> Parser::paramList() {

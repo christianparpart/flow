@@ -81,6 +81,7 @@ class Lexer {
 
   Token parseNumber(int base);
   Token parseEnvVar();
+  Token parseRegExpGroup();
   Token parseRawString();
   Token parseString(Token result);
   Token parseInterpolationFragment(bool start);
