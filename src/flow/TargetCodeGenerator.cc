@@ -449,15 +449,19 @@ void TargetCodeGenerator::visit(MatchInstr& matchInstr) {
   switch (matchDef.op) {
   case MatchClass::Same:
     emitInstr(Opcode::SMATCHEQ, matchId);
+    pop(1);
     break;
   case MatchClass::Head:
     emitInstr(Opcode::SMATCHBEG, matchId);
+    pop(1);
     break;
   case MatchClass::Tail:
     emitInstr(Opcode::SMATCHEND, matchId);
+    pop(1);
     break;
   case MatchClass::RegExp:
     emitInstr(Opcode::SMATCHR, matchId);
+    pop(1);
     break;
   }
 }
@@ -638,6 +642,7 @@ void TargetCodeGenerator::visit(SCmpREInstr& scmpre) {
 
   emitLoad(scmpre.operand(0));
   emitInstr(Opcode::SREGMATCH, cp_.makeRegExp(re->get()));
+  changeStack(1, &scmpre);
 }
 
 void TargetCodeGenerator::visit(SCmpBegInstr& scmpbeg) {
