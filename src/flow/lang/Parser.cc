@@ -797,6 +797,7 @@ std::unique_ptr<Expr> Parser::primaryExpr() {
     case Token::IP:
     case Token::Cidr:
     case Token::RegExp:
+    case Token::Div: // beginning of regexp
       return literalExpr();
     case Token::StringType:
     case Token::NumberType:
