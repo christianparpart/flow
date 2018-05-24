@@ -118,94 +118,100 @@ std::unique_ptr<Instr> Instr::replace(std::unique_ptr<Instr> newInstr) {
 }
 
 void Instr::dumpOne(const char* mnemonic) {
-  if (type() != LiteralType::Void) {
-    fmt::print("\t%{} = {}", !name().empty() ? name() : "?", mnemonic);
-  } else {
-    fmt::print("\t{}", mnemonic);
-  }
+  fmt::print("\t{}\n", formatOne(mnemonic));
+}
+
+std::string Instr::formatOne(std::string mnemonic) const {
+  std::stringstream sstr;
+
+  if (type() == LiteralType::Void)
+    sstr << mnemonic;
+  else if (name().empty())
+    sstr << fmt::format("%??? = {}", mnemonic);
+  else
+    sstr << fmt::format("%{} = {}", name(), mnemonic);
 
   for (size_t i = 0, e = operands_.size(); i != e; ++i) {
-    printf(i ? ", " : " ");
+    sstr << (i ? ", " : " ");
     Value* arg = operands_[i];
     if (dynamic_cast<Constant*>(arg)) {
       if (auto i = dynamic_cast<ConstantInt*>(arg)) {
-        printf("%" PRIi64 "", i->get());
+        sstr << i->get();
         continue;
       }
       if (auto s = dynamic_cast<ConstantString*>(arg)) {
-        printf("\"%s\"", s->get().c_str());
+        sstr << '"' << s->get() << '"';
         continue;
       }
       if (auto ip = dynamic_cast<ConstantIP*>(arg)) {
-        printf("%s", ip->get().c_str());
+        sstr << ip->get().c_str();
         continue;
       }
       if (auto cidr = dynamic_cast<ConstantCidr*>(arg)) {
-        printf("%s", cidr->get().str().c_str());
+        sstr << cidr->get().str();
         continue;
       }
       if (auto re = dynamic_cast<ConstantRegExp*>(arg)) {
-        printf("/%s/", re->get().pattern().c_str());
+        sstr << '/' << re->get().pattern() << '/';
         continue;
       }
       if (auto bh = dynamic_cast<IRBuiltinHandler*>(arg)) {
-        printf("%s", bh->signature().to_s().c_str());
+        sstr << bh->signature().to_s();
         continue;
       }
       if (auto bf = dynamic_cast<IRBuiltinFunction*>(arg)) {
-        printf("%s", bf->signature().to_s().c_str());
+        sstr << bf->signature().to_s();
         continue;
       }
       if (auto ar = dynamic_cast<ConstantArray*>(arg)) {
-        printf("[");
+        sstr << '[';
         size_t i = 0;
         switch (ar->type()) {
           case LiteralType::IntArray:
             for (const auto& v : ar->get()) {
-              if (i) printf(", ");
-              printf("%" PRIi64 "", static_cast<ConstantInt*>(v)->get());
+              if (i) sstr << ", ";
+              sstr << static_cast<ConstantInt*>(v)->get();
               ++i;
             }
             break;
           case LiteralType::StringArray:
             for (const auto& v : ar->get()) {
-              if (i) printf(", ");
-              printf("\"%s\"", static_cast<ConstantString*>(v)->get().c_str());
+              if (i) sstr << ", ";
+              sstr << '"' << static_cast<ConstantString*>(v)->get() << '"';
               ++i;
             }
             break;
           case LiteralType::IPAddrArray:
             for (const auto& v : ar->get()) {
-              if (i) printf(", ");
-              printf("%s", static_cast<ConstantIP*>(v)->get().str().c_str());
+              if (i) sstr << ", ";
+              sstr << static_cast<ConstantIP*>(v)->get().str();
               ++i;
             }
             break;
           case LiteralType::CidrArray:
             for (const auto& v : ar->get()) {
-              if (i) printf(", ");
-              printf("\"%s\"",
-                     static_cast<ConstantCidr*>(v)->get().str().c_str());
+              if (i) sstr << ", ";
+              sstr << static_cast<ConstantCidr*>(v)->get().str();
               ++i;
             }
             break;
           default:
             abort();
         }
-        printf("]");
+        sstr << ']';
         continue;
       }
     }
-    printf("%%%s", arg->name().c_str());
+    sstr << '%' << arg->name();
   }
 
   // XXX sometimes u're interested in the name of the instr, even though it
   // doesn't yield a result value on the stack
   // if (type() == LiteralType::Void) {
-  //   printf("\t; (%%%s)", name().c_str());
+  //   sstr << "\t; (%" << name() << ")";
   // }
 
-  printf("\n");
+  return sstr.str();
 }
 
 }  // namespace flow

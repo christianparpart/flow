@@ -66,6 +66,8 @@ class Value {
 
   virtual void dump();
 
+  virtual std::string to_string() const;
+
  private:
   LiteralType type_;
   std::string name_;

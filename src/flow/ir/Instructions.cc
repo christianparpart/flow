@@ -85,7 +85,11 @@ const char* cstr(BinaryOperator op)  // {{{
 }
 // }}}
 // {{{ NopInstr
-void NopInstr::dump() { dumpOne("NOP"); }
+void NopInstr::dump() { dumpOne("nop"); }
+
+std::string NopInstr::to_string() const {
+  return formatOne("nop");
+}
 
 std::unique_ptr<Instr> NopInstr::clone() {
   return std::make_unique<NopInstr>();
@@ -96,6 +100,10 @@ void NopInstr::accept(InstructionVisitor& v) { v.visit(*this); }
 // {{{ CastInstr
 void CastInstr::dump() {
   dumpOne((std::string("cast ") + tos(type()).c_str()).c_str());
+}
+
+std::string CastInstr::to_string() const {
+  return formatOne(fmt::format("cast {}", type()));
 }
 
 std::unique_ptr<Instr> CastInstr::clone() {
@@ -112,6 +120,10 @@ CondBrInstr::CondBrInstr(Value* cond, BasicBlock* trueBlock, BasicBlock* falseBl
 
 void CondBrInstr::dump() { dumpOne("condbr"); }
 
+std::string CondBrInstr::to_string() const {
+  return formatOne("condbr");
+}
+
 std::unique_ptr<Instr> CondBrInstr::clone() {
   return std::make_unique<CondBrInstr>(condition(), trueBlock(), falseBlock());
 }
@@ -122,6 +134,10 @@ void CondBrInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 BrInstr::BrInstr(BasicBlock* targetBlock) : TerminateInstr({targetBlock}) {}
 
 void BrInstr::dump() { dumpOne("br"); }
+
+std::string BrInstr::to_string() const {
+  return formatOne("br");
+}
 
 std::unique_ptr<Instr> BrInstr::clone() {
   return std::make_unique<BrInstr>(targetBlock());
@@ -161,6 +177,21 @@ void MatchInstr::dump() {
   }
 }
 
+std::string MatchInstr::to_string() const {
+  switch (op()) {
+    case MatchClass::Same:
+      return formatOne("match.same");
+    case MatchClass::Head:
+      return formatOne("match.head");
+    case MatchClass::Tail:
+      return formatOne("match.tail");
+    case MatchClass::RegExp:
+      return formatOne("match.re");
+    default:
+      abort();
+  }
+}
+
 MatchInstr::MatchInstr(const MatchInstr& v) : TerminateInstr(v), op_(v.op()) {}
 
 std::unique_ptr<Instr> MatchInstr::clone() {
@@ -189,6 +220,10 @@ RetInstr::RetInstr(Value* result) : TerminateInstr({result}) {}
 
 void RetInstr::dump() { dumpOne("ret"); }
 
+std::string RetInstr::to_string() const {
+  return formatOne("ret");
+}
+
 std::unique_ptr<Instr> RetInstr::clone() {
   return std::make_unique<RetInstr>(operand(0));
 }
@@ -206,6 +241,10 @@ CallInstr::CallInstr(IRBuiltinFunction* callee, const std::vector<Value*>& args,
 
 void CallInstr::dump() {
   dumpOne("call");
+}
+
+std::string CallInstr::to_string() const {
+  return formatOne("call");
 }
 
 std::unique_ptr<Instr> CallInstr::clone() {
@@ -229,6 +268,10 @@ HandlerCallInstr::HandlerCallInstr(IRBuiltinHandler* callee,
 
 void HandlerCallInstr::dump() { dumpOne("handler"); }
 
+std::string HandlerCallInstr::to_string() const {
+  return formatOne("handler");
+}
+
 std::unique_ptr<Instr> HandlerCallInstr::clone() {
   return std::make_unique<HandlerCallInstr>(operands());
 }
@@ -242,6 +285,10 @@ PhiNode::PhiNode(const std::vector<Value*>& ops, const std::string& name)
     : Instr(ops[0]->type(), ops, name) {}
 
 void PhiNode::dump() { dumpOne("phi"); }
+
+std::string PhiNode::to_string() const {
+  return formatOne("phi");
+}
 
 std::unique_ptr<Instr> PhiNode::clone() {
   return std::make_unique<PhiNode>(operands(), name());
@@ -258,17 +305,29 @@ void LoadInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 
 void AllocaInstr::dump() { dumpOne("alloca"); }
 
+std::string AllocaInstr::to_string() const {
+  return formatOne("alloca");
+}
+
 std::unique_ptr<Instr> AllocaInstr::clone() {
   return std::make_unique<AllocaInstr>(type(), operand(0), name());
 }
 
 void LoadInstr::dump() { dumpOne("load"); }
 
+std::string LoadInstr::to_string() const {
+  return formatOne("load");
+}
+
 std::unique_ptr<Instr> LoadInstr::clone() {
   return std::make_unique<LoadInstr>(variable(), name());
 }
 
 void StoreInstr::dump() { dumpOne("store"); }
+
+std::string StoreInstr::to_string() const {
+  return formatOne("store");
+}
 
 std::unique_ptr<Instr> StoreInstr::clone() {
   return std::make_unique<StoreInstr>(variable(), index(), source(), name());

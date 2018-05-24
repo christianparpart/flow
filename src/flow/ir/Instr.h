@@ -117,6 +117,7 @@ class Instr : public Value {
 
  protected:
   void dumpOne(const char* mnemonic);
+  std::string formatOne(std::string mnemonic) const;
 
   void setParent(BasicBlock* bb) { basicBlock_ = bb; }
 
