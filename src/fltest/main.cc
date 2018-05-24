@@ -64,9 +64,12 @@ class Tester : public flow::Runtime {
   void flow_sum(flow::Params& args);
   void flow_assert(flow::Params& args);
 
+  void flow_print(flow::Params& args);
+
  private:
   flow::diagnostics::Report report_;
   uintmax_t errorCount_ = 0;
+  std::string output_;
 
 };
 
@@ -87,6 +90,10 @@ Tester::Tester() {
       .bind(&Tester::flow_assert, this)
       .param<flow::FlowNumber>("condition")
       .param<flow::FlowString>("description", "");
+
+  registerFunction("print")
+      .bind(&Tester::flow_print, this)
+      .param<flow::FlowString>("text");
 }
 
 void Tester::flow_handle_always(flow::Params& args) {
@@ -113,6 +120,10 @@ void Tester::flow_assert(flow::Params& args) {
     else
       reportError(fmt::format("Assertion failed ({}).", description));
   }
+}
+
+void Tester::flow_print(flow::Params& args) {
+  output_ += args.getString(1);
 }
 
 bool Tester::import(
@@ -212,6 +223,9 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
       flow::TargetCodeGenerator().generate(programIR.get());
 
   program->link(this, report);
+
+  // TODO: execute to check expected output against `output_`
+  output_.clear();
 }
 
 int main(int argc, const char* argv[]) {
