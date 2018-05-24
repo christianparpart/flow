@@ -23,6 +23,7 @@ class AfkProcessor : public flow::lang::Interpreter {
  private:
   void flow_line(flow::Params& args);
   void flow_print(flow::Params& args);
+  void flow_regex_group(flow::Params& args);
 
  private:
   bool trace_;
@@ -39,6 +40,12 @@ AfkProcessor::AfkProcessor(bool debug)
   registerFunction("print")
       .bind(&AfkProcessor::flow_print, this)
       .param<std::string>("text");
+
+  registerFunction("regex.group")
+      .bind(&AfkProcessor::flow_regex_group, this)
+      .setReadOnly()
+      .param<flow::FlowNumber>("group")
+      .returnType(flow::LiteralType::String);
 }
 
 void AfkProcessor::flow_line(flow::Params& args) {
@@ -47,6 +54,23 @@ void AfkProcessor::flow_line(flow::Params& args) {
 
 void AfkProcessor::flow_print(flow::Params& args) {
   std::cout << args.getString(1) << '\n';
+}
+
+void AfkProcessor::flow_regex_group(flow::Params& args) {
+  flow::FlowNumber position = args.getInt(1);
+
+  if (const flow::util::RegExp::Result* rr = args.caller()->regexpContext()->regexMatch()) {
+    if (position >= 0 && position < static_cast<flow::FlowNumber>(rr->size())) {
+      std::string match = rr->str(position);
+      args.setResult(args.caller()->newString(std::move(match)));
+    } else {
+      // match index out of bounds
+      args.setResult("");
+    }
+  } else {
+    // no regex match executed
+    args.setResult("");
+  }
 }
 
 void AfkProcessor::process(std::string line) {
@@ -73,6 +97,7 @@ void AfkProcessor::finalize() {
 int main(int argc, const char* argv[]) {
   flow::util::Flags flags;
   flags.defineString("file", 'f', "PROGRAM_FILE", "Path to program to execute");
+  flags.defineNumber("optimization-level", 'O', "LEVEL", "Sets target code optimization level", 1);
   flags.defineBool("help", 'h', "Shows this help and then exits");
   flags.defineBool("dump-tc", 'd', "Prints program target code and exits.");
   flags.defineBool("dump-ir", 0, "Prints program IR at the beginning and exits.");
@@ -87,11 +112,12 @@ int main(int argc, const char* argv[]) {
   }
 
   std::string programFileName = flags.getString("file");
+  int optimizationLevel = flags.getNumber("optimization-level");
 
   AfkProcessor afk{flags.getBool("trace")};
   {
     flow::diagnostics::Report report;
-    if (!afk.compileLocalFile(programFileName, &report, 1)) {
+    if (!afk.compileLocalFile(programFileName, &report, optimizationLevel)) {
       std::cerr << report << "\n";
       return EXIT_FAILURE;
     }
