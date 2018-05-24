@@ -799,6 +799,8 @@ std::unique_ptr<Expr> Parser::primaryExpr() {
     case Token::RegExp:
     case Token::Div: // beginning of regexp
       return literalExpr();
+    case Token::RegExpGroup:
+      return regexpGroup();
     case Token::StringType:
     case Token::NumberType:
     case Token::BoolType:
@@ -1063,6 +1065,14 @@ std::unique_ptr<Expr> Parser::literalExpr() {
                         token());
       return nullptr;
   }
+}
+
+std::unique_ptr<Expr> Parser::regexpGroup() {
+  FlowNumber groupId = numberValue();
+  SourceLocation loc = location();
+  consume(Token::RegExpGroup);
+
+  return std::make_unique<RegExpGroupExpr>(loc.update(), groupId);
 }
 
 std::unique_ptr<ParamList> Parser::paramList() {

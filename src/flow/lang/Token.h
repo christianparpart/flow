@@ -102,6 +102,7 @@ enum class Token {
 
   // misc
   Ident,
+  RegExpGroup,
   Period,
   DblPeriod,
   Ellipsis,

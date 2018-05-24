@@ -612,6 +612,14 @@ LiteralType LiteralExpr<std::string>::getType() const {
 
 LiteralType CallExpr::getType() const { return callee_->signature().returnType(); }
 
+void RegExpGroupExpr::visit(ASTVisitor& v) override {
+  v.accept(*this);
+}
+
+LiteralType RegExpGroupExpr::getType() const {
+  return LiteralType::String;
+}
+
 LiteralType VariableExpr::getType() const {
   return variable_->initializer()->getType();
 }

@@ -428,6 +428,20 @@ class CallExpr : public Expr {
   LiteralType getType() const override;
 };
 
+class RegExpGroupExpr : public Expr {
+ private:
+  FlowNumber groupId_;
+
+ public:
+  RegExpGroupExpr(SourceLocation loc, FlowNumber groupId)
+      : Expr{std::move(loc)}, groupId_{groupId} {}
+
+  FlowNumber groupId() const noexcept { return groupId_; }
+
+  void visit(ASTVisitor& v) override;
+  LiteralType getType() const override;
+};
+
 class VariableExpr : public Expr {
  private:
   VariableSym* variable_;

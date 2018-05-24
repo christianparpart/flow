@@ -32,6 +32,7 @@ class BinaryExpr;
 class UnaryExpr;
 template <typename> class LiteralExpr;
 class CallExpr;
+class RegExpGroupExpr;
 class VariableExpr;
 class HandlerRefExpr;
 class ArrayExpr;
@@ -66,6 +67,7 @@ class ASTVisitor {
   virtual void accept(UnaryExpr& expr) = 0;
   virtual void accept(BinaryExpr& expr) = 0;
   virtual void accept(CallExpr& expr) = 0;
+  virtual void accept(RegExpGroupExpr& expr) = 0;
   virtual void accept(VariableExpr& expr) = 0;
   virtual void accept(HandlerRefExpr& expr) = 0;
 

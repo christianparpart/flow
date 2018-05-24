@@ -277,6 +277,8 @@ std::string to_string(Token t) {
       return "string()";
     case Token::Ident:
       return "Ident";
+    case Token::RegExpGroup:
+      return "RegExpGroup";
     case Token::Period:
       return "Period";
     case Token::DblPeriod:

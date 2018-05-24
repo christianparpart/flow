@@ -463,7 +463,11 @@ Token Lexer::nextToken() {
           return token_ = Token::Not;
       }
     case '$':
-      return token_ = parseEnvVar();
+      if (std::isdigit(peekChar())) {
+        return token_ = parseRegExpGroup();
+      } else {
+        return token_ = parseEnvVar();
+      }
     case '\'':
       return token_ = parseRawString();
     case '"':
@@ -494,6 +498,23 @@ Token Lexer::nextToken() {
   }
 
   return token_;
+}
+
+// REGEX_GROUP = $[0-9]+
+Token Lexer::parseRegExpGroup() {
+  nextChar(); // skip leading '$'
+
+  stringValue_.clear();
+  numberValue_ = 0;
+
+  while (!eof() && std::isdigit(currentChar())) {
+    numberValue_ *= 10;
+    numberValue_ += currentChar() - '0';
+    stringValue_ += static_cast<char>(currentChar());
+    nextChar();
+  }
+
+  return Token::RegExpGroup;
 }
 
 Token Lexer::parseEnvVar() {

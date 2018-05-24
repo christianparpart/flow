@@ -6,6 +6,7 @@
 ------------------------------------------------------------------------------
 
 unit              ::= importDecl* (varDecl | handlerDecl)*
+
 importDecl        ::= 'import' STRING ['from' STRING]
 varDecl           ::= 'var' SYMBOL '=' expr ';'
 handlerDecl       ::= ['handler'] SYMBOL '{' varDecl* stmt '}'
@@ -19,6 +20,7 @@ matchStmt         ::= 'match' expr [MATCH_OP] '{'
                       ['else' stmt]
                       '}'
 compoundStmt      ::= '{' stmt '}'
+
 
 expr              ::= logicExpr
 logicExpr         ::= notExpr (('and' | 'xor' | 'or) notExpr)*
