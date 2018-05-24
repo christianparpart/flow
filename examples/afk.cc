@@ -16,9 +16,7 @@ class AfkProcessor : public flow::lang::Interpreter {
  public:
   explicit AfkProcessor(bool trace);
 
-  void initialize();
   void process(std::string line);
-  void finalize();
 
  private:
   void flow_line(flow::Params& args);
@@ -86,14 +84,6 @@ void AfkProcessor::process(std::string line) {
   }
 }
 
-void AfkProcessor::initialize() {
-  run("initially");
-}
-
-void AfkProcessor::finalize() {
-  run("finally");
-}
-
 int main(int argc, const char* argv[]) {
   flow::util::Flags flags;
   flags.defineString("file", 'f', "PROGRAM_FILE", "Path to program to execute");
@@ -106,21 +96,16 @@ int main(int argc, const char* argv[]) {
   flags.parse(argc, argv);
 
   if (flags.getBool("help")) {
-    std::cerr << "afk [-f PROGRAM_FILE] INPUT_FILEL" << "\n\n";
+    std::cerr << "afk [-f PROGRAM_FILE] [other options] INPUT_FILE ..." << "\n\n";
     std::cerr << flags.helpText() << "\n";
     return EXIT_SUCCESS;
   }
 
-  std::string programFileName = flags.getString("file");
-  int optimizationLevel = flags.getNumber("optimization-level");
-
   AfkProcessor afk{flags.getBool("trace")};
-  {
-    flow::diagnostics::Report report;
-    if (!afk.compileLocalFile(programFileName, &report, optimizationLevel)) {
-      std::cerr << report << "\n";
-      return EXIT_FAILURE;
-    }
+  if (flow::diagnostics::Report report;
+      !afk.compileLocalFile(flags.getString("file"), &report, flags.getNumber("optimization-level"))) {
+    std::cerr << report << "\n";
+    return EXIT_FAILURE;
   }
 
   if (flags.getBool("dump-ir")) {
@@ -133,7 +118,7 @@ int main(int argc, const char* argv[]) {
     return EXIT_SUCCESS;
   }
 
-  afk.initialize();
+  afk.run("initially");
 
   for (const std::string& inputFileName: flags.parameters()) {
     std::ifstream source{inputFileName};
@@ -148,7 +133,7 @@ int main(int argc, const char* argv[]) {
     }
   }
 
-  afk.finalize();
+  afk.run("finally");
 
   return EXIT_SUCCESS;
 }
