@@ -28,9 +28,8 @@ class ConstantValue : public Constant {
 
   T get() const { return value_; }
 
-  void dump() override {
-    std::cout << fmt::format("Constant '{}': {} = {}\n",
-        name(), type(), value_);
+  std::string to_string() const override {
+    return fmt::format("Constant '{}': {} = {}", name(), type(), value_);
   }
 
  private:

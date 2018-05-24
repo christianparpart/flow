@@ -85,8 +85,6 @@ const char* cstr(BinaryOperator op)  // {{{
 }
 // }}}
 // {{{ NopInstr
-void NopInstr::dump() { dumpOne("nop"); }
-
 std::string NopInstr::to_string() const {
   return formatOne("nop");
 }
@@ -98,10 +96,6 @@ std::unique_ptr<Instr> NopInstr::clone() {
 void NopInstr::accept(InstructionVisitor& v) { v.visit(*this); }
 // }}}
 // {{{ CastInstr
-void CastInstr::dump() {
-  dumpOne((std::string("cast ") + tos(type()).c_str()).c_str());
-}
-
 std::string CastInstr::to_string() const {
   return formatOne(fmt::format("cast {}", type()));
 }
@@ -118,8 +112,6 @@ void CastInstr::accept(InstructionVisitor& v) {
 CondBrInstr::CondBrInstr(Value* cond, BasicBlock* trueBlock, BasicBlock* falseBlock)
     : TerminateInstr({cond, trueBlock, falseBlock}) {}
 
-void CondBrInstr::dump() { dumpOne("condbr"); }
-
 std::string CondBrInstr::to_string() const {
   return formatOne("condbr");
 }
@@ -132,8 +124,6 @@ void CondBrInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 // }}}
 // {{{ BrInstr
 BrInstr::BrInstr(BasicBlock* targetBlock) : TerminateInstr({targetBlock}) {}
-
-void BrInstr::dump() { dumpOne("br"); }
 
 std::string BrInstr::to_string() const {
   return formatOne("br");
@@ -158,23 +148,6 @@ void MatchInstr::setElseBlock(BasicBlock* code) { setOperand(1, code); }
 
 BasicBlock* MatchInstr::elseBlock() const {
   return static_cast<BasicBlock*>(operand(1));
-}
-
-void MatchInstr::dump() {
-  switch (op()) {
-    case MatchClass::Same:
-      dumpOne("match.same");
-      break;
-    case MatchClass::Head:
-      dumpOne("match.head");
-      break;
-    case MatchClass::Tail:
-      dumpOne("match.tail");
-      break;
-    case MatchClass::RegExp:
-      dumpOne("match.re");
-      break;
-  }
 }
 
 std::string MatchInstr::to_string() const {
@@ -218,8 +191,6 @@ void MatchInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 // {{{ RetInstr
 RetInstr::RetInstr(Value* result) : TerminateInstr({result}) {}
 
-void RetInstr::dump() { dumpOne("ret"); }
-
 std::string RetInstr::to_string() const {
   return formatOne("ret");
 }
@@ -238,10 +209,6 @@ CallInstr::CallInstr(const std::vector<Value*>& args, const std::string& name)
 CallInstr::CallInstr(IRBuiltinFunction* callee, const std::vector<Value*>& args,
                      const std::string& name)
     : Instr(callee->signature().returnType(), join(callee, args), name) {}
-
-void CallInstr::dump() {
-  dumpOne("call");
-}
 
 std::string CallInstr::to_string() const {
   return formatOne("call");
@@ -266,8 +233,6 @@ HandlerCallInstr::HandlerCallInstr(IRBuiltinHandler* callee,
   // by the execution engine.
 }
 
-void HandlerCallInstr::dump() { dumpOne("handler"); }
-
 std::string HandlerCallInstr::to_string() const {
   return formatOne("handler");
 }
@@ -283,8 +248,6 @@ void HandlerCallInstr::accept(InstructionVisitor& visitor) {
 // {{{ PhiNode
 PhiNode::PhiNode(const std::vector<Value*>& ops, const std::string& name)
     : Instr(ops[0]->type(), ops, name) {}
-
-void PhiNode::dump() { dumpOne("phi"); }
 
 std::string PhiNode::to_string() const {
   return formatOne("phi");
@@ -303,8 +266,6 @@ void StoreInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 
 void LoadInstr::accept(InstructionVisitor& visitor) { visitor.visit(*this); }
 
-void AllocaInstr::dump() { dumpOne("alloca"); }
-
 std::string AllocaInstr::to_string() const {
   return formatOne("alloca");
 }
@@ -312,8 +273,6 @@ std::string AllocaInstr::to_string() const {
 std::unique_ptr<Instr> AllocaInstr::clone() {
   return std::make_unique<AllocaInstr>(type(), operand(0), name());
 }
-
-void LoadInstr::dump() { dumpOne("load"); }
 
 std::string LoadInstr::to_string() const {
   return formatOne("load");
@@ -323,18 +282,12 @@ std::unique_ptr<Instr> LoadInstr::clone() {
   return std::make_unique<LoadInstr>(variable(), name());
 }
 
-void StoreInstr::dump() { dumpOne("store"); }
-
 std::string StoreInstr::to_string() const {
   return formatOne("store");
 }
 
 std::unique_ptr<Instr> StoreInstr::clone() {
   return std::make_unique<StoreInstr>(variable(), index(), source(), name());
-}
-
-void RegExpGroupInstr::dump() {
-  dumpOne("reggroup");
 }
 
 std::string RegExpGroupInstr::to_string() const {

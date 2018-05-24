@@ -28,7 +28,6 @@ class NopInstr : public Instr {
  public:
   NopInstr() : Instr(LiteralType::Void, {}, "nop") {}
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -71,7 +70,6 @@ class AllocaInstr : public Instr {
 
   Value* arraySize() const { return operands()[0]; }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -87,7 +85,6 @@ class StoreInstr : public Instr {
   ConstantInt* index() const { return static_cast<ConstantInt*>(operand(1)); }
   Value* source() const { return operand(2); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -100,7 +97,6 @@ class RegExpGroupInstr : public Instr {
 
   ConstantInt* groupId() const { return static_cast<ConstantInt*>(operand(0)); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -113,7 +109,6 @@ class LoadInstr : public Instr {
 
   Value* variable() const { return operand(0); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -127,7 +122,6 @@ class CallInstr : public Instr {
 
   IRBuiltinFunction* callee() const { return (IRBuiltinFunction*)operand(0); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -140,7 +134,6 @@ class HandlerCallInstr : public Instr {
 
   IRBuiltinHandler* callee() const { return (IRBuiltinHandler*)operand(0); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -153,7 +146,6 @@ class CastInstr : public Instr {
 
   Value* source() const { return operand(0); }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -167,7 +159,6 @@ class UnaryInstr : public Instr {
 
   UnaryOperator op() const { return operator_; }
 
-  void dump() override { dumpOne(cstr(operator_)); }
   std::string to_string() const override { return formatOne(cstr(operator_)); }
 
   std::unique_ptr<Instr> clone() override {
@@ -188,7 +179,6 @@ class BinaryInstr : public Instr {
 
   BinaryOperator op() const { return operator_; }
 
-  void dump() override { dumpOne(cstr(operator_)); }
   std::string to_string() const override { return formatOne(cstr(operator_)); }
 
   std::unique_ptr<Instr> clone() override {
@@ -214,7 +204,6 @@ class PhiNode : public Instr {
  public:
   PhiNode(const std::vector<Value*>& ops, const std::string& name);
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -251,7 +240,6 @@ class CondBrInstr : public TerminateInstr {
   BasicBlock* trueBlock() const { return (BasicBlock*)operands()[1]; }
   BasicBlock* falseBlock() const { return (BasicBlock*)operands()[2]; }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -266,7 +254,6 @@ class BrInstr : public TerminateInstr {
 
   BasicBlock* targetBlock() const { return (BasicBlock*)operands()[0]; }
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -279,7 +266,6 @@ class RetInstr : public TerminateInstr {
  public:
   RetInstr(Value* result);
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;
@@ -308,7 +294,6 @@ class MatchInstr : public TerminateInstr {
   BasicBlock* elseBlock() const;
   void setElseBlock(BasicBlock* code);
 
-  void dump() override;
   std::string to_string() const override;
   std::unique_ptr<Instr> clone() override;
   void accept(InstructionVisitor& v) override;

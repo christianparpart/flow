@@ -64,8 +64,6 @@ class Value {
    */
   void replaceAllUsesWith(Value* newUse);
 
-  virtual void dump();
-
   virtual std::string to_string() const;
 
  private:

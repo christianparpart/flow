@@ -15,7 +15,7 @@ class Constant : public Value {
  public:
   Constant(LiteralType ty, const std::string& name) : Value(ty, name) {}
 
-  void dump() override;
+  std::string to_string() const override;
 };
 
 }  // namespace flow

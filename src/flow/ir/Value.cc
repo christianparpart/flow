@@ -64,10 +64,6 @@ void Value::replaceAllUsesWith(Value* newUse) {
   }
 }
 
-void Value::dump() {
-  printf("Value '%s': %s\n", name_.c_str(), tos(type_).c_str());
-}
-
 std::string Value::to_string() const {
   return fmt::format("Value {} of type {}", name_, type_);
 }

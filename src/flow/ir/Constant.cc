@@ -9,8 +9,8 @@
 
 namespace flow {
 
-void Constant::dump() {
-  printf("Constant '%s': %s\n", name().c_str(), tos(type()).c_str());
+std::string Constant::to_string() const {
+  return fmt::format("Constant '{}': {}", name(), type());
 }
 
 }  // namespace flow

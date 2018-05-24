@@ -176,7 +176,7 @@ class BasicBlock : public Value {
   /** Retrieves all immediate dominators of given basic block. */
   std::vector<BasicBlock*> immediateDominators();
 
-  void dump() override;
+  void dump();
 
   /**
    * Performs sanity checks on internal data structures.

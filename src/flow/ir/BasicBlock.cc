@@ -14,6 +14,8 @@
 #include <flow/util/assert.h>
 
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 #include <iterator>
 #include <cassert>
 #include <cmath>
@@ -173,31 +175,35 @@ bool BasicBlock::isAfter(const BasicBlock* otherBB) const {
 }
 
 void BasicBlock::dump() {
-  int n = printf("%%%s:", name().c_str());
+  std::stringstream sstr;
+
+  sstr << '%' << name() << ':';
   if (!predecessors_.empty()) {
-    printf("%*c; [preds: ", 20 - n, ' ');
+    sstr << " ; [preds: ";
     for (size_t i = 0, e = predecessors_.size(); i != e; ++i) {
-      if (i) printf(", ");
-      printf("%%%s", predecessors_[i]->name().c_str());
+      if (i) sstr << ", ";
+      sstr << '%' << predecessors_[i]->name();
     }
-    printf("]");
+    sstr << ']';
   }
-  printf("\n");
+  sstr << '\n';
 
   if (!successors_.empty()) {
-    printf("%20c; [succs: ", ' ');
+    sstr << " ; [succs: ";
     for (size_t i = 0, e = successors_.size(); i != e; ++i) {
-      if (i) printf(", ");
-      printf("%%%s", successors_[i]->name().c_str());
+      if (i) sstr << ", ";
+      sstr << '%' << successors_[i]->name();
     }
-    printf("]\n");
+    sstr << "]\n";
   }
 
   for (size_t i = 0, e = code_.size(); i != e; ++i) {
-    code_[i]->dump();
+    sstr << code_[i]->to_string() << '\n';
   }
 
-  printf("\n");
+  sstr << "\n";
+
+  std::cerr << sstr.str();
 }
 
 void BasicBlock::linkSuccessor(BasicBlock* successor) {

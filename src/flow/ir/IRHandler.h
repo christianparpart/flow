@@ -34,7 +34,7 @@ class IRHandler : public Constant {
   IRProgram* getProgram() const { return program_; }
   void setParent(IRProgram* prog) { program_ = prog; }
 
-  void dump() override;
+  void dump();
 
   bool empty() const noexcept { return blocks_.empty(); }
 
