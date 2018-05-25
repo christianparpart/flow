@@ -11,6 +11,7 @@
 
 namespace flow::diagnostics {
 
+// {{{ Message
 std::string Message::string() const {
   switch (type) {
     case Type::Warning:
@@ -28,12 +29,46 @@ bool Message::operator==(const Message& other) const noexcept {
          sourceLocation.begin == other.sourceLocation.begin &&
          text == other.text;
 }
+// }}}
+// {{{ ConsoleReport
+ConsoleReport::ConsoleReport()
+    : errorCount_{0} {
+}
 
-void Report::clear() {
+bool ConsoleReport::containsFailures() const noexcept {
+  return errorCount_ != 0;
+}
+
+void ConsoleReport::push_back(Message message) {
+  if (message.type != Type::Warning)
+    errorCount_++;
+
+  switch (message.type) {
+    case Type::Warning:
+      std::cerr << fmt::format("Warning: {}\n", message);
+      break;
+    default:
+      std::cerr << fmt::format("Error: {}\n", message);
+      break;
+  }
+}
+// }}}
+// {{{ BufferedReport
+void BufferedReport::push_back(Message msg) {
+  messages_.emplace_back(std::move(msg));
+}
+
+bool BufferedReport::containsFailures() const noexcept {
+  return std::count_if(begin(), end(),
+                       [](const Message& m) { return m.type != Type::Warning; })
+         != 0;
+}
+
+void BufferedReport::clear() {
   messages_.clear();
 }
 
-void Report::log() const {
+void BufferedReport::log() const {
   for (const Message& message: messages_) {
     switch (message.type) {
       case Type::Warning:
@@ -46,7 +81,7 @@ void Report::log() const {
   }
 }
 
-bool Report::operator==(const Report& other) const noexcept {
+bool BufferedReport::operator==(const BufferedReport& other) const noexcept {
   if (size() != other.size())
     return false;
 
@@ -57,7 +92,7 @@ bool Report::operator==(const Report& other) const noexcept {
   return true;
 }
 
-bool Report::contains(const Message& message) const noexcept {
+bool BufferedReport::contains(const Message& message) const noexcept {
   for (const Message& m: messages_)
     if (m == message)
       return true;
@@ -65,7 +100,7 @@ bool Report::contains(const Message& message) const noexcept {
   return false;
 }
 
-DifferenceReport difference(const Report& first, const Report& second) {
+DifferenceReport difference(const BufferedReport& first, const BufferedReport& second) {
   DifferenceReport diff;
 
   for (const Message& m: first)
@@ -79,7 +114,7 @@ DifferenceReport difference(const Report& first, const Report& second) {
   return diff;
 }
 
-std::ostream& operator<<(std::ostream& os, const Report& report) {
+std::ostream& operator<<(std::ostream& os, const BufferedReport& report) {
   for (const Message& message: report) {
     switch (message.type) {
       case Type::Warning:
@@ -92,5 +127,6 @@ std::ostream& operator<<(std::ostream& os, const Report& report) {
   }
   return os;
 }
+// }}}
 
 } // namespace flow::diagnostics

@@ -11,7 +11,7 @@
 
 int main(int argc, const char* argv[]) {
   flow::lang::Interpreter interpreter;
-  flow::diagnostics::Report report;
+  flow::diagnostics::ConsoleReport report;
 
   interpreter.registerFunction("greetings")
       .param<std::string>("from")
@@ -19,14 +19,10 @@ int main(int argc, const char* argv[]) {
     std::cout << "Hello, " << params.getString(1) << "!\n";
   });
 
-  interpreter.compileString(R"(
-    handler greeter {
-      greetings from: "World";
-    };
-  )", &report);
-
-  if (report.containsFailures())
-    std::cerr << report;
-  else
+  if (interpreter.compileString(R"(handler greeter {
+                                     greetings from: "World";
+                                   };
+                                  )", &report)) {
     interpreter.run("greeter");
+  }
 }

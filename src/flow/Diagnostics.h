@@ -38,39 +38,50 @@ struct Message {
   bool operator!=(const Message& other) const noexcept { return !(*this == other); }
 };
 
-using MessageList = std::vector<Message>;
-
 class Report {
  public:
+  virtual ~Report() {}
+
   template<typename... Args> void tokenError(const SourceLocation& sloc, const std::string& f, Args... args) {
-    messages_.emplace_back(Type::TokenError, sloc, fmt::format(f, std::move(args)...));
+    emplace_back(Type::TokenError, sloc, fmt::format(f, std::move(args)...));
   }
 
   template<typename... Args> void syntaxError(const SourceLocation& sloc, const std::string& f, Args... args) {
-    messages_.emplace_back(Type::SyntaxError, sloc, fmt::format(f, std::move(args)...));
+    emplace_back(Type::SyntaxError, sloc, fmt::format(f, std::move(args)...));
   }
 
   template<typename... Args> void typeError(const SourceLocation& sloc, const std::string& f, Args... args) {
-    messages_.emplace_back(Type::TypeError, sloc, fmt::format(f, std::move(args)...));
+    emplace_back(Type::TypeError, sloc, fmt::format(f, std::move(args)...));
   }
 
   template<typename... Args> void warning(const SourceLocation& sloc, const std::string& f, Args... args) {
-    messages_.emplace_back(Type::Warning, sloc, fmt::format(f, std::move(args)...));
+    emplace_back(Type::Warning, sloc, fmt::format(f, std::move(args)...));
   }
 
   template<typename... Args> void linkError(const std::string& f, Args... args) {
-    messages_.emplace_back(Type::LinkError, SourceLocation{}, fmt::format(f, std::move(args)...));
+    emplace_back(Type::LinkError, SourceLocation{}, fmt::format(f, std::move(args)...));
   }
 
-  void emplace_back(Message&& m) {
-    messages_.emplace_back(std::move(m));
+  void emplace_back(Type ty, SourceLocation sl, std::string t) {
+    push_back(Message(ty, std::move(sl), std::move(t)));
   }
+
+  virtual void push_back(Message msg) = 0;
+  virtual bool containsFailures() const noexcept = 0;
+};
+
+using MessageList = std::vector<Message>;
+
+class BufferedReport : public Report {
+ public:
+  void push_back(Message msg) override;
+  bool containsFailures() const noexcept override;
 
   void log() const;
-  void clear();
 
   const MessageList& messages() const noexcept { return messages_; }
 
+  void clear();
   size_t size() const noexcept { return messages_.size(); }
   const Message& operator[](size_t i) const { return messages_[i]; }
 
@@ -81,26 +92,31 @@ class Report {
   const_iterator begin() const noexcept { return messages_.begin(); }
   const_iterator end() const noexcept { return messages_.end(); }
 
-  size_t errorCount() const noexcept {
-    return std::count_if(begin(), end(), [](const Message& m) { return m.type != Type::Warning; });
-  }
-
-  bool containsFailures() const noexcept { return errorCount() != 0; }
-
-  bool operator==(const Report& other) const noexcept;
-  bool operator!=(const Report& other) const noexcept { return !(*this == other); }
-
   bool contains(const Message& m) const noexcept;
+
+  bool operator==(const BufferedReport& other) const noexcept;
+  bool operator!=(const BufferedReport& other) const noexcept { return !(*this == other); }
 
  private:
   MessageList messages_;
+};
+
+class ConsoleReport : public Report {
+ public:
+  ConsoleReport();
+
+  void push_back(Message msg) override;
+  bool containsFailures() const noexcept override;
+
+ private:
+  size_t errorCount_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Report& report);
 
 using DifferenceReport = std::pair<MessageList, MessageList>;
 
-DifferenceReport difference(const Report& first, const Report& second);
+DifferenceReport difference(const BufferedReport& first, const BufferedReport& second);
 
 class DiagnosticsError : public std::runtime_error {
  public:

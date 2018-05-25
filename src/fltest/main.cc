@@ -67,7 +67,7 @@ class Tester : public flow::Runtime {
   void flow_print(flow::Params& args);
 
  private:
-  flow::diagnostics::Report report_;
+  flow::diagnostics::BufferedReport report_;
   uintmax_t errorCount_ = 0;
   std::string output_;
 
@@ -171,10 +171,10 @@ static std::string readFile(const std::string& filename) {
 }
 
 bool Tester::testFile(const std::string& filename) {
-  flow::diagnostics::Report actual;
+  flow::diagnostics::BufferedReport actual;
   compileFile(filename, &actual);
 
-  flow::diagnostics::Report expected;
+  flow::diagnostics::BufferedReport expected;
   Parser p(filename, readFile(filename));
   std::error_code ec = p.parse(&expected);
   if (ec) {

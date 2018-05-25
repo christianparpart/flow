@@ -59,7 +59,7 @@ bool Interpreter::compile(Parser&& parser,
                           int optimizationLevel) {
   std::unique_ptr<flow::lang::UnitSym> unit = parser.parse();
 
-  if (report->errorCount() > 0)
+  if (report->containsFailures())
     return false;
 
   IRGenerator irgen{report};
@@ -88,7 +88,7 @@ bool Interpreter::compile(Parser&& parser,
 
   std::unique_ptr<Program> program = TargetCodeGenerator().generate(programIR_.get());
   program->link(this, report);
-  if (report->errorCount() > 0)
+  if (report->containsFailures())
     return false;
 
   program_ = std::move(program);

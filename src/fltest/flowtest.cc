@@ -233,7 +233,7 @@ std::error_code Parser::parse(flow::diagnostics::Report* report) {
   lexer_.consume(Token::InitializerMark);
 
   while (!lexer_.eof())
-    report->emplace_back(parseMessage());
+    report->push_back(parseMessage());
 
   return std::error_code{};
 }

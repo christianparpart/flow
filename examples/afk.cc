@@ -102,9 +102,8 @@ int main(int argc, const char* argv[]) {
   }
 
   AfkProcessor afk{flags.getBool("trace")};
-  if (flow::diagnostics::Report report;
+  if (flow::diagnostics::ConsoleReport report;
       !afk.compileLocalFile(flags.getString("file"), &report, flags.getNumber("optimization-level"))) {
-    std::cerr << report << "\n";
     return EXIT_FAILURE;
   }
 
