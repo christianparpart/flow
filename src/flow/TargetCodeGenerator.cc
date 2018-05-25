@@ -138,8 +138,16 @@ void TargetCodeGenerator::emitJump(BasicBlock* bb) {
 }
 
 void TargetCodeGenerator::emitBinary(Instr& binaryInstr, Opcode opcode) {
-  emitLoad(binaryInstr.operand(0));
-  emitLoad(binaryInstr.operand(1));
+  // emit operands only if not already on stack in ordered form and just used by this instruction.
+  if (!(stack_.size() >= 2 &&
+        binaryInstr.operand(0) == stack_[stack_.size() - 2] &&
+        binaryInstr.operand(1) == stack_[stack_.size() - 1] &&
+        binaryInstr.operand(0)->useCount() == 1 &&
+        binaryInstr.operand(1)->useCount() == 1)) {
+    emitLoad(binaryInstr.operand(0));
+    emitLoad(binaryInstr.operand(1));
+  }
+
   emitInstr(opcode);
   changeStack(2, &binaryInstr);
 }
@@ -147,10 +155,7 @@ void TargetCodeGenerator::emitBinary(Instr& binaryInstr, Opcode opcode) {
 void TargetCodeGenerator::emitBinaryAssoc(Instr& binaryInstr, Opcode opcode) {
   // TODO: switch lhs and rhs if lhs is const and rhs is not
   // TODO: revive stack/imm opcodes
-  emitLoad(binaryInstr.operand(0));
-  emitLoad(binaryInstr.operand(1));
-  emitInstr(opcode);
-  changeStack(2, &binaryInstr);
+  emitBinary(binaryInstr, opcode);
 }
 
 void TargetCodeGenerator::emitUnary(Instr& unaryInstr, Opcode opcode) {
