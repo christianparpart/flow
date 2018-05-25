@@ -393,6 +393,14 @@ void TargetCodeGenerator::emitLoad(Value* value) {
   push(value);
 }
 
+void TargetCodeGenerator::dumpCurrentStack() {
+  fmt::print("Dump stack state ({} elements):\n", stack_.size());
+
+  for (size_t i = 0, e = stack_.size(); i != e; ++i) {
+    fmt::print("stack[{}]: {}\n", i, stack_[i]->to_string());
+  }
+}
+
 void TargetCodeGenerator::visit(PhiNode& phiInstr) {
   fprintf(stderr, "Should never reach here, as PHI instruction nodes should have been replaced by target registers.");
   abort();

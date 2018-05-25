@@ -51,6 +51,8 @@ class TargetCodeGenerator : public InstructionVisitor {
  protected:
   void generate(IRHandler* handler);
 
+  void dumpCurrentStack();
+
   /**
    * Ensures @p value is available on top of the stack.
    *
