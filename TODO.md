@@ -1,6 +1,6 @@
 # incomplete TODO
 
-- [ ] make global scope an optional language feature (so host apps can disable it before compilation)
+- [x] make global scope an optional language feature (so host apps can disable it before compilation)
 - [ ] support iterator loops in language (optional feature that can be toggled)
 - [ ] ensure SourceLocation is properly containing [begin, end] of the source code representation of the given AST
 - [ ] ensure the AST always contains the right SourceLocation
