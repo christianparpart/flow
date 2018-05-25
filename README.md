@@ -1,16 +1,22 @@
 ## Flow
 
-Flow control language frontend, compiler backend, and virtual machine.
+**Flow** is a domain specific language designed to define control flow for
+customizable hooks in your application, such as for request routing, event routing, and
+more.
 
-here be dragons (with ponnies)
+This project provides you with the Flow language frontend, compiler backend, and a virtual machine.
 
-### Goal
+### Main Features
 
-- enable other projects to use Flow as their own flow control configuration language.
-- in theory, be able to add other language frontends that can make use of the backend & VM.
+- A deterministic, non-turing-complete domain specific language for routing and configuration
+- Customizability of the host application
+- Extensibility through the module system
+- 
 
-### Components
+### Use Flow, if ...
 
-- language frontend
-- compiler backend (IR & target code generator)
-- virtual machine
+Use Flow if:
+
+- speed matters
+- reliability of termination of your scripts matter.
+- table based configuration is not enough
