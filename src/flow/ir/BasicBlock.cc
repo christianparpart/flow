@@ -198,7 +198,7 @@ void BasicBlock::dump() {
   }
 
   for (size_t i = 0, e = code_.size(); i != e; ++i) {
-    sstr << code_[i]->to_string() << '\n';
+    sstr << '\t' << code_[i]->to_string() << '\n';
   }
 
   sstr << "\n";
