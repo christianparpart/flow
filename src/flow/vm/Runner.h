@@ -28,6 +28,9 @@
 
 namespace flow {
 
+using Quota = int64_t;
+constexpr Quota NoQuota = -1;
+
 // ExecutionEngine
 // VM
 class Runner {
@@ -36,6 +39,11 @@ class Runner {
     Inactive,   //!< No handler running nor suspended.
     Running,    //!< Active handler is currently running.
     Suspended,  //!< Active handler is currently suspended.
+  };
+
+  class QuotaExceeded : public std::runtime_error {
+   public:
+    QuotaExceeded() : std::runtime_error{"Flow runtime quota exceeded."} {}
   };
 
   using Value = uint64_t;
@@ -109,6 +117,7 @@ class Runner {
 
  public:
   Runner(const Handler* handler, void* userdata, Globals* globals, TraceLogger logger);
+  Runner(const Handler* handler, void* userdata, Globals* globals, Quota quota, TraceLogger logger);
   ~Runner() = default;
 
   const Handler* handler() const noexcept { return handler_; }
@@ -131,6 +140,9 @@ class Runner {
   FlowString* newString(std::string value);
 
  private:
+  //! consumes @p tokens from quota and raises QuotaExceeded if quota is being exceeded.
+  void consume(Opcode op);
+
   //! retrieves a pointer to a an empty string constant.
   const FlowString* emptyString() const { return &*stringGarbage_.begin(); }
 
@@ -159,6 +171,7 @@ class Runner {
   Runner& operator=(Runner&) = delete;
 
  private:
+  Quota quota_;
   const Handler* handler_;
   TraceLogger traceLogger_;
 

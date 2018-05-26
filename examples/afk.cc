@@ -77,7 +77,7 @@ void AfkProcessor::process(std::string line) {
   if (!trace_) {
     run("process");
   } else {
-    run("process", nullptr,
+    run("process", nullptr, flow::NoQuota,
         [this](flow::Instruction instr, size_t ip, size_t sp) {
           std::cerr << flow::disassemble(instr, ip, sp, &program()->constants()) << "\n";
         });

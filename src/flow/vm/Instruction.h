@@ -129,6 +129,29 @@ typedef uint64_t Instruction;
 typedef uint16_t Operand;
 
 // --------------------------------------------------------------------------
+// opcode pricing
+
+constexpr inline unsigned getPrice(Opcode opcode) {
+  switch (opcode) {
+    case Opcode::EXIT:
+      return 0;
+    case Opcode::JMP:
+      return 1;
+    case Opcode::JN:
+    case Opcode::JZ:
+      return 2;
+    case Opcode::GSTORE:
+    case Opcode::STORE:
+      return 4;
+    case Opcode::CALL:
+    case Opcode::HANDLER:
+      return 8;
+    default:
+      return 1;
+  }
+}
+
+// --------------------------------------------------------------------------
 // encoder
 
 /** Creates an instruction with no operands. */

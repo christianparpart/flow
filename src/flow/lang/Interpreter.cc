@@ -98,11 +98,15 @@ bool Interpreter::compile(Parser&& parser,
 
 #define GLOBAL_SCOPE_INIT_NAME "@__global_init__"
 
-bool Interpreter::run(const std::string& handlerName, void* userdata, TraceLogger trace) const {
+bool Interpreter::run(const std::string& handlerName) const {
+  return run(handlerName, nullptr, NoQuota, TraceLogger{});
+}
+
+bool Interpreter::run(const std::string& handlerName, void* userdata, Quota quota, TraceLogger trace) const {
   if (!initialized_) {
     initialized_ = true;
     if (Handler* handler = program_->findHandler(GLOBAL_SCOPE_INIT_NAME); handler != nullptr) {
-      Runner{handler, userdata, &globals_, trace}.run();
+      Runner{handler, userdata, &globals_, NoQuota, trace}.run();
     }
   }
 
@@ -110,7 +114,7 @@ bool Interpreter::run(const std::string& handlerName, void* userdata, TraceLogge
   if (!handler)
     return false;
 
-  return Runner{handler, userdata, &globals_, trace}.run();
+  return Runner{handler, userdata, &globals_, quota, trace}.run();
 }
 
 } // namespace flow::lang

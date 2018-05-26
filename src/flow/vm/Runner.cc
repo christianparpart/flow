@@ -51,24 +51,24 @@ namespace flow {
   #define instr(NAME)     case NAME: tracelog();
   #define get_pc()        (pc - code.data())
   #define set_pc(offset)  do { pc = code.data() + (offset); } while (0)
-  #define jump            if (true) { break; }
-  #define next            if (true) { ++pc; break; }
+  #define next            if (true) { ++pc; jump; }
+  #define jump            if (true) { consume(OP); break; }
 #elif defined(ENABLE_FLOW_DIRECT_THREADED_VM)
   #define LOOP_BEGIN()    jump;
   #define LOOP_END()
   #define instr(name)     l_##name : ++pc; tracelog();
   #define get_pc()        ((pc - code.data()) / 2)
   #define set_pc(offset)  do { pc = code.data() + (offset) * 2; } while (0)
-  #define jump            goto* (void*) *pc
-  #define next            goto* (void*) *++pc
+  #define next            do { ++pc; jump; } while (0)
+  #define jump            do { consume(OP); goto* (void*) *pc; } while (0)
 #else
   #define LOOP_BEGIN()    jump;
   #define LOOP_END()
   #define instr(name)     l_##name : tracelog();
   #define get_pc()        (pc - code.data())
   #define set_pc(offset)  do { pc = code.data() + (offset); } while (0)
-  #define jump            goto* ops[OP]
-  #define next            goto* ops[opcode(*++pc)]
+  #define next            do { ++pc; jump; } while (0)
+  #define jump            do { consume(OP); goto* ops[OP]; } while (0)
 #endif
 // }}}
 
@@ -86,7 +86,11 @@ void Runner::Stack::rotate(size_t n) {
 static FlowString* t = nullptr;
 
 Runner::Runner(const Handler* handler, void* userdata, Globals* globals, TraceLogger traceLogger)
-    : handler_(handler),
+    : Runner{handler, userdata, globals, NoQuota, traceLogger} {}
+
+Runner::Runner(const Handler* handler, void* userdata, Globals* globals, Quota quota, TraceLogger traceLogger)
+    : quota_{quota},
+      handler_(handler),
       traceLogger_{traceLogger ? std::move(traceLogger) : [](Instruction, size_t, size_t) {}},
       program_(handler->program()),
       userdata_(userdata),
@@ -98,6 +102,19 @@ Runner::Runner(const Handler* handler, void* userdata, Globals* globals, TraceLo
       stringGarbage_() {
   // initialize emptyString()
   t = newString("");
+}
+
+void Runner::consume(Opcode opcode) {
+  if (quota_ == NoQuota)
+    return;
+
+  unsigned price = getPrice(opcode);
+  if (price >= quota_) {
+    quota_ = 0;
+    throw QuotaExceeded{};
+  }
+
+  quota_ -= price;
 }
 
 FlowString* Runner::newString(std::string value) {

@@ -35,7 +35,8 @@ class Interpreter : public Runtime {
   bool compileString(const std::string& path, diagnostics::Report* report, int optimizationLevel = 0);
   bool compileLocalFile(const std::string& path, diagnostics::Report* report, int optimizationLevel = 0);
 
-  bool run(const std::string& handlerName, void* userdata = nullptr, TraceLogger trace = TraceLogger{}) const;
+  bool run(const std::string& handlerName) const;
+  bool run(const std::string& handlerName, void* userdata, Quota quota, TraceLogger trace = TraceLogger{}) const;
 
   Program* program() const noexcept { return program_.get(); }
   IRProgram* programIR() const noexcept { return programIR_.get(); }
