@@ -1,0 +1,16 @@
+# vim:syntax=flow
+
+var nr = 0;
+
+process {
+  if LINE =~ /^([^:]+):([^:]+):([^:]+):.*$/ {
+    if int($3) >= 1000 {
+      print $1 + " with ID " + $3;
+      nr = nr + 1;
+    }
+  }
+}
+
+finally {
+  print "Found #{nr} real users.";
+}
