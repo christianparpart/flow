@@ -66,6 +66,8 @@ void CallVisitor::accept(CallExpr& call) {
   }
 }
 
+void CallVisitor::accept(RegExpGroupExpr& expr) {}
+
 void CallVisitor::accept(VariableExpr& expr) {}
 
 void CallVisitor::accept(HandlerRefExpr& expr) {}
