@@ -32,10 +32,7 @@ bool TokenTraits::isKeyword(Token t) {
 }
 
 bool TokenTraits::isReserved(Token t) {
-  switch (t) {
-    default:
-      return false;
-  }
+  return false;
 }
 
 bool TokenTraits::isType(Token t) {

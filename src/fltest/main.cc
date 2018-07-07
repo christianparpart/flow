@@ -7,14 +7,14 @@
 
 #include "flowtest.h"
 
-#include <flow/lang/Parser.h>
-#include <flow/lang/IRGenerator.h>
-#include <flow/SourceLocation.h>
 #include <flow/NativeCallback.h>
 #include <flow/Params.h>
+#include <flow/SourceLocation.h>
 #include <flow/TargetCodeGenerator.h>
 #include <flow/ir/IRProgram.h>
 #include <flow/ir/PassManager.h>
+#include <flow/lang/IRGenerator.h>
+#include <flow/lang/Parser.h>
 #include <flow/transform/EmptyBlockElimination.h>
 #include <flow/transform/InstructionElimination.h>
 #include <flow/transform/MergeBlockPass.h>
@@ -24,9 +24,10 @@
 
 #include <fmt/format.h>
 
-#include <iostream>
-#include <vector>
 #include <experimental/filesystem>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 namespace fs = std::experimental::filesystem;
 
@@ -51,9 +52,9 @@ class Tester : public flow::Runtime {
 
   void reportError(const std::string& msg);
 
-  template<typename... Args>
-  void reportError(const std::string& fmt, Args&&... args) {
-    reportError(fmt::format(fmt, args...));
+  template <typename... Args>
+  void reportError(const std::string& msg, Args&&... args) {
+    reportError(fmt::format(msg, args...));
   }
 
   // handlers
@@ -70,16 +71,12 @@ class Tester : public flow::Runtime {
   flow::diagnostics::BufferedReport report_;
   uintmax_t errorCount_ = 0;
   std::string output_;
-
 };
 
 Tester::Tester() {
-  registerHandler("handle_always")
-      .bind(&Tester::flow_handle_always, this);
+  registerHandler("handle_always").bind(&Tester::flow_handle_always, this);
 
-  registerHandler("handle")
-      .bind(&Tester::flow_handle, this)
-      .param<bool>("result");
+  registerHandler("handle").bind(&Tester::flow_handle, this).param<bool>("result");
 
   registerFunction("sum", flow::LiteralType::Number)
       .bind(&Tester::flow_sum, this)
@@ -91,9 +88,7 @@ Tester::Tester() {
       .param<flow::FlowNumber>("condition")
       .param<flow::FlowString>("description", "");
 
-  registerFunction("print")
-      .bind(&Tester::flow_print, this)
-      .param<flow::FlowString>("text");
+  registerFunction("print").bind(&Tester::flow_print, this).param<flow::FlowString>("text");
 }
 
 void Tester::flow_handle_always(flow::Params& args) {
@@ -126,10 +121,9 @@ void Tester::flow_print(flow::Params& args) {
   output_ += args.getString(1);
 }
 
-bool Tester::import(
-    const std::string& name,
-    const std::string& path,
-    std::vector<flow::NativeCallback*>* builtins) {
+bool Tester::import(const std::string& name,
+                    const std::string& path,
+                    std::vector<flow::NativeCallback*>* builtins) {
   return true;
 }
 
@@ -150,7 +144,7 @@ bool Tester::test(const std::string& path) {
 
 bool Tester::testDirectory(const std::string& path) {
   int errorCount = 0;
-  for (auto& dir: fs::recursive_directory_iterator(path)) {
+  for (auto& dir : fs::recursive_directory_iterator(path)) {
     if (dir.path().extension() == ".flow") {
       report_.clear();
       if (!testFile(dir.path().string())) {
@@ -183,9 +177,9 @@ bool Tester::testFile(const std::string& filename) {
   }
 
   flow::diagnostics::DifferenceReport diff = flow::diagnostics::difference(actual, expected);
-  for (const Message& m: diff.first)
+  for (const Message& m : diff.first)
     reportError("Missing: {}", m);
-  for (const Message& m: diff.second)
+  for (const Message& m : diff.second)
     reportError("Superfluous: {}", m);
 
   if (actual != expected)
@@ -198,8 +192,7 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
   fmt::print("testing {}\n", filename);
 
   constexpr bool optimize = true;
-  flow::lang::Parser parser{{ flow::lang::Feature::GlobalScope,
-                              flow::lang::Feature::WhileLoop },
+  flow::lang::Parser parser{{flow::lang::Feature::GlobalScope, flow::lang::Feature::WhileLoop},
                             report,
                             this,
                             [this](auto x, auto y, auto z) { return import(x, y, z); }};
@@ -223,8 +216,7 @@ void Tester::compileFile(const std::string& filename, flow::diagnostics::Report*
     pm.run(programIR.get());
   }
 
-  std::unique_ptr<flow::Program> program =
-      flow::TargetCodeGenerator().generate(programIR.get());
+  std::unique_ptr<flow::Program> program = flow::TargetCodeGenerator().generate(programIR.get());
 
   program->link(this, report);
 
