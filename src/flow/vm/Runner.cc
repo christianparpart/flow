@@ -147,10 +147,8 @@ void Runner::rewind() {
 }
 
 bool Runner::loop() {
-  state_ = Running;
-
-#if !defined(FLOW_VM_LOOP_SWITCH)
 // {{{ jump table
+#if !defined(FLOW_VM_LOOP_SWITCH)
 #define label(opcode) &&l_##opcode
   static const void* const ops[] = {
       // misc
@@ -199,12 +197,12 @@ bool Runner::loop() {
       label(S2N),
 
       // invokation
-      label(CALL),      label(HANDLER), };
+      label(CALL),      label(HANDLER),
+  };
+#endif
 // }}}
 // {{{ direct threaded code initialization
-#elif !defined(ENABLE_FLOW_DIRECT_THREADED_VM)
-  const std::vector<Instruction>& code = handler_->code();
-#else
+#if defined(ENABLE_FLOW_DIRECT_THREADED_VM)
   std::vector<uint64_t>& code = handler_->directThreadedCode();
   if (code.empty()) {
     const std::vector<Instruction>& source = handler_->code();
@@ -218,8 +216,12 @@ bool Runner::loop() {
       *pc++ = instr;
     }
   }
+#else
+  const std::vector<Instruction>& code = handler_->code();
 #endif
   // }}}
+
+  state_ = Running;
   decltype(code.data()) pc;
   set_pc(ip_);
 
