@@ -55,6 +55,11 @@ include(CheckLibraryExists)
 include(CheckCSourceCompiles)
 include(CMakeDetermineCCompiler)
 
+if(MSVC)
+# some MSVC specialties (MIN/MAX macros conflict with std::min/std::max)
+add_definitions(-DNOMINMAX)
+endif()
+
 # fmtlib
 if(FLOW_EMBEDDED_FMTLIB)
   add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/fmt" EXCLUDE_FROM_ALL)

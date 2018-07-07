@@ -202,7 +202,7 @@ bool Runner::loop() {
       label(CALL),      label(HANDLER), };
 // }}}
 // {{{ direct threaded code initialization
-#if !defined(ENABLE_FLOW_DIRECT_THREADED_VM)
+#elif !defined(ENABLE_FLOW_DIRECT_THREADED_VM)
   const std::vector<Instruction>& code = handler_->code();
 #else
   std::vector<uint64_t>& code = handler_->directThreadedCode();
@@ -220,7 +220,6 @@ bool Runner::loop() {
   }
 #endif
   // }}}
-#endif
   decltype(code.data()) pc;
   set_pc(ip_);
 
