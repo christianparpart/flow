@@ -44,8 +44,8 @@ class PassManager {
   void run(IRHandler* handler);
 
   template<typename... Args>
-  void logDebug(const char* fmt, Args... args) {
-    logDebug(fmt::format(fmt, args...));
+  void logDebug(const char* msg, Args... args) {
+    logDebug(fmt::format(msg, args...));
   }
 
   void logDebug(const std::string& msg);
