@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <cinttypes>
+#include <sstream>
 #include <utility>
 
 namespace flow {
