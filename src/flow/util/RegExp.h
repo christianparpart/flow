@@ -6,10 +6,12 @@
 // the License at: http://opensource.org/licenses/MIT
 #pragma once
 
+#include <memory>
 #include <regex>
 #include <string>
 #include <vector>
-#include <memory>
+
+#include <fmt/format.h>
 
 namespace flow::util {
 
@@ -80,3 +82,18 @@ class RegExpContext {
 };
 
 }  // namespace flow::util
+
+namespace fmt {
+  template<>
+  struct formatter<flow::util::RegExp> {
+    using RegExp = flow::util::RegExp;
+
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
+
+    template <typename FormatContext>
+    constexpr auto format(const RegExp& v, FormatContext &ctx) {
+      return format_to(ctx.begin(), "{}", v.pattern());
+    }
+  };
+}
