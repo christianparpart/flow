@@ -207,19 +207,19 @@ void TargetCodeGenerator::visit(AllocaInstr& allocaInstr) {
   }
 }
 
-ssize_t TargetCodeGenerator::findGlobal(const Value* variable) const {
+std::optional<size_t> TargetCodeGenerator::findGlobal(const Value* variable) const {
   for (size_t i = 0, e = globals_.size(); i != e; ++i)
     if (globals_[i] == variable)
-      return static_cast<ssize_t>(i);
+      return i;
 
-  return -1;
+  return std::nullopt;
 }
 
 // variable = expression
 void TargetCodeGenerator::visit(StoreInstr& storeInstr) {
-  if (ssize_t gi = findGlobal(storeInstr.variable()); gi != -1) {
+  if (std::optional<size_t> gi = findGlobal(storeInstr.variable()); gi.has_value()) {
     emitLoad(storeInstr.source());
-    emitInstr(Opcode::GSTORE, gi);
+    emitInstr(Opcode::GSTORE, *gi);
     changeStack(1, nullptr);
     return;
   }
@@ -238,8 +238,8 @@ void TargetCodeGenerator::visit(StoreInstr& storeInstr) {
 }
 
 void TargetCodeGenerator::visit(LoadInstr& loadInstr) {
-  if (ssize_t gi = findGlobal(loadInstr.variable()); gi != -1) {
-    emitInstr(Opcode::GLOAD, gi);
+  if (std::optional<size_t> gi = findGlobal(loadInstr.variable()); gi.has_value()) {
+    emitInstr(Opcode::GLOAD, *gi);
     changeStack(0, &loadInstr);
     return;
   }

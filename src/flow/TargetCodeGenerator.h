@@ -111,7 +111,7 @@ class TargetCodeGenerator : public InstructionVisitor {
   /**
    * Finds given variable on global storage and returns its absolute offset if found or -1 if not.
    */
-  ssize_t findGlobal(const Value* variable) const;
+  std::optional<size_t> findGlobal(const Value* variable) const;
 
   /**
    * Retrieves the current number of elements on the stack.
