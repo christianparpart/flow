@@ -112,6 +112,10 @@ add_library(FlowCore STATIC
             )
 
 target_link_libraries(FlowCore PUBLIC fmt::fmt-header-only)
+if(MSVC)
+  target_link_libraries(FlowCore PUBLIC ws2_32)
+endif()
+
 set_target_properties(FlowCore PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 if(CLANG_TIDY_EXE)
   set_target_properties(FlowCore PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
