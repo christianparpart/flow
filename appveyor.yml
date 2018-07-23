@@ -30,7 +30,7 @@ environment:
 
 build_script:
   - mkdir build
-  - cmake .. -G "%GENERATOR%" -B build
+  - cmake -G "%GENERATOR%" -B build .
   - cmake --build build --config "%CONFIG%"
 
 only_commits:
