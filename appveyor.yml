@@ -10,24 +10,28 @@ configuration:
 - Debug
 platform:
 - x64
-environment:
-  matrix:
-  - arch: Win64
-  # - arch: #does not work, Release|x64 not a valid target
+
 matrix:
   fast_finish: true
 
-before_build:
-- cmd: |-
-    mkdir build
-    cd build
-    cmake --version
-    cmake .. -G %generator%
+environment:
+  matrix:
+	- GENERATOR: "Visual Studio 15"
+		CONFIG: Debug
 
-build:
-  project: c:\projects\cmake-init\build\template.sln
-  verbosity: minimal
-  parallel: true
+	- GENERATOR: "Visual Studio 15"
+		CONFIG: Release
+
+	- GENERATOR: "Visual Studio 15 Win64"
+		CONFIG: Debug
+
+	- GENERATOR: "Visual Studio 15 Win64"
+		CONFIG: Release
+
+build_script:
+	- cmake .. -G "%GENERATOR%" -B build
+	- cmake --build build --config "%CONFIG%"
+
 only_commits:
   files:
     - CMakeLists.txt
