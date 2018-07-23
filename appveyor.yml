@@ -29,6 +29,7 @@ environment:
       CONFIG: Release
 
 build_script:
+  - mkdir build
   - cmake .. -G "%GENERATOR%" -B build
   - cmake --build build --config "%CONFIG%"
 
