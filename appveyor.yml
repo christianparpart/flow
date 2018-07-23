@@ -29,7 +29,7 @@ environment:
       CONFIG: Release
 
 build_script:
-  - git submodule update --init --recursive --depth=1
+  - git submodule update --init --recursive
   - mkdir build
   - cmake -G "%GENERATOR%" -B build .
   - cmake --build build --config "%CONFIG%"
