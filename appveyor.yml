@@ -1,0 +1,37 @@
+version: '{build}'
+branches:
+  only:
+  - master
+clone_folder: c:\projects\cmake-init
+image:
+- Visual Studio 2017
+configuration:
+- Release
+- Debug
+platform:
+- x64
+environment:
+  matrix:
+  - arch: Win64
+  # - arch: #does not work, Release|x64 not a valid target
+matrix:
+  fast_finish: true
+
+before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    cmake --version
+    cmake .. -G %generator%
+
+build:
+  project: c:\projects\cmake-init\build\template.sln
+  verbosity: minimal
+  parallel: true
+only_commits:
+  files:
+    - CMakeLists.txt
+    - appveyor.yml
+    - src/
+    - examples/
+    - docs/
