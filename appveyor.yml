@@ -29,8 +29,8 @@ environment:
       CONFIG: Release
 
 build_script:
-	- cmake .. -G "%GENERATOR%" -B build
-	- cmake --build build --config "%CONFIG%"
+  - cmake .. -G "%GENERATOR%" -B build
+  - cmake --build build --config "%CONFIG%"
 
 only_commits:
   files:
